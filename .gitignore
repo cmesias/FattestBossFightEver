@@ -1,0 +1,3 @@
+Debug/src  # ignore src files in Debug folder
+*.exe           # ignore all .exe files
+*.exe

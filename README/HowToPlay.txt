@@ -1,0 +1,6 @@
+[Controls]
+A: 			- Rotate ship left
+D: 			- Rotate ship right
+W: 			- Thrust ship in facing direction
+SPACEBAR: 		- Shoot
+Mouse Left Click: 	- Shoot
