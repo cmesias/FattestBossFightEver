@@ -37,8 +37,6 @@ public:	// resources
 	// Local resources
 	LTexture gPlayer;
 	LTexture gShield;
-	SDL_Rect rPlayer[8];
-	SDL_Rect rShield[7];
 
 	// Audio
 	Mix_Chunk *sCast 			= NULL;
@@ -52,7 +50,22 @@ public:	// resources
 	 * 0-3: Walk
 	 * 4:   Before slash
 	 * 5:   Slash
+	 * 6:   Parry
 	 * 7:   Down Stab
+	 * 8:   Dash frame 0
+	 * 9:   Dash frame 1
+	 */
+	SDL_Rect rPlayer[10];
+	SDL_Rect rShield[7];
+
+	/*
+	 * 0-3: Walk
+	 * 4:   Before slash
+	 * 5:   Slash
+	 * 6:   Parry
+	 * 7:   Down Stab
+	 * 8:   Dash frame 0
+	 * 9:   Dash frame 1
 	 */
 	int sprite_index;
 
@@ -75,6 +88,8 @@ public:	// variables
 		   radianSin 	= 0.0;
 	float vX 			= 0.0;
 	float vY 			= 0.0;
+	const float velMax 	= 6;
+	const float velSpeed= 3;
 	float thrustSpeed 	= 0.0;
 	float vYMax			= 10;
 	bool camlocked 		= true;
@@ -200,12 +215,6 @@ public:	// functions
 
 private:	// Private variables
 
-	// Invurnerable
-	int invurnerableFrame;
-	int invurnerableTick;
-	int invurnerableT;
-	bool invurnerable;
-
 	// Walktimer for sprite usage
 	double walkTimer;
 
@@ -229,18 +238,25 @@ private:	// Private variables
 	float knockBackPower;	// Knock back power
 
 
-	// Parry
+	// Parry state
 	bool parry;
 	int parryTimer;			// Parry timer
 	int parryCDTimer;		// Parry cooldown timer tracker
 	int parryCDMax;			// Parry cooldown
 
+	// Dash state
 	bool dash;				// Dash ability
-	float dashSpeed;
-	float dashLength;
-	float dashCooldown;
-	float dashCounter;
-	float dashCoolCounter;
+	float dashSpeed;		// default: 15
+	float dashLength;		// default: 10
+	float dashCooldown;		// default: 60
+	float dashCounter;		// default: 0
+	float dashCoolCounter;	// default: 0
+
+	// Invurnerable state
+	int invurnerableFrame;
+	int invurnerableTick;
+	int invurnerableT;
+	bool invurnerable;
 
 
 public:	// Functions to do stuff?
@@ -270,6 +286,9 @@ public:	// Mutator functions
 
 	// Stop Slash Attack
 	void StopSlashAttack();
+
+	// Stop dashing
+	void StopDash();
 
 public:	// Accessor functions
 

@@ -106,7 +106,7 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 
 	// Dash ability
 	this->dash 			= false;
-	this->dashSpeed 	= 5;
+	this->dashSpeed 	= 10;
 	this->dashLength 	= 10;
 	this->dashCooldown 	= 60;
 	this->dashCounter 	= 0;
@@ -144,15 +144,18 @@ void Players::Load(SDL_Renderer* gRenderer){
     // load textures
 	gPlayer.loadFromFile(gRenderer, "resource/gfx/player/player.png");
 	gShield.loadFromFile(gRenderer, "img/shield.png");
-	rPlayer[0] = {0,0,48,48};
-	rPlayer[1] = {48,0,48,48};
-	rPlayer[2] = {96,0,48,48};
-	rPlayer[3] = {144,0,48,48};
+	rPlayer[0] = {0,0,48,48};			// Walking 			0
+	rPlayer[1] = {48,0,48,48};			// Walking 			1
+	rPlayer[2] = {96,0,48,48};			// Walking 			2
+	rPlayer[3] = {144,0,48,48};			// Walking 			3
 
-	rPlayer[4] = {0,48,48,48};
-	rPlayer[5] = {48,48,62,48};
-	rPlayer[6] = {0,96,48,48};
-	rPlayer[7] = {144,48,48,55};		// down attack
+	rPlayer[4] = {0,48,48,48};			// Before Slash 	4
+	rPlayer[5] = {48,48,62,48};			// Slash attack 	5
+	rPlayer[6] = {0,96,48,48};			// Parry 			6
+	rPlayer[7] = {144,48,48,55};		// Down-Stab attack 7
+	rPlayer[8] = {48,96,48,48};			// Dash frame 0:	9
+	rPlayer[9] = {96,96,48,48};			// Dash frame 1:	9
+
 	for (int i=0; i<7; i++){setClips(rShield[i], i*48, 0, 48, 48);}
 
 	// Load audio
@@ -574,25 +577,27 @@ void Players::update(Map &map,
 			//angle += 5;
 		}
 
-		// Movement
+		////////////////////////////////////////////////////////////////////////////////////
+		//--------------------------------------------------------------------------------//
+		//----------------------------------- Movement -----------------------------------//
 		{
-			// Max speeds
-			float velMax = 6;
-			float velSpeed = 3;
-
 			// X Axis movement
 			{
 				// Move left
-				if (this->moveleft && !this->attack && !this->parry) {
-					this->vX -= velSpeed;
+				if (this->moveleft && !this->attack && !this->parry && !this->dash) {
+					if (this->vX > -velMax) {
+						this->vX -= velSpeed;
+					}
 					this->moving = true;
 			        if (!this->shift) {
 			        	this->facing = "left";
 			        }
 				}
 				// Move right
-				if (this->moveright && !this->attack && !this->parry) {
-					this->vX += velSpeed;
+				else if (this->moveright && !this->attack && !this->parry && !this->dash) {
+					if (this->vX < velMax) {
+						this->vX += velSpeed;
+					}
 					this->moving = true;
 			        if (!this->shift) {
 			        	this->facing = "right";
@@ -603,70 +608,60 @@ void Players::update(Map &map,
 			// Y Axis movement
 			{
 				// Move up
-				if ((this->moveup && !this->attack && !this->parry)) {
-					this->vY -= velSpeed;
+				if ((this->moveup && !this->attack && !this->parry && !this->dash)) {
+					if (this->vY > -velMax) {
+						this->vY -= velSpeed;
+					}
 					this->moving = true;
 			        if (!this->shift) {
 			        	//this->facing = "left";
 			        }
 				}
 				// Move down
-				else if (this->movedown && !this->attack && !this->parry) {
-					this->vY += velSpeed;
+				else if (this->movedown && !this->attack && !this->parry && !this->dash) {
+					if (this->vY < velMax) {
+						this->vY += velSpeed;
+					}
 					this->moving = true;
 			        if (!this->shift) {
 			        	//this->facing = "right";
 			        }
 				}
+			}
 
-				// Max speeds
-				if (!dash) {
-					// Max X speed
-					if (this->vX < -velMax) {
-						this->vX = -velMax;
-					}
-					if (this->vX > velMax) {
-						this->vX = velMax;
-					}
-					// Max Y speed
-					if (this->vY < -velMax) {
-						this->vY = -velMax;
-					}
-					if (this->vY > velMax) {
-						this->vY = velMax;
-					}
+			// If not dashing
+			if (!this->dash) {
+				// Max X speed
+				if (this->vX < -velMax) {
+					this->vX = -velMax;
+				}
+				if (this->vX > velMax) {
+					this->vX = velMax;
+				}
+				// Max Y speed
+				if (this->vY < -velMax) {
+					this->vY = -velMax;
+				}
+				if (this->vY > velMax) {
+					this->vY = velMax;
 				}
 			}
+
+			// Facing direction for flip
+		    if (facing == "left") {
+		        flipW = SDL_FLIP_HORIZONTAL;
+		    }
+		    if (facing == "right") {
+		        flipW = SDL_FLIP_NONE;
+		    }
 		}
-		// If dash counter os greater than 0
-		if (dashCounter > 0) {
-
-			// Subtract dash counter by 1 every frame
-			dashCounter -= 1;
-
-			// If dash counter goes lower than 0
-			if (dashCounter <= 0) {
-
-				// Stop x velocity
-				StopMovement();
-
-				// Start dash cool down timer
-				dashCoolCounter = dashCooldown;
-
-				// Dash on cool down
-				dash = false;
-			}
-		}
-
-		// If dash on cooldown
-		if (dashCoolCounter > 0) {
-			dashCoolCounter -= 1;
-		}
-
+		//----------------------------------- Movement -----------------------------------//
+		//--------------------------------------------------------------------------------//
+		////////////////////////////////////////////////////////////////////////////////////
 
 		////////////////////////////////////////////////////////////////////////////////////
 		//--------------------------------------------------------------------------------//
-		//--------------------------- Collision w/ Tiles ---------------------------------//
+		//--------------------------- Movement & Collision w/ Tiles ----------------------//
 		std::string tempHere = "";
 		// Handle movement of player, and handle collision with Tiles
 		tl.checkCollisionXY(tile,
@@ -675,71 +670,40 @@ void Players::update(Map &map,
 				this->vX, this->vY,
 				tempHere, this->jumps);
 
-		//--------------------------- Collision w/ Tiles ---------------------------------//
+		//--------------------------- Movement & Collision w/ Tiles ----------------------//
 		//--------------------------------------------------------------------------------//
 		////////////////////////////////////////////////////////////////////////////////////
 
-	    // Location of sword when down-stabbing
-		this->swordX = this->x;
-		this->swordY = this->y+35;
 
-	    // comment this in to enable invisible ground for player
-	    /* if (y+h > 500) {
-	        vY = 0.0;
-	        jumpstate = "ground";
-	        jumps = 1;
-	    }*/
+	    // TODO [ ] - Do !Parrying and !Attack and !Parry
+	    ////////////////////////////////////////////////////////////////////////////
+	    //------------------------------------------------------------------------//
+	    //--------------------------------- Do !Parrying -------------------------//
 
-		// Rustle timer
-		// player left and right swaying
-		if (moving) {
-			rustleW += 1 * rustleDirX;
-			rustleH += 1 * rustleDirY;
-		}
-		if (rustleW > 4) {
-			rustleDirX = rustleDirX * -1;
-		}
-		if (rustleW < -4) {
-			rustleDirX = rustleDirX * -1;
-		}
-		if (rustleH > 4) {
-			rustleDirY = rustleDirY * -1;
-		}
-		if (rustleH < -4) {
-			rustleDirY = rustleDirY * -1;
-		}
-
-		// Player not moving X
-		if (!moveleft && !moveright && !dash) {
-	        vX = vX - vX * 0.2;
-		}
-
-		// Player not moving Y
-		if (!moveup && !movedown && !dash) {
-	        vY = vY - vY * 0.2;
-		}
-
-		// Player not moving
-		if (!moveup && !movedown && !moveleft && !moveright && !dash) {
-			moving = false;
-		}
-
-	    // Idle animation
-	    if (!moving) {
-            sprite_index = 0;
+	    if (this->parry) {
 
 	    }
 
-	    // Moving animation
-	    else{
+	    // IDKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
+	    //{
+		// Idle animation
+		if (!moving) {
 
-	    	// If not attacking
-	    	if (!this->attack) {
+			// If not attacking
+			if (!this->attack && !this->dash && !this->parry) {
+				sprite_index = 0;
+			}
+
+		// Moving animation
+		} else {
+
+			// If not attacking
+			//if (!this->attack) {
 
 				///////////////////////////////////////////////////////////////////////////
 				//-----------------------------------------------------------------------//
 				//----------------------------- Do walkTimer ----------------------------//
-		    	{
+				{
 					// Increment animation timer
 					walkTimer += 10;
 
@@ -762,7 +726,7 @@ void Players::update(Map &map,
 					if (sprite_index > 3) {
 						sprite_index = 0;
 					}
-		    	}
+				}
 				//----------------------------- Do walkTimer ----------------------------//
 				//-----------------------------------------------------------------------//
 				///////////////////////////////////////////////////////////////////////////
@@ -824,173 +788,233 @@ void Players::update(Map &map,
 				//--------------------------- Do walkTimerVFX ---------------------------//
 				//-----------------------------------------------------------------------//
 				///////////////////////////////////////////////////////////////////////////
-	    	}
-	    }
+			//}
+		}
 
-		// Facing direction for flip
-	    if (facing == "left") {
-	        flipW = SDL_FLIP_HORIZONTAL;
-	    }
-	    if (facing == "right") {
-	        flipW = SDL_FLIP_NONE;
-	    }
+		// Animations
+		{
+			///////////////////////////////////////////////////////////////////////////
+			//-----------------------------------------------------------------------//
+			//------------------------------- Do Dash -------------------------------//
+			if (this->dash) {
 
-		///////////////////////////////////////////////////////////////////////////
-		//-----------------------------------------------------------------------//
-		//----------------------------- Do Attacking ----------------------------//
-	    // If attacking
-	    if (this->attack)
-	    {
-        	// If dashing
-	    	if (this->dash)
-	    	{
-	    		// Stop player movement
-	    		//StopMovement();
-	    	}
-	    	// If attack-type: Slash Attack
-	    	if (this->attackType == 0)
-	    	{
-		        // Increase attack timer/frames
-	    		this->attackTimer++;
+				if (dashCounter >= 0 && dashCounter < 5) {
+					sprite_index = 9;
+				}
+				else if (dashCounter >= 5 && dashCounter < 10) {
+					sprite_index = 8;
+				}
+				else if (dashCounter >= 10 && dashCounter < 15) {
+					sprite_index = 9;
+				}
+				else if (dashCounter >= 25 && dashCounter < 20) {
+					sprite_index = 8;
+				}
 
-		        // If attack timer below 15 frames
-		        if (this->attackTimer < 15)
-		        {
-	                // Set pre-slashing sprite
-		        	this->sprite_index = 4;
+				int rands = rand() % 9 + 2;
+				float newX = x+w/2;
+				float newY = y+h/2;
+				p_dummy.spawnParticleAngle(particle, 2,
+									newX-rands/2,
+									newY-rands/2,
+								   rands, rands,
+								   0, randDouble(0.1, 0.3),
+								   0.0,
+								   {255, 255, 255, 255}, 1,
+								   1, 1,
+								   rand() % 100 + 150, rand() % 2 + 5,
+								   rand() % 50 + 90, 0,
+								   true, 0.11,
+								   rand() % 9 + 2, 1);
 
-		    		// Stop player movement
-		    		StopMovement();
-		        }
+				// If dash counter is greater than 0
+				if (dashCounter > 0) {
 
-		        // At frame 16, spawn attack collision
-		        else{
+					// Subtract dash counter by 1 every frame
+					dashCounter -= 1;
 
-	                // Set slashing sprite
-		            sprite_index = 5;
+					// If dash counter goes lower than 0
+					if (dashCounter <= 0) {
 
-		        	// If are spawning an attack-object
-		            if (spawnAttack) {
+						// Stop player movement
+						StopMovement();
 
-		            	// Immediatly stop attacking
-		                spawnAttack = false;
+						// Dash on cool down
+						dash = false;
 
-		                // If facing right
-		                int width;
-		                if (facing == "right") {
+						// Start dash cool down timer
+						dashCoolCounter = dashCooldown;
+					}
+				}
+			}
 
-		                	// Set attack object's x pos to the right of player's body
-			                width = 38;
-		                }else{
+			// If dash on cooldown
+			if (dashCoolCounter > 0) {
+				dashCoolCounter -= 1;
+			}
 
-		                	// Set attack object's x pos to the left of player's body
-			                width = -21;
-		                }
-		                // Attack-object's width and height
-		                int tempWidth = 38;
-		                int tempHeight = 64;
+			//------------------------------- Do Dash -------------------------------//
+			//-----------------------------------------------------------------------//
+			///////////////////////////////////////////////////////////////////////////
+			///////////////////////////////////////////////////////////////////////////
+			//-----------------------------------------------------------------------//
+			//----------------------------- Do Attacking ----------------------------//
+			// If attacking
+			else if (this->attack)
+			{
 
-		                // Spawn attack object (it will appear in the world for 1 frame then remove itself)
-		                obj.spawn(object, x+w/2-38/2+width,
-		                				  y-16,
-										  tempWidth, tempHeight,
-										  0);
-		            }
-		            // Play slash sound effect
-		            if (playSlash) {
-		            	playSlash = false;
-		                Mix_PlayChannel(-1, sSlash, 0);
-		            }
-		        }
-		        // Attack over
-		        if (attackTimer > 20) {
-		        	// Reset attack-type
-		        	attackType = -1;
-		            attackTimer = 0;
-		            attack = false;
-		        }
-	    	}
+				// If attack-type: Slash Attack
+				if (this->attackType == 0)
+				{
+					// Stop player movement
+					StopMovement();
 
-	    	// Handle Down-Stab attack
-	    	/*else if (attackType == 1)
-	    	{
-                // Set animation until Player hits the ground
-	            sprite_index = 7;
+					// Increase attack timer/frames
+					this->attackTimer++;
 
-	        	// If are spawning an attack-object
-	            if (spawnAttack) {
-	            	spawnAttack = false;
+					// If attack timer below 15 frames
+					if (this->attackTimer < 15)
+					{
+						// Set pre-slashing sprite
+						this->sprite_index = 4;
+					}
 
-		            // Spawn down-stab object
-	                obj.spawnFollow(object, x, y, 28, 20, 1, &swordX, &swordY);
-	            }
+					// At frame 16, spawn attack collision
+					else{
 
-                // If player is on the ground
-	            if (jumpstate=="ground") {
-	            	//attack = false;
+						// Set slashing sprite
+						sprite_index = 5;
 
-	                // If we can play the sound effect
-	                if (playSFXDownStabHittingFloor) {
-	                	// Stop playing sound effect
-	                	playSFXDownStabHittingFloor = false;
+						// If are spawning an attack-object
+						if (spawnAttack) {
 
-	                	// Player sound effect
-	                	//Mix_PlayChannel(-1, sDownStab, 0);
-	                }
+							// Immediatly stop attacking
+							spawnAttack = false;
 
-			        // Attack timer
-			        attackTimer++;
+							// If facing right
+							int width;
+							if (facing == "right") {
 
-			        // After 0.25 second or 15 frames
-		        	// Attack over
-			        if (attackTimer > 15)
-			        {
-			        	// Reset attack-type
-			        	attackType = -1;
+								// Set attack object's x pos to the right of player's body
+								width = 38;
+							}else{
 
-			        	// Enable play sound effect next time we down stab
-	                	playSFXDownStabHittingFloor = true;
+								// Set attack object's x pos to the left of player's body
+								width = -21;
+							}
+							// Attack-object's width and height
+							int tempWidth = 38;
+							int tempHeight = 64;
 
-	                	// Stop attack
-			            attackTimer = 0;
-			            attack = false;
-			        }
-	            }
-	    	}*/
-	    }
-		//----------------------------- Do Attacking ----------------------------//
-		//-----------------------------------------------------------------------//
-		///////////////////////////////////////////////////////////////////////////
+							// Spawn attack object (it will appear in the world for 1 frame then remove itself)
+							obj.spawn(object, x+w/2-38/2+width,
+											  y-16,
+											  tempWidth, tempHeight,
+											  0);
+						}
+						// Play slash sound effect
+						if (playSlash) {
+							playSlash = false;
+							Mix_PlayChannel(-1, sSlash, 0);
+						}
+					}
+					// Attack over
+					if (attackTimer > 20) {
+						// Reset attack-type
+						attackType = -1;
+						attackTimer = 0;
+						attack = false;
+					}
+				}
 
-		///////////////////////////////////////////////////////////////////////////
-		//-----------------------------------------------------------------------//
-		//------------------------------ Do Parrying ----------------------------//
-	    // Parrying animation
-	    if (this->parry) {
-        	// Stop movement
-			StopMovement();
+				// Handle Down-Stab attack
+				/*else if (attackType == 1)
+				{
+					// Set animation until Player hits the ground
+					sprite_index = 7;
 
-	        // Determine direction
-	        if (this->facing == "left") {
-	        	this->sprite_index = 6;
-	        }
-	        if (this->facing == "right") {
-	        	this->sprite_index = 6;
-	        }
+					// If are spawning an attack-object
+					if (spawnAttack) {
+						spawnAttack = false;
 
-	        // Start Parrying timer
-	        this->parryTimer++;
+						// Spawn down-stab object
+						obj.spawnFollow(object, x, y, 28, 20, 1, &swordX, &swordY);
+					}
 
-	        // Parry for 15 frames
-	        if (this->parryTimer > 15){
-	        	this->StopParrying();
-	        }
-	    // Parry cool-down
-	    }else{
-	        if (this->parryCDTimer > 0) {
-	        	this->parryCDTimer -= 1;
-	        }
-	    }
+					// If player is on the ground
+					if (jumpstate=="ground") {
+						//attack = false;
+
+						// If we can play the sound effect
+						if (playSFXDownStabHittingFloor) {
+							// Stop playing sound effect
+							playSFXDownStabHittingFloor = false;
+
+							// Player sound effect
+							//Mix_PlayChannel(-1, sDownStab, 0);
+						}
+
+						// Attack timer
+						attackTimer++;
+
+						// After 0.25 second or 15 frames
+						// Attack over
+						if (attackTimer > 15)
+						{
+							// Reset attack-type
+							attackType = -1;
+
+							// Enable play sound effect next time we down stab
+							playSFXDownStabHittingFloor = true;
+
+							// Stop attack
+							attackTimer = 0;
+							attack = false;
+						}
+					}
+				}*/
+			}
+			//----------------------------- Do Attacking ----------------------------//
+			//-----------------------------------------------------------------------//
+			///////////////////////////////////////////////////////////////////////////
+
+			///////////////////////////////////////////////////////////////////////////
+			//-----------------------------------------------------------------------//
+			//------------------------------ Do Parrying ----------------------------//
+			// Parrying animation
+			else if (this->parry)
+			{
+				// Stop movement
+				StopMovement();
+
+				// Determine direction
+				if (this->facing == "left") {
+					this->sprite_index = 6;
+				}
+				if (this->facing == "right") {
+					this->sprite_index = 6;
+				}
+
+				// Start Parrying timer
+				this->parryTimer++;
+
+				// Parry for 15 frames
+				if (this->parryTimer > 15){
+					this->StopParrying();
+				}
+			// Parry cool-down
+			} else if (!this->parry) {
+				if (this->parryCDTimer > 0) {
+					this->parryCDTimer -= 1;
+				}
+			}
+			//------------------------------ Do Parrying ----------------------------//
+			//-----------------------------------------------------------------------//
+			///////////////////////////////////////////////////////////////////////////
+
+		}
+
+
 
 		//------------------------------ Do Parrying ----------------------------//
 		//-----------------------------------------------------------------------//
@@ -1000,7 +1024,7 @@ void Players::update(Map &map,
 		//-----------------------------------------------------------------------//
 		//------------------------------- Do Stunned ----------------------------//
 	    // Stunned
-	    if (this->stunned) {
+	    /*if (this->stunned) {
 	        if (this->facing == "left") {
 	        	this->sprite_index = 3;
 	        }
@@ -1012,10 +1036,56 @@ void Players::update(Map &map,
 	        	this->stunTimer = 0;
 	            this->stunned = false;
 	        }
-	    }
+	    }*/
 		//------------------------------- Do Stunned ----------------------------//
 		//-----------------------------------------------------------------------//
 		///////////////////////////////////////////////////////////////////////////
+
+		////////////////////////////////////////////////////////////////////////////////////
+		//--------------------------------------------------------------------------------//
+		//-------------------------------- Stop Movement ---------------------------------//
+
+	    // Location of sword when down-stabbing
+		this->swordX = this->x;
+		this->swordY = this->y+35;
+
+		// Rustle timer
+		// player left and right swaying
+		if (moving) {
+			rustleW += 1 * rustleDirX;
+			rustleH += 1 * rustleDirY;
+		}
+		if (rustleW > 4) {
+			rustleDirX = rustleDirX * -1;
+		}
+		if (rustleW < -4) {
+			rustleDirX = rustleDirX * -1;
+		}
+		if (rustleH > 4) {
+			rustleDirY = rustleDirY * -1;
+		}
+		if (rustleH < -4) {
+			rustleDirY = rustleDirY * -1;
+		}
+
+		// Player not moving X
+		if (!moveleft && !moveright && !dash) {
+	        vX = vX - vX * 0.2;
+		}
+
+		// Player not moving Y
+		if (!moveup && !movedown && !dash) {
+	        vY = vY - vY * 0.2;
+		}
+
+		// Player not moving
+		if (!moveup && !movedown && !moveleft && !moveright && !dash) {
+			moving = false;
+		}
+
+		//-------------------------------- Stop Movement ---------------------------------//
+		//--------------------------------------------------------------------------------//
+		////////////////////////////////////////////////////////////////////////////////////
 
 		// Player shoot
 		fire(particle, p_dummy, sCast, mx+camx, my+camy);
@@ -1502,9 +1572,14 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY)
 	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 0, gText.getWidth(), gText.getHeight());
 
 	tempsi.str( std::string() );
-	tempsi << "moveright: " << moveright;
+	tempsi << "sprite_index: " << sprite_index;
 	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
-	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 24, gText.getWidth(), gText.getHeight());
+	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 24*1, gText.getWidth(), gText.getHeight());
+
+	tempsi.str( std::string() );
+	tempsi << "dashCounter: " << dashCounter;
+	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
+	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 24*2, gText.getWidth(), gText.getHeight());
 
 	//tempsi.str( std::string() );
 	//tempsi << "dmg x " << this->damageMultipler;
@@ -1616,26 +1691,66 @@ void Players::OnKeyDown(SDL_Keycode sym )
 		if (this->dashCoolCounter <= 0 && this->dashCounter <=0) {
 
 			// If currently attacking
-			if (this->attack) {
-				StopSlashAttack();
-			}
+			StopSlashAttack();
 
 			// Depending on which way the player is moving,
 			if (this->moveleft) {
-				this->vX = -this->dashSpeed;
+				this->vX -= this->dashSpeed;
 			}else if (moveright) {
-				this->vX = this->dashSpeed;
+				this->vX += this->dashSpeed;
 			}
 			if (this->moveup) {
-				this->vY = -this->dashSpeed;
+				this->vY -= this->dashSpeed;
 			}else if (movedown) {
-				this->vY = this->dashSpeed;
+				this->vY += this->dashSpeed;
 			}
 			this->dash = true;
 			this->dashCounter = this->dashLength;
 
 			// Play dash sound effect
 			Mix_PlayChannel(-1, sDash, 0);
+
+			// If not moving
+			/*if (!this->moving)
+			{
+				// Depending on which way the player is moving,
+				if (this->facing=="left") {
+					this->vX -= this->dashSpeed;
+				} else if (this->facing=="right") {
+					this->vX += this->dashSpeed;
+				}
+				if (this->moveup) {
+					this->vY -= this->dashSpeed;
+				}else if (movedown) {
+					this->vY += this->dashSpeed;
+				}
+				this->dash = true;
+				this->dashCounter = this->dashLength;
+
+				// Play dash sound effect
+				Mix_PlayChannel(-1, sDash, 0);
+			}
+
+			// If moving
+			else {
+
+				// Depending on which way the player is moving,
+				if (this->moveleft) {
+					this->vX -= this->dashSpeed;
+				}else if (moveright) {
+					this->vX += this->dashSpeed;
+				}
+				if (this->moveup) {
+					this->vY -= this->dashSpeed;
+				}else if (movedown) {
+					this->vY += this->dashSpeed;
+				}
+				this->dash = true;
+				this->dashCounter = this->dashLength;
+
+				// Play dash sound effect
+				Mix_PlayChannel(-1, sDash, 0);
+			}*/
 		}
 
         /*if (!this->attack && !this->stunned && !this->parry) {
@@ -1646,7 +1761,11 @@ void Players::OnKeyDown(SDL_Keycode sym )
         }*/
 		break;
 	case SDLK_n:						// Attack - Slash
-		//this->initialshot = true;
+
+		// Stop dashing
+		StopDash();
+
+		// Attack
 		SlashAttack();
 		break;
 	case SDLK_m:						// Dodge
@@ -1888,6 +2007,7 @@ void Players::StopMovement()
 	// Stop player movement
     this->vX = 0.0;
     this->vY = 0.0;
+    this->moving = false;
 }
 
 void Players::StopSlashAttack()
@@ -1896,6 +2016,15 @@ void Players::StopSlashAttack()
 	attackType = -1;
     attackTimer = 0;
     attack = false;
+}
+
+void Players::StopDash()
+{
+	// Reset dash timers
+	this->dash = false;
+	this->dashCooldown 	= 60;
+	this->dashCounter 	= 0;
+	this->dashCoolCounter = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

@@ -785,6 +785,9 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 
 		tl.renderTile(gRenderer, tile, 1, camx, camy);
 
+		// Render Star particles
+		part.renderStarParticle(particles, camx, camy, 1, gRenderer);
+
 		// Render our player
 		player.Render(mex, mey, camx, camy, gWindow,
 					  gRenderer, {255,255,255}, part.count, gText);
@@ -805,7 +808,6 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 	sli.Render(gRenderer, slime, gFont13, gText, camx, camy);
 
 	// Render particles
-	part.renderStarParticle(particles, camx, camy, 1, gRenderer);
 	part.renderBulletParticle(particles, camx, camy, 1, gRenderer);
 }
 

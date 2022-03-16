@@ -85,9 +85,11 @@ int main(int argc, char *argv[]) {
 // TODO [ ] (3-12-2022) - Create animation attack for Slime in photoshop
 // TODO [ ] (3-12-2022) - Add more monsters
 // TODO [ ] (3-12-2022) - Add objective to game
-// TODO [ ] (3-25-2022) - Make walk VFX nicer
-// TODO [ ] (3-25-2022) - Give dash a sound effect
-// TODO [ ] (3-25-2022) - Fix collision check with Slimer and Tiles
+// TODO [x] (3-15-2022) - Make walk VFX nicer
+// TODO [x] (3-15-2022) - Give dash a sound effect
+// TODO [x] (3-15-2022) - Fix collision check with Slimer and Tiles
+// TODO [ ] (3-15-2022) - Create sprite in photoshop for Player that animates when the Player uses teh Dash ability
+// TODO [ ] (3-16-2022) - Make player invulnerable when dashing
 
 // Focus here
 // TODO [x] (3-10-2022) - Create level selection Scene
