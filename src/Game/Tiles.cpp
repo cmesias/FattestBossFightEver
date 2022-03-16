@@ -313,9 +313,9 @@ void Tile::checkCollisionXY(Tile tile[],
 		// Player Velocity X Axis
 		x += vX;
 		SDL_Rect rectA;
-		rectA.x = x+4;
+		rectA.x = x-6;
 		rectA.y = y+8;
-		rectA.w = w-8;
+		rectA.w = w+12;
 		rectA.h = h/2;
 		bool moveBack;
 		moveBack = false;

@@ -33,6 +33,7 @@ void Slime::Init(Slime slime[]) {
 		slime[i].collision 			= false;
 		slime[i].onScreen 			= false;
 		slime[i].alert 				= false;
+		slime[i].renderInFront 		= false;
 		slime[i].type 				= 0;
 		slime[i].jumpstate			= "falling";
 		slime[i].jumps				= 1;
@@ -56,6 +57,7 @@ void Slime::Init(Slime slime[]) {
 
 void Slime::Load(SDL_Renderer *gRenderer) {
 	gTexture.loadFromFile(gRenderer, "resource/gfx/slime.png");
+	gSlimeShadow.loadFromFile(gRenderer, "resource/gfx/slime_shadow.png");
 	rClip[0] = {0, 0, 32, 24};
 	rClip[1] = {32, 0, 32, 24};
 	rClip[2] = {64, 0, 32, 24};
@@ -65,6 +67,7 @@ void Slime::Load(SDL_Renderer *gRenderer) {
 
 void Slime::Free() {
 	gTexture.free();
+	gSlimeShadow.free();
 }
 
 void Slime::Clear(Slime slime[]) {
@@ -364,45 +367,100 @@ void Slime::Update(Slime slime[], Object &obj, Object object[], Map &map, int ca
 	// Other classes:
 }
 
-void Slime::Render(SDL_Renderer *gRenderer, Slime slime[], TTF_Font *gFont, LTexture gText, int camx, int camy) {
+void Slime::RenderBack(SDL_Renderer *gRenderer, Slime slime[], TTF_Font *gFont, LTexture gText, int camx, int camy) {
 	for (int i = 0; i < max; i++) {
 		if (slime[i].alive) {
+			if (!slime[i].renderInFront) {
 
-			// Walking around or idle
-			if (slime[i].animState == -1)
-			{
-				gTexture.setColor(255, 255, 255);
-			}
-
-			// Walking around or idle
-			else if (slime[i].animState == 0) {
-
-				// If slime is on alert (sees player)
-				if (slime[i].alert)
+				// Walking around or idle
+				if (slime[i].animState == -1)
 				{
-					// Set color red
-					gTexture.setColor(200, 0, 0);
-				} else {
-					// Set color normal
 					gTexture.setColor(255, 255, 255);
 				}
+
+				// Walking around or idle
+				else if (slime[i].animState == 0) {
+
+					// If slime is on alert (sees player)
+					if (slime[i].alert)
+					{
+						// Set color red
+						gTexture.setColor(200, 0, 0);
+					} else {
+						// Set color normal
+						gTexture.setColor(255, 255, 255);
+					}
+				}
+
+				// Moving towards player animation
+				else if (slime[i].animState == 1) {
+
+				}
+
+				// Charging-attack animation
+				else if (slime[i].animState == 2) {
+					gTexture.setColor(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1);
+				}
+
+				// Render slime shadow
+				gSlimeShadow.render(gRenderer, slime[i].x-3 - camx, slime[i].y-8 - camy,
+											slime[i].w+6, slime[i].h+12);
+
+				// Render slime
+				gTexture.render(gRenderer, slime[i].x - camx, slime[i].y - camy,
+											slime[i].w, slime[i].h,
+											&rClip[slime[i].animFrame],
+											slime[i].angle);
 			}
+		}
+	}
+}
 
-			// Moving towards player animation
-			else if (slime[i].animState == 1) {
+void Slime::RenderFront(SDL_Renderer *gRenderer, Slime slime[], TTF_Font *gFont, LTexture gText, int camx, int camy) {
+	for (int i = 0; i < max; i++) {
+		if (slime[i].alive) {
+			if (slime[i].renderInFront) {
 
+				// Walking around or idle
+				if (slime[i].animState == -1)
+				{
+					gTexture.setColor(255, 255, 255);
+				}
+
+				// Walking around or idle
+				else if (slime[i].animState == 0) {
+
+					// If slime is on alert (sees player)
+					if (slime[i].alert)
+					{
+						// Set color red
+						gTexture.setColor(200, 0, 0);
+					} else {
+						// Set color normal
+						gTexture.setColor(255, 255, 255);
+					}
+				}
+
+				// Moving towards player animation
+				else if (slime[i].animState == 1) {
+
+				}
+
+				// Charging-attack animation
+				else if (slime[i].animState == 2) {
+					gTexture.setColor(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1);
+				}
+
+				// Render slime shadow
+				gSlimeShadow.render(gRenderer, slime[i].x-3 - camx, slime[i].y-8 - camy,
+											slime[i].w+6, slime[i].h+12);
+
+				// Render slime
+				gTexture.render(gRenderer, slime[i].x - camx, slime[i].y - camy,
+											slime[i].w, slime[i].h,
+											&rClip[slime[i].animFrame],
+											slime[i].angle);
 			}
-
-			// Charging-attack animation
-			else if (slime[i].animState == 2) {
-				gTexture.setColor(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1);
-			}
-
-			// Render slime
-			gTexture.render(gRenderer, slime[i].x - camx, slime[i].y - camy,
-										slime[i].w, slime[i].h,
-										&rClip[slime[i].animFrame],
-										slime[i].angle);
 		}
 	}
 }
@@ -439,15 +497,15 @@ void Slime::RenderDebug(SDL_Renderer *gRenderer, Slime slime[], TTF_Font *gFont,
 
 // Functions that work with other classes
 
-void Slime::GetDistanceOfPlayer(Slime slime[], float playerCenterX, float playerCenterY) {
+void Slime::GetDistanceOfPlayer(Slime slime[], float targetX, float targetY, float targetW, float targetH) {
 	for (int i = 0; i < max; i++) {
 		if (slime[i].alive) {
 
 			////////////////////////////////////////////////////////////////////////////
 			/////////////////////////// GET DISTANCE OF PLAYER /////////////////////////
 			// Get center of attack-object (spawned by the player attacking)
-			slime[i].bmx = playerCenterX;
-			slime[i].bmy = playerCenterY;
+			slime[i].bmx = targetX+targetW/2;
+			slime[i].bmy = targetY+targetH/2;
 
 			// Get center of slime
 			slime[i].bmx2 = slime[i].x+slime[i].w/2;
@@ -476,6 +534,13 @@ void Slime::GetDistanceOfPlayer(Slime slime[], float playerCenterX, float player
 
 			/////////////////////////// GET DISTANCE OF PLAYER /////////////////////////
 			////////////////////////////////////////////////////////////////////////////
+
+			// Check if player is in front of slime or not
+			if (slime[i].y+slime[i].h > targetY+targetH){
+				slime[i].renderInFront = true;
+			} else {
+				slime[i].renderInFront = false;
+			}
 		}
 	}
 }

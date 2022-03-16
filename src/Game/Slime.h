@@ -23,6 +23,7 @@ public:
 	int count;
 	const int max = 100;
 	LTexture gTexture;
+	LTexture gSlimeShadow;
 	SDL_Rect rClip[5];
 
 public: // variables
@@ -37,12 +38,13 @@ public:	// Core Functions
 	void Clear(Slime slime[]);
 	void Spawn(Slime slime[], float x, float y, float w, float h, float angle, float speed, int type);
 	void Update(Slime slime[], Object &obj, Object object[], Map &map, int camx, int camy);
-	void Render(SDL_Renderer *gRenderer, Slime slime[], TTF_Font *gFont, LTexture gText, int camx, int camy);
+	void RenderBack(SDL_Renderer *gRenderer, Slime slime[], TTF_Font *gFont, LTexture gText, int camx, int camy);
+	void RenderFront(SDL_Renderer *gRenderer, Slime slime[], TTF_Font *gFont, LTexture gText, int camx, int camy);
 	void RenderDebug(SDL_Renderer *gRenderer, Slime slime[], TTF_Font *gFont, LTexture gText, int camx, int camy);
 
 public:	// Functions that work with other classes
 
-	void GetDistanceOfPlayer(Slime slime[], float playerCenterX, float playerCenterY);
+	void GetDistanceOfPlayer(Slime slime[], float targetX, float targetY, float targetW, float targetH);
 
 public:	// Animations
 
@@ -51,6 +53,8 @@ public:	// Animations
 
 	// Self center
 	float bmx2, bmy2;
+
+	bool renderInFront;
 
 
 

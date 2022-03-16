@@ -643,7 +643,7 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		 */
 
 		// Move slime towards player
-		sli.GetDistanceOfPlayer(slime, player.getCenterX(), player.getCenterY());
+		sli.GetDistanceOfPlayer(slime, player.getX(), player.getY(), player.getW(), player.getH());
 
 		// Update slime
 		sli.Update(slime, obj, object, map, camx, camy);
@@ -788,9 +788,15 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 		// Render Star particles
 		part.renderStarParticle(particles, camx, camy, 1, gRenderer);
 
+		// Render Slime
+		sli.RenderBack(gRenderer, slime, gFont13, gText, camx, camy);
+
 		// Render our player
 		player.Render(mex, mey, camx, camy, gWindow,
 					  gRenderer, {255,255,255}, part.count, gText);
+
+		// Render Slime
+		sli.RenderFront(gRenderer, slime, gFont13, gText, camx, camy);
 
 		// Render tile, appliances
 		tl.renderTile(gRenderer, tile, 2, camx, camy);
@@ -803,9 +809,6 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 
 		tl.renderTile(gRenderer, tile, 6, camx, camy);
 	}
-
-	// Render Slime
-	sli.Render(gRenderer, slime, gFont13, gText, camx, camy);
 
 	// Render particles
 	part.renderBulletParticle(particles, camx, camy, 1, gRenderer);

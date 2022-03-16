@@ -88,8 +88,8 @@ public:	// variables
 		   radianSin 	= 0.0;
 	float vX 			= 0.0;
 	float vY 			= 0.0;
-	const float velMax 	= 6;
-	const float velSpeed= 3;
+	const float velMax 	= 4;
+	const float velSpeed= 2;
 	float thrustSpeed 	= 0.0;
 	float vYMax			= 10;
 	bool camlocked 		= true;
@@ -133,9 +133,9 @@ public:	// variables
 	double recoilY = 0;
 
 	// Lives
-	int lives = 1;
+	int lives 			= 1;
 	int health			= 100;
-	const int healthMax		= 100;
+	const int healthMax	= 100;
 
 	double tempc, temps;
 	SDL_Rect continueButton[3];
@@ -242,15 +242,15 @@ private:	// Private variables
 	bool parry;
 	int parryTimer;			// Parry timer
 	int parryCDTimer;		// Parry cooldown timer tracker
-	int parryCDMax;			// Parry cooldown
+	int parryCDMax;			// Parry cooldown, default: 60*3
 
 	// Dash state
-	bool dash;				// Dash ability
-	float dashSpeed;		// default: 15
-	float dashLength;		// default: 10
-	float dashCooldown;		// default: 60
-	float dashCounter;		// default: 0
-	float dashCoolCounter;	// default: 0
+	bool dash;							// Dash ability
+	float dashSpeed;					// default: 15
+	float dashLength;					// default: 10
+	const float dashCooldown 	= 60;	// default: 60
+	float dashCounter;					// default: 0
+	float dashCoolCounter;				// default: 0
 
 	// Invurnerable state
 	int invurnerableFrame;
@@ -262,6 +262,10 @@ private:	// Private variables
 public:	// Functions to do stuff?
 
 	void SlashAttack();
+
+	void ActivateParry();
+
+	void ActivateDash();
 
 public:	// Mutator functions
 
@@ -288,7 +292,10 @@ public:	// Mutator functions
 	void StopSlashAttack();
 
 	// Stop dashing
-	void StopDash();
+	void StopDashing();
+
+	// Reset dashing
+	void ResetDashing();
 
 public:	// Accessor functions
 
@@ -297,6 +304,24 @@ public:	// Accessor functions
 
 	// Get y pos
 	float getY();
+
+	// Get width
+	float getW();
+
+	// Get height
+	float getH();
+
+	// Get left pos
+	float getLeftSide();
+
+	// Get right pos
+	float getRightSide();
+
+	// Get top pos
+	float getTopSide();
+
+	// Get bottom pos
+	float getBottomSide();
 
 	// Get player damage
 	float getDamage();
@@ -309,6 +334,9 @@ public:	// Accessor functions
 
 	// Get y center of player
 	float getCenterY();
+
+	// Get value depending on direction facing
+	float getXDir();
 
 	// Get knockback power
 	float getKnockBackPower();

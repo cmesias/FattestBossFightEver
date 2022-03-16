@@ -80,11 +80,7 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 	jumps				= 1;
 	walkTimer 			= 0;
 	walkTimerVFX 		= 0;
-	attackTimer 		= 0;
-	attackFrame 		= 0;
 	sprite_index 		= 0;
-	attack 				= false;
-	attackType			= -1;
 	stunned 			= false;
 	stunTimer 			= 0;
 	playSlash 			= false;
@@ -99,6 +95,14 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 	}
 
 	// Always reset these
+
+	// Attack ability
+	this->attackTimer 		= 0;
+	this->attackFrame 		= 0;
+	this->attack 			= false;
+	this->attackType		= -1;
+
+	// Parry ability
 	this->parry 			= false;
 	this->parryTimer 		= 0;
 	this->parryCDTimer 		= 0;
@@ -108,7 +112,6 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 	this->dash 			= false;
 	this->dashSpeed 	= 10;
 	this->dashLength 	= 10;
-	this->dashCooldown 	= 60;
 	this->dashCounter 	= 0;
 	this->dashCoolCounter = 0;
 
@@ -585,8 +588,8 @@ void Players::update(Map &map,
 			{
 				// Move left
 				if (this->moveleft && !this->attack && !this->parry && !this->dash) {
-					if (this->vX > -velMax) {
-						this->vX -= velSpeed;
+					if (this->vX > -this->velMax) {
+						this->vX -= this->velSpeed;
 					}
 					this->moving = true;
 			        if (!this->shift) {
@@ -595,8 +598,8 @@ void Players::update(Map &map,
 				}
 				// Move right
 				else if (this->moveright && !this->attack && !this->parry && !this->dash) {
-					if (this->vX < velMax) {
-						this->vX += velSpeed;
+					if (this->vX < this->velMax) {
+						this->vX += this->velSpeed;
 					}
 					this->moving = true;
 			        if (!this->shift) {
@@ -609,8 +612,8 @@ void Players::update(Map &map,
 			{
 				// Move up
 				if ((this->moveup && !this->attack && !this->parry && !this->dash)) {
-					if (this->vY > -velMax) {
-						this->vY -= velSpeed;
+					if (this->vY > -this->velMax) {
+						this->vY -= this->velSpeed;
 					}
 					this->moving = true;
 			        if (!this->shift) {
@@ -619,8 +622,8 @@ void Players::update(Map &map,
 				}
 				// Move down
 				else if (this->movedown && !this->attack && !this->parry && !this->dash) {
-					if (this->vY < velMax) {
-						this->vY += velSpeed;
+					if (this->vY < this->velMax) {
+						this->vY += this->velSpeed;
 					}
 					this->moving = true;
 			        if (!this->shift) {
@@ -632,18 +635,18 @@ void Players::update(Map &map,
 			// If not dashing
 			if (!this->dash) {
 				// Max X speed
-				if (this->vX < -velMax) {
-					this->vX = -velMax;
+				if (this->vX < -this->velMax) {
+			        vX = vX - vX * 0.2;
 				}
-				if (this->vX > velMax) {
-					this->vX = velMax;
+				if (this->vX > this->velMax) {
+			        vX = vX - vX * 0.2;
 				}
 				// Max Y speed
-				if (this->vY < -velMax) {
-					this->vY = -velMax;
+				if (this->vY < -this->velMax) {
+			        vY = vY - vY * 0.2;
 				}
-				if (this->vY > velMax) {
-					this->vY = velMax;
+				if (this->vY > this->velMax) {
+			        vY = vY - vY * 0.2;
 				}
 			}
 
@@ -679,10 +682,6 @@ void Players::update(Map &map,
 	    ////////////////////////////////////////////////////////////////////////////
 	    //------------------------------------------------------------------------//
 	    //--------------------------------- Do !Parrying -------------------------//
-
-	    if (this->parry) {
-
-	    }
 
 	    // IDKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
 	    //{
@@ -748,15 +747,16 @@ void Players::update(Map &map,
 							float adjustX = 0;
 							if (facing == "left" ) {
 								tempAngel = 0;
-								adjustX = 20;
+								adjustX = 24;
 							} else if (facing == "right" ) {
 								tempAngel = 180;
-								adjustX = -20;
+								adjustX = -24;
 							}
 
 							// Spawn size and pos
 							int randSize = rand() % 5 + 5;
-							float spawnX = this->x+this->w + adjustX;
+
+							float spawnX = this->x+this->w/2 + adjustX;
 							float spawnY = this->y+this->h;
 
 							// Spawn particle effect at feet
@@ -764,7 +764,7 @@ void Players::update(Map &map,
 												spawnX-randSize/2,
 												spawnY-randSize/2,
 												randSize, randSize,
-											   tempAngel, randDouble(2.1, 4.4),
+											   tempAngel, randDouble(0.1, 0.4),
 											   0.0,
 											   {255, 255, 255, 255}, 1,
 											   1, 1,
@@ -772,8 +772,6 @@ void Players::update(Map &map,
 											   rand() % 50 + 90, 0,
 											   true, randDouble(0.1, 0.7),
 											   100, 10);
-							for (double i=0.0; i< 180.0; i+=rand() % 10 + 40){
-							}
 							// Play sound effect
 							Mix_PlayChannel(-1, sStep, 0);
 						}
@@ -798,22 +796,25 @@ void Players::update(Map &map,
 			//------------------------------- Do Dash -------------------------------//
 			if (this->dash) {
 
-				if (dashCounter >= 0 && dashCounter < 5) {
+				if (dashCounter >= 0 && dashCounter < 2) {
 					sprite_index = 9;
 				}
-				else if (dashCounter >= 5 && dashCounter < 10) {
+				else if (dashCounter >= 2 && dashCounter < 4) {
 					sprite_index = 8;
 				}
-				else if (dashCounter >= 10 && dashCounter < 15) {
+				else if (dashCounter >= 4 && dashCounter < 6) {
 					sprite_index = 9;
 				}
-				else if (dashCounter >= 25 && dashCounter < 20) {
+				else if (dashCounter >= 6 && dashCounter < 8) {
 					sprite_index = 8;
+				}
+				else if (dashCounter >= 8 && dashCounter < 10) {
+					sprite_index = 9;
 				}
 
 				int rands = rand() % 9 + 2;
 				float newX = x+w/2;
-				float newY = y+h/2;
+				float newY = y+h;
 				p_dummy.spawnParticleAngle(particle, 2,
 									newX-rands/2,
 									newY-rands/2,
@@ -832,25 +833,19 @@ void Players::update(Map &map,
 
 					// Subtract dash counter by 1 every frame
 					dashCounter -= 1;
-
-					// If dash counter goes lower than 0
-					if (dashCounter <= 0) {
-
-						// Stop player movement
-						StopMovement();
-
-						// Dash on cool down
-						dash = false;
-
-						// Start dash cool down timer
-						dashCoolCounter = dashCooldown;
-					}
 				}
-			}
+				// If dash counter goes lower than 0
+				else {
 
-			// If dash on cooldown
-			if (dashCoolCounter > 0) {
-				dashCoolCounter -= 1;
+					// Stop player movement
+					StopMovement();
+
+					// Dash on cool down
+					dash = false;
+
+					// Start dash cool down timer
+					dashCoolCounter = dashCooldown;
+				}
 			}
 
 			//------------------------------- Do Dash -------------------------------//
@@ -862,7 +857,6 @@ void Players::update(Map &map,
 			// If attacking
 			else if (this->attack)
 			{
-
 				// If attack-type: Slash Attack
 				if (this->attackType == 0)
 				{
@@ -1012,7 +1006,25 @@ void Players::update(Map &map,
 			//-----------------------------------------------------------------------//
 			///////////////////////////////////////////////////////////////////////////
 
-		}
+			///////////////////////////////////////////////////////////////////////////
+			//-----------------------------------------------------------------------//
+			//----------------------------- Do NOT Dash -----------------------------//
+
+			// If dash on cooldown
+			if (!this->dash) {
+
+				// Start cooldown countdown
+				if (this->dashCoolCounter > 0) {
+					this->dashCoolCounter -= 1;
+				}
+			}
+
+			//----------------------------- Do NOT Dash -----------------------------//
+			//-----------------------------------------------------------------------//
+			///////////////////////////////////////////////////////////////////////////
+
+
+		} // end Animations
 
 
 
@@ -1572,12 +1584,12 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY)
 	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 0, gText.getWidth(), gText.getHeight());
 
 	tempsi.str( std::string() );
-	tempsi << "sprite_index: " << sprite_index;
+	tempsi << "attack: " << attack;
 	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
 	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 24*1, gText.getWidth(), gText.getHeight());
 
 	tempsi.str( std::string() );
-	tempsi << "dashCounter: " << dashCounter;
+	tempsi << "dashCoolCounter: " << dashCoolCounter;
 	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
 	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 24*2, gText.getWidth(), gText.getHeight());
 
@@ -1687,104 +1699,28 @@ void Players::OnKeyDown(SDL_Keycode sym )
 	case SDLK_y:
 		this->camlocked = ( !this->camlocked );
 		break;
-	case SDLK_SPACE: 					// Jump
-		if (this->dashCoolCounter <= 0 && this->dashCounter <=0) {
-
-			// If currently attacking
-			StopSlashAttack();
-
-			// Depending on which way the player is moving,
-			if (this->moveleft) {
-				this->vX -= this->dashSpeed;
-			}else if (moveright) {
-				this->vX += this->dashSpeed;
-			}
-			if (this->moveup) {
-				this->vY -= this->dashSpeed;
-			}else if (movedown) {
-				this->vY += this->dashSpeed;
-			}
-			this->dash = true;
-			this->dashCounter = this->dashLength;
-
-			// Play dash sound effect
-			Mix_PlayChannel(-1, sDash, 0);
-
-			// If not moving
-			/*if (!this->moving)
-			{
-				// Depending on which way the player is moving,
-				if (this->facing=="left") {
-					this->vX -= this->dashSpeed;
-				} else if (this->facing=="right") {
-					this->vX += this->dashSpeed;
-				}
-				if (this->moveup) {
-					this->vY -= this->dashSpeed;
-				}else if (movedown) {
-					this->vY += this->dashSpeed;
-				}
-				this->dash = true;
-				this->dashCounter = this->dashLength;
-
-				// Play dash sound effect
-				Mix_PlayChannel(-1, sDash, 0);
-			}
-
-			// If moving
-			else {
-
-				// Depending on which way the player is moving,
-				if (this->moveleft) {
-					this->vX -= this->dashSpeed;
-				}else if (moveright) {
-					this->vX += this->dashSpeed;
-				}
-				if (this->moveup) {
-					this->vY -= this->dashSpeed;
-				}else if (movedown) {
-					this->vY += this->dashSpeed;
-				}
-				this->dash = true;
-				this->dashCounter = this->dashLength;
-
-				// Play dash sound effect
-				Mix_PlayChannel(-1, sDash, 0);
-			}*/
-		}
-
-        /*if (!this->attack && !this->stunned && !this->parry) {
-            if ( this->jumps > 0 ){
-            	this->jumps--;
-            	this->jumpstate = "jump";
-            }
-        }*/
-		break;
-	case SDLK_n:						// Attack - Slash
-
-		// Stop dashing
-		StopDash();
-
-		// Attack
-		SlashAttack();
-		break;
 	case SDLK_m:						// Dodge
 		// Future code to dodge
 	case SDLK_j:						// Attack (spell attack? This is not finalized.)
 		this->initialshot = true;
 		break;
-	case SDLK_b:						// Parry
-        if (!this->parry && this->parryCDTimer <= 0 && !this->stunned)
-        {
-        	// enable parrying
-        	this->parry = true;
-
-        	// Play sound effect
-        	Mix_PlayChannel(-1, sParry, 0);
-        }
-		break;
 	case SDLK_LSHIFT:
 		this->shift = true;
+		break;
+	case SDLK_n:						// Attack
+
+		// Attack
+		SlashAttack();
+		break;
+	case SDLK_b:						// Parry
+
+		// Activate Parry
+		ActivateParry();
+		break;
+	case SDLK_SPACE: 					// Dash
+
+		// Activate Dash
+		ActivateDash();
 		break;
 	}
 }
@@ -1947,12 +1883,21 @@ void Players::updateJoystick( SDL_Event &e){
 
 void Players::SlashAttack() {
 	if (!this->attack && !this->stunned && !this->parry) {
+
+		// If currently dashing
+		if (this->dash)
+		{
+			// Stop dashing
+			StopDashing();
+		}
+
 		// Set attack parameters
 		this->playSlash = true;
 		this->clash = false;
 		this->attack = true;
 		this->spawnAttack = true;
 		this->attackType = 0;
+
 		// Do normal Slash Attack
 		/*if (!this->movedown) {
 			this->attackType = 0;
@@ -1961,6 +1906,61 @@ void Players::SlashAttack() {
 		else {
 			this->attackType = 1;
 		}*/
+	}
+}
+
+void Players::ActivateParry() {
+    if (!this->parry && this->parryCDTimer <= 0 && !this->stunned)
+    {
+		// Stop attacking
+		if (this->attack) {
+			StopSlashAttack();
+		}
+
+		// Stop dashing
+		if (this->dash) {
+			StopDashing();
+		}
+
+    	// enable parrying
+    	this->parry = true;
+
+    	// Play sound effect
+    	Mix_PlayChannel(-1, sParry, 0);
+    }
+}
+
+void Players::ActivateDash() {
+	// If Dash is not on cool down
+	if (this->dashCoolCounter <= 0 && this->dashCounter <=0) {
+
+		// Make sure we are not parrying before dashing
+		// Because we dont want to stop the animation of parrying
+		// if we dash.
+		if (!this->parry) {
+
+			// Stop attacking
+			if (this->attack) {
+				StopSlashAttack();
+			}
+
+			// Depending on which way the player is moving,
+			if (this->moveleft) {
+				this->vX -= this->dashSpeed;
+			}else if (moveright) {
+				this->vX += this->dashSpeed;
+			}
+			if (this->moveup) {
+				this->vY -= this->dashSpeed;
+			}else if (movedown) {
+				this->vY += this->dashSpeed;
+			}
+			this->dash = true;
+			this->dashCounter = this->dashLength;
+
+			// Play dash sound effect
+			Mix_PlayChannel(-1, sDash, 0);
+		}
 	}
 }
 
@@ -2018,11 +2018,18 @@ void Players::StopSlashAttack()
     attack = false;
 }
 
-void Players::StopDash()
+void Players::StopDashing()
 {
 	// Reset dash timers
 	this->dash = false;
-	this->dashCooldown 	= 60;
+	this->dashCounter 	= 0;
+	this->dashCoolCounter = this->dashCooldown;
+}
+
+void Players::ResetDashing()
+{
+	// Reset dash timers
+	this->dash = false;
 	this->dashCounter 	= 0;
 	this->dashCoolCounter = 0;
 }
@@ -2036,6 +2043,30 @@ float Players::getX() {
 
 float Players::getY() {
 	return this->y;
+}
+
+float Players::getW() {
+	return this->w;
+}
+
+float Players::getH() {
+	return this->h;
+}
+
+float Players::getLeftSide() {
+	return this->x;
+}
+
+float Players::getRightSide() {
+	return this->x+this->w;
+}
+
+float Players::getTopSide() {
+	return this->y;
+}
+
+float Players::getBottomSide() {
+	return this->y+this->h;
 }
 
 float Players::getDamage() {
@@ -2055,6 +2086,19 @@ float Players::getCenterX() {
 // Get y center of player
 float Players::getCenterY() {
 	return this->y + this->h/2;
+}
+
+// Get value depending on direction facing
+float Players::getXDir() {
+	// Knockback player
+	float xDir = 1;
+	if (this->facing=="left") {
+		xDir = -1;
+	}
+	if (this->facing=="right") {
+		xDir = 1;
+	}
+	return xDir;
 }
 
 // Get knockback power
