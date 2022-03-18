@@ -27,6 +27,7 @@ public:
 	int count;
 	const int max = 100;
 	LTexture gTexture;
+	LTexture gTextureFlashed;
 	LTexture gMiddleTurret;
 	LTexture gTurret;
 	LTexture gBossShadow;
@@ -83,6 +84,13 @@ public:	// Animations
 
 	bool renderInFront;
 	bool mouse;
+	bool flash;				// flash bosses texture on getting hit by players attacks
+
+	/*
+	 * 0: Attack 1
+	 * 1: Attack 2
+	 */
+	int randomAttack;
 
 
 

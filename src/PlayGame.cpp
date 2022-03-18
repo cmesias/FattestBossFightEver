@@ -1078,7 +1078,7 @@ void PlayGame::RenderText(SDL_Renderer *gRenderer, LWindow &gWindow)
 
 			// These texts have an x & y coordinate, render these (like damage text)
 			else if (text[i].type == 1) {
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255, 255, 255, 255}, gFont13);
+				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255, 255, 0, 255}, gFont26);
 				gText.setAlpha(text[i].alpha);
 				gText.render(gRenderer, text[i].x-camx, text[i].y-camy, gText.getWidth(), gText.getHeight());
 			}
@@ -1177,7 +1177,7 @@ void PlayGame::checkCollisionParticleTile()
 															newY-rands/2,
 														   rands, rands,
 														   i, randDouble(2.1, 5.1),
-														   0.0,
+														   0.0, 0, 0,
 														   {210, 144, 40, 255}, 1,
 														   1, 1,
 														   rand() % 100 + 150, rand() % 2 + 5,
@@ -1224,8 +1224,8 @@ void PlayGame::checkCollisionParticleBoss()
 											  (bmy - bmy2) * (bmy - bmy2));
 
 						// If distance is less than 50 pixels
-						if (distance < 50)
-						{
+						//if (distance < 50)
+						//{
 							// Get angle of boss relative to attack-particle
 							float angle = atan2(bmy - bmy2,bmx - bmx2);
 							angle = angle * (180 / 3.1416);
@@ -1245,6 +1245,9 @@ void PlayGame::checkCollisionParticleBoss()
 							// collision occurred
 							if (distance < boss[i].w/2 + particles[j].w/2)
 							{
+								// Flash Bosses sprite
+								boss[i].flash = true;
+
 								// Remove particle
 								particles[j].time = 0;
 								particles[j].alive = false;
@@ -1261,8 +1264,8 @@ void PlayGame::checkCollisionParticleBoss()
 								}
 
 								// Move the boss in someway
-								boss[i].vX += player.getKnockBackPower()/2 * xDir;
-								boss[i].vY = -1;
+								//boss[i].vX += player.getKnockBackPower()/2 * xDir;
+								//boss[i].vY = -1;
 
 								// Play hit sound effect
 				                Mix_PlayChannel(-1, sCastHitBoss, 0);
@@ -1273,12 +1276,12 @@ void PlayGame::checkCollisionParticleBoss()
 				                // Show damage text (it will print how much damage the player did to the boss)
 				    			std::stringstream tempss;
 				    			tempss << player.getCastDamage();
-				    			tex.spawn(text, boss[i].x+boss[i].w/2, boss[i].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
+				    			tex.spawn(text, boss[i].x+boss[i].w/2, boss[i].y+boss[i].w/2-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
 							}
 							//----------------------------- Collision Detection based on player-attack hit-box and Boss hit-box -----------------------------//
 							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							//--------------------------------------------------------------------------------------------------------------------------------//
-						}
+						//}
 					}
 				}
 			}
@@ -1454,8 +1457,8 @@ void PlayGame::checkPlayerAttacksCollisionBoss() {
 								{
 									float distanceW = sqrt((bmx - bmx2) * (bmx - bmx2));
 									float distanceH = sqrt((bmy - bmy2) * (bmy - bmy2));
-									float tempVX 	= 5 * (bmx - bmx2) / distanceW;
-									float tempVY 	= 5 * (bmy - bmy2) / distanceH;
+									float tempVX 	= 0.8 * (bmx - bmx2) / distanceW;
+									float tempVY 	= 0.8 * (bmy - bmy2) / distanceH;
 
 									boss[i].vX += tempVX;
 									boss[i].vY += tempVY;
@@ -1576,7 +1579,7 @@ void PlayGame::checkPlayerAttacksTileCollision() {
 													   newY-rands/2,						// Y
 													   rands, rands,						// width, height
 													   -h, randDouble(0.1, 1.4),				// angle, speed
-													   0.0,									// damage
+													   0.0, 0, 0,									// damage
 													   {200, 144, 40, 255}, 1,				// color and layer
 													   1, 1,								// angleSpe, angleDir
 													   rand() % 100 + 150, rand() % 2 + 5,	// alpha, alphaSpeed
@@ -1658,7 +1661,7 @@ void PlayGame::checkBossAttacksCollisionPlayer() {
 												newY-rands/2,
 											   rands, rands,
 											   i, randDouble(2.1, 5.1),
-											   0.0,
+											   0.0, 0, 0,
 											   {144, 144, 144, 255}, 1,
 											   1, 1,
 											   rand() % 100 + 150, rand() % 2 + 5,
@@ -1728,7 +1731,7 @@ void PlayGame::checkBossAttacksCollisionPlayer() {
 												newY-rands/2,
 											   rands, rands,
 											   i, randDouble(2.1, 5.1),
-											   0.0,
+											   0.0, 0, 0,
 											   {210, 144, 40, 255}, 1,
 											   1, 1,
 											   rand() % 100 + 150, rand() % 2 + 5,
@@ -1788,7 +1791,7 @@ void PlayGame::checkBossAttacksCollisionPlayer() {
 												newY-rands/2,
 											   rands, rands,
 											   i, randDouble(2.1, 5.1),
-											   0.0,
+											   0.0, 0, 0,
 											   {240, 0, 0, 255}, 1,
 											   1, 1,
 											   rand() % 100 + 150, rand() % 2 + 5,
@@ -1945,7 +1948,7 @@ void PlayGame::checkCollisionParticlePlayer() {
 													newY-rands/2,
 												   rands, rands,
 												   i, randDouble(2.1, 5.1),
-												   0.0,
+												   0.0, 0, 0,
 												   {210, 144, 40, 255}, 1,
 												   1, 1,
 												   rand() % 100 + 150, rand() % 2 + 5,
@@ -1965,11 +1968,6 @@ void PlayGame::checkCollisionParticlePlayer() {
 						//---------------------------------------------------------------//
 						//---------------- NOT Parrying, so hurt the Player -------------//
 						else {
-
-							// remove particle
-							particles[i].alive = false;
-							part.count--;
-
 							// Knock back player
 							{
 								float distanceW = sqrt((bmx - bmx2) * (bmx - bmx2));
@@ -1991,7 +1989,7 @@ void PlayGame::checkCollisionParticlePlayer() {
 													newY-rands/2,
 												   rands, rands,
 												   i, randDouble(2.1, 5.1),
-												   0.0,
+												   0.0, 0, 0,
 												   {255, 0, 255, 255}, 1,
 												   1, 1,
 												   rand() % 100 + 150, rand() % 2 + 5,
@@ -2004,7 +2002,17 @@ void PlayGame::checkCollisionParticlePlayer() {
 							Mix_PlayChannel(-1, sSlashHitBoss, 0);
 
 							// Subtract player health
-							player.health -= 1;
+							player.health -= particles[i].damage;
+
+			                // Show damage text (it will print how much damage the player did to the boss)
+			    			std::stringstream tempss;
+			    			tempss << particles[i].damage;
+			    			tex.spawn(text, player.x+player.w/2, player.y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
+
+							// remove particle
+							particles[i].alive = false;
+							part.count--;
+
 						}
 						//---------------- NOT Parrying, so hurt the Player -------------//
 						//---------------------------------------------------------------//
@@ -2047,10 +2055,13 @@ void PlayGame::checkCollisionParticleParticle() {
 									// Circle Collision
 									if (distance < particles[j].w/2 + particles[i].w/2)
 									{
-										// Remove Enemy particle first
-										particles[j].time = 0;
-										particles[j].alive = false;
-										part.count--;
+										// Reduce health of Enemey Particle
+										particles[j].health -= particles[i].dmgToParticles;
+
+						                // Show damage text (it will print how much damage the player did to the boss)
+						    			std::stringstream tempss;
+						    			tempss << particles[i].dmgToParticles;
+						    			tex.spawn(text, particles[j].x+particles[j].w/2, particles[j].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
 
 										// Remove Player particle next
 										particles[i].time = 0;
@@ -2067,7 +2078,7 @@ void PlayGame::checkCollisionParticleParticle() {
 																newY-rands/2,
 															   rands, rands,
 															   i, randDouble(2.1, 5.1),
-															   0.0,
+															   0.0, 0, 0,
 															   {210, 144, 40, 255}, 1,
 															   1, 1,
 															   rand() % 100 + 150, rand() % 2 + 5,

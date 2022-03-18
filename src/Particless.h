@@ -19,9 +19,9 @@ class Particle: public Helper, public TextNFont {
 public:	// other variables
 	int count;
 	const int max = 512;
-	LTexture spr_bullet;					// Bullet Textures
-	LTexture spr_bullet_blue;				// Bullet Texture blue
+	LTexture gBullet;				// Bullet Texture blue
 	LTexture blue_block;					// Blue block, this will be used to create "bits" that come off of a block when hit
+	LTexture gSlash;
 	LTexture gParticles;					// Particle Textures
 	SDL_Rect cParticles[ 6 ];				// [0: Blue], [1: Green], [2: Orange], [3: Red], [4: White], [5: Yellow] Particle
 
@@ -53,6 +53,8 @@ public:	// variables
 	 */
 	int type;
 	int damage;
+	float dmgToParticles;	// this is for damage to other particles
+	float health;
 	SDL_Color color;
 	int layer;
 
@@ -74,7 +76,7 @@ public:	// functions
 			float spawnX, float spawnY,
 			int spawnW, int spawnH,
 			double angle, double speed,
-			double damage,
+			float damage, float dmgToParticles, float health,
 			SDL_Color color, int layer,
 			int angleSpe, int angleDir,
 			int alpha, int alphaspeed,
@@ -87,7 +89,7 @@ public:	// functions
 			float spawnX, float spawnY,
 			int spawnW, int spawnH,
 			double angle, double speed,
-			double damage,
+			float damage, float dmgToParticles, float health,
 			SDL_Color color, int layer,
 			int angleSpe, int angleDir,
 			int alpha, int alphaspeed,

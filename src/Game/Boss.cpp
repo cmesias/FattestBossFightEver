@@ -31,6 +31,7 @@ void Boss::Init(Boss boss[]) {
 		boss[i].damage 				= 5;
 		boss[i].distance 			= 1;
 		boss[i].mouse 				= false;
+		boss[i].flash 				= false;
 		boss[i].alive 				= false;
 		boss[i].collision 			= false;
 		boss[i].onScreen 			= false;
@@ -47,6 +48,7 @@ void Boss::Init(Boss boss[]) {
 		boss[i].walkSpeed			= 1;
 		boss[i].walkFrame			= 0;
 		boss[i].animState			= -1;
+		boss[i].randomAttack		= 0;
 		boss[i].coolDownTimer		= this->coolDownTimeStart;
 		boss[i].coolDownTimeStart	= this->coolDownTimeStart;
 
@@ -60,7 +62,8 @@ void Boss::Init(Boss boss[]) {
 }
 
 void Boss::Load(SDL_Renderer *gRenderer) {
-	gTexture.loadFromFile(gRenderer, "resource/gfx/Boss/Boss.png");
+	gTexture.loadFromFile(gRenderer, "resource/gfx/Boss/boss.png");
+	gTextureFlashed.loadFromFile(gRenderer, "resource/gfx/Boss/boss_flash.png");
 	gMiddleTurret.loadFromFile(gRenderer, "resource/gfx/Boss/middle-turret.png");
 	gTurret.loadFromFile(gRenderer, "resource/gfx/Boss/turret.png");
 	gBossShadow.loadFromFile(gRenderer, "resource/gfx/boss_shadow.png");
@@ -69,6 +72,7 @@ void Boss::Load(SDL_Renderer *gRenderer) {
 
 void Boss::Free() {
 	gTexture.free();
+	gTextureFlashed.free();
 	gBossShadow.free();
 	gMiddleTurret.free();
 	gTurret.free();
@@ -125,6 +129,7 @@ void Boss::Spawn(Boss boss[], float x, float y, float w, float h, float angle, f
 			boss[i].damage			= 5;
 			boss[i].alive 			= true;
 			boss[i].mouse 			= false;
+			boss[i].flash 			= false;
 
 			// Spawning normal boss, set default parameters
 			if (type == 0) {
@@ -292,8 +297,8 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 				{
 				}
 
-				// If player is within 300 pixels, start charging animation
-				if (boss[i].distance < 300 && !boss[i].chargingAttack)
+				// If player is within 200 pixels, start charging animation
+				if (boss[i].distance < 200 && !boss[i].chargingAttack)
 				{
 					// Start charge-attack animation
 					boss[i].chargingAttack = true;
@@ -304,6 +309,9 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 					// Stop moving boss
 					boss[i].vX = 0.0;
 					boss[i].vY = 0.0;
+
+					// Choose random attack for Boss before starting Shooting animations
+					boss[i].randomAttack = rand() % 2;
 				}
 			}
 
@@ -321,36 +329,87 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 
 					// Boss shoots based on what our chargeTime is
 					{
-						for (int j=0; j<5; j++) {
-							if (boss[i].chargeTime == j * 6) {
+						// Random Boss attack 1
+						// Typical Boss shoot
+						if (boss[i].randomAttack) {
+							for (int j=0; j<5; j++) {
+								if (boss[i].chargeTime == j * 6) {
 
-								// Spawn particle effect
-								int rands = 32;
-								float tempX = boss[i].x + boss[i].w/2 - rands/2;
-								float tempY = boss[i].y + boss[i].h/2 - rands/2;
-								for (double h=0.0; h< 360.0; h+=rand() % 10 + 10){
+									// Spawn particle effect
+									int rands = 32;
+									float tempX = boss[i].x + boss[i].w/2 - rands/2;
+									float tempY = boss[i].y + boss[i].h/2 - rands/2;
+									for (double h=0.0; h< 360.0; h+=rand() % 10 + 10){
 
-									//int rands = rand() % 11 + 3;
+										//int rands = rand() % 11 + 3;
 
 
-									p_dummy.spawnParticleAngle(particle, 1,
-													   tempX,
-													   tempY,
-													   rands, rands,
-													   h, randDouble(5, 5),
-													   0.0,
-													   {144, 144, 144, 255}, 1,
-													   1, 1,
-													   rand() % 100 + 150, rand() % 2 + 5,
-													   rand() % 50 + 90, 0,
-													   true, randDouble(0.1, 0.7),
-													   100, 10);
+										p_dummy.spawnParticleAngle(particle, 1,
+														   tempX,
+														   tempY,
+														   rands, rands,
+														   h, randDouble(5, 5),
+														   10, 0, 20,
+														   {144, 144, 144, 255}, 1,
+														   1, 1,
+														   rand() % 100 + 150, 0,
+														   rand() % 50 + 90, 0,
+														   true, randDouble(0.1, 0.7),
+														   100, 10);
+									}
+
+									// Play SFX
+									Mix_PlayChannel(-1, sCast, 0);
 								}
-
-								// Play SFX
-								Mix_PlayChannel(-1, sCast, 0);
 							}
 						}
+
+						// Random Boss attack 2
+						// FAST BARRAGE!!!!!!!!!!
+						else {
+							for (int j=0; j<10; j++) {
+								if (boss[i].chargeTime == j * 5) {
+
+									// Spawn particle effect
+									int rands = 32;
+									float tempX = boss[i].x + boss[i].w/2 - rands/2;
+									float tempY = boss[i].y + boss[i].h/2 - rands/2;
+									for (double h=0.0; h< 360.0; h+=rand() % 10 + 5){
+
+										//int rands = rand() % 11 + 3;
+
+
+										p_dummy.spawnParticleAngle(particle, 1,
+														   tempX,
+														   tempY,
+														   rands, rands,
+														   h, randDouble(12, 14),
+														   5, 0, 20,
+														   {144, 144, 144, 255}, 1,
+														   1, 1,
+														   255, 0,
+														   randDouble(20, 30), 1,
+														   true, randDouble(0.1, 0.7),
+														   100, 10);
+									}
+
+									// Play SFX
+									Mix_PlayChannel(-1, sCast, 0);
+								}
+							}
+						}
+
+
+
+
+
+
+
+
+
+
+
+
 					}
 
 
@@ -475,12 +534,12 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 									   tempY,
 									   rands, rands,
 									   boss[i].angleFacingTarget, speed,
-									   0.0,
+									   50, 0, 100,
 									   {144, 144, 144, 255}, 1,
 									   1, 1,
-									   rand() % 100 + 150, rand() % 2 + 5,
+									   255, 0,
 									   60*6, 1,
-									   true, randDouble(0.1, 0.7),
+									   false, 0,
 									   100, 10,
 									   true, boss[i].xFollow, boss[i].yFollow);
 
@@ -572,6 +631,11 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 			if( boss[i].y+boss[i].h > map.h ){
 				boss[i].y = map.h-boss[i].h ;
 			}
+			if (
+				boss[i].flash) {
+
+				boss[i].flash = false;
+			}
 		}
 	}
 
@@ -635,10 +699,17 @@ void Boss::RenderBack(SDL_Renderer *gRenderer, Boss boss[], TTF_Font *gFont, LTe
 											boss[i].w+6, boss[i].h+30);
 
 				// Render boss
-				gTexture.setAlpha(255);
-				gTexture.render(gRenderer, boss[i].x - camx, boss[i].y - camy,
-											boss[i].w, boss[i].h, NULL,
-											boss[i].angle);
+				if (boss[i].flash) {
+					gTextureFlashed.setAlpha(255);
+					gTextureFlashed.render(gRenderer, boss[i].x - camx, boss[i].y - camy,
+												boss[i].w, boss[i].h, NULL,
+												boss[i].angle);
+				} else {
+					gTexture.setAlpha(255);
+					gTexture.render(gRenderer, boss[i].x - camx, boss[i].y - camy,
+												boss[i].w, boss[i].h, NULL,
+												boss[i].angle);
+				}
 
 				///////////////////////////////////////////////////////////////
 				//-----------------------------------------------------------//
@@ -731,10 +802,17 @@ void Boss::RenderFront(SDL_Renderer *gRenderer, Boss boss[], TTF_Font *gFont, LT
 											boss[i].w+6, boss[i].h+30);
 
 				// Render boss
-				gTexture.setAlpha(255);
-				gTexture.render(gRenderer, boss[i].x - camx, boss[i].y - camy,
-											boss[i].w, boss[i].h, NULL,
-											boss[i].angle);
+				if (boss[i].flash) {
+					gTextureFlashed.setAlpha(255);
+					gTextureFlashed.render(gRenderer, boss[i].x - camx, boss[i].y - camy,
+												boss[i].w, boss[i].h, NULL,
+												boss[i].angle);
+				} else {
+					gTexture.setAlpha(255);
+					gTexture.render(gRenderer, boss[i].x - camx, boss[i].y - camy,
+												boss[i].w, boss[i].h, NULL,
+												boss[i].angle);
+				}
 
 				///////////////////////////////////////////////////////////////
 				//-----------------------------------------------------------//
@@ -790,25 +868,42 @@ void Boss::RenderUI(SDL_Renderer *gRenderer, Boss boss[], int camx, int camy) {
 	for (int i = 0; i < max; i++) {
 		if (boss[i].alive) {
 			// Boss UI
+			// Text
+			{
+				// Render Text
+				int uiX = screenWidth/2-gText.getWidth()/2;
+				int uiY = 50;
+
+				std::stringstream tempss;
+				tempss << "THE FATTEST BOSS FIGHT EVER";
+				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255, 255, 255}, gFont36);
+				gText.render(gRenderer, uiX, uiY, gText.getWidth(), gText.getHeight());
+			}
+
 			// Health
 			{
 				// Render health
-				int barWidth = boss[i].w;
+				int barWidth = screenWidth * 0.85;
+
+				int uiX = screenWidth/2 - barWidth/2;
+				int uiY = 10;
 
 				// Health bar, bg
-				SDL_Rect tempRect = {boss[i].x-camx, boss[i].y-45-camy, (barWidth*boss[i].maxHealth)/boss[i].maxHealth, 35};
+				SDL_Rect tempRect = {uiX, uiY, (barWidth*boss[i].maxHealth)/boss[i].maxHealth, 35};
 				SDL_SetRenderDrawColor(gRenderer, 60, 60, 60, 255);
 
 				// Render health
-				tempRect = {boss[i].x-camx, boss[i].y-45-camy, (barWidth*boss[i].health)/boss[i].maxHealth, 35};
+				tempRect = {uiX, uiY, (barWidth*boss[i].health)/boss[i].maxHealth, 35};
 				SDL_SetRenderDrawColor(gRenderer, 200, 30, 30, 255);
 				SDL_RenderFillRect(gRenderer, &tempRect);
 
 				// Render health, border
-				tempRect = {boss[i].x-camx, boss[i].y-45-camy, (barWidth*boss[i].maxHealth)/boss[i].maxHealth, 35};
+				tempRect = {uiX, uiY, (barWidth*boss[i].maxHealth)/boss[i].maxHealth, 35};
 				SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
 				SDL_RenderDrawRect(gRenderer, &tempRect);
 			}
+
+
 		}
 	}
 }

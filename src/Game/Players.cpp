@@ -123,7 +123,7 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 	this->manaRegenSpeed		= 19.87;
 	this->damage				= 25;
 	this->damageMultipler		= 1;
-	this->castDamage			= 13;
+	this->castDamage			= 50;
 	this->knockBackPower		= 1.58;
 
 }
@@ -398,14 +398,23 @@ void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, 
 					Mix_PlayChannel(1, sCastSFX, 0);
 
 
+					int offSetX =0;
+					if (facing == "left") {
+						offSetX = 32;
+					}
+					else if (facing == "right") {
+						offSetX = 0;
+					}
+
+
 					// depracated
 					// spawn particle
 					p_dummy.spawnParticleAngle(particle, 0,
-							x+w/2,
+							x+w/2-offSetX,
 							y+w/2,
 							particleW, particleH,
 						   angle, 21,
-						   25,
+						   this->castDamage, this->castDamage, 0,
 						   {255, 255,0}, 1,
 						   1, 1,
 						   255, 0,
@@ -799,7 +808,7 @@ void Players::update(Map &map,
 												spawnY-randSize/2,
 												randSize, randSize,
 											   tempAngel, randDouble(0.1, 0.4),
-											   0.0,
+											   0.0, 0, 0,
 											   {255, 255, 255, 255}, 1,
 											   1, 1,
 											   rand() % 100 + 150, rand() % 2 + 5,
@@ -854,7 +863,7 @@ void Players::update(Map &map,
 									newY-rands/2,
 								   rands, rands,
 								   0, randDouble(0.1, 0.3),
-								   0.0,
+								   0.0, 0, 0,
 								   {255, 255, 255, 255}, 1,
 								   1, 1,
 								   rand() % 100 + 150, rand() % 2 + 5,
@@ -952,6 +961,9 @@ void Players::update(Map &map,
 						attackType = -1;
 						attackTimer = 0;
 						attack = false;
+
+						// Stop shooting slashes
+						this->initialshot = false;
 					}
 				}
 
@@ -1173,7 +1185,7 @@ void Players::update(Map &map,
 									newY-rands/2,
 								   rands, rands,
 								   i, randDouble(2.1, 5.1),
-								   0.0,
+								   0.0, 0, 0,
 								   {255, 0, 0, 255}, 1,
 								   1, 1,
 								   rand() % 100 + 150, rand() % 2 + 5,
@@ -1796,9 +1808,6 @@ void Players::mouseClickState(SDL_Event &e){
 
 			// Attack
 			SlashAttack();
-
-			// Shoot bullet
-			this->initialshot = true;
 		}
 		if (e.button.button == SDL_BUTTON_RIGHT) {
 			this->controls = 0;
@@ -1940,6 +1949,9 @@ void Players::SlashAttack() {
 		this->attack = true;
 		this->spawnAttack = true;
 		this->attackType = 0;
+
+		// Shoot bullet
+		this->initialshot = true;
 
 		// Do normal Slash Attack
 		/*if (!this->movedown) {

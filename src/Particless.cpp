@@ -34,8 +34,8 @@ void Particle::load(SDL_Renderer* gRenderer){
 	setClips(cParticles[5], 48, 0, 8, 8);
 	gParticles.loadFromFile(gRenderer, "img/particle/particles.png");
 	gParticles.setBlendMode(SDL_BLENDMODE_ADD);
-	spr_bullet.loadFromFile(gRenderer, "resource/gfx/player/basic_spell.png");
-	spr_bullet_blue.loadFromFile(gRenderer, "resource/gfx/player/basic_spell.png");
+	gBullet.loadFromFile(gRenderer, "resource/gfx/player/gBullet.png");
+	gSlash.loadFromFile(gRenderer, "resource/gfx/player/gSlash.png");
 	blue_block.loadFromFile(gRenderer, "resource/gfx/blue_block.png");
 
 	// From other class
@@ -44,9 +44,9 @@ void Particle::load(SDL_Renderer* gRenderer){
 
 void Particle::free(){
 	gParticles.free();
-	spr_bullet.free();
-	spr_bullet_blue.free();
+	gBullet.free();
 	blue_block.free();
+	gSlash.free();
 
 	// From other class
 	//textFont.Free();
@@ -86,7 +86,8 @@ void Particle::init(Particle particle[]) {
 		particle[i].deathSpe 		= 0;
 		particle[i].side 			= "";
 		particle[i].type 			= 0;
-		particle[i].damage 			= 0;
+		particle[i].damage 			= 37;
+		particle[i].dmgToParticles 			= 0;
 		particle[i].color 			= { 255, 255, 255, 255 };
 	}
 }
@@ -96,7 +97,7 @@ void Particle::spawnParticleAngle(Particle particle[], int type,
 		float spawnX, float spawnY,
 		int spawnW, int spawnH,
 		double angle, double speed,
-		double damage,
+		float damage, float dmgToParticles, float health,
 		SDL_Color color, int layer,
 		int angleSpe, int angleDir,
 		int alpha, int alphaspeed,
@@ -107,6 +108,11 @@ void Particle::spawnParticleAngle(Particle particle[], int type,
 	{
 		if (!particle[i].alive)
 		{
+			particle[i].type 			= type;
+			particle[i].damage 			= damage;
+			particle[i].dmgToParticles 	= dmgToParticles;
+			particle[i].health 			= health;
+
 			particle[i].follow 			= false;
 			particle[i].x 				= spawnX;
 			particle[i].y 				= spawnY;
@@ -119,8 +125,6 @@ void Particle::spawnParticleAngle(Particle particle[], int type,
 			particle[i].speed 			= speed;
 			particle[i].vX 				= (cos( (3.14159265/180)*(angle) ));
 			particle[i].vY 				= (sin( (3.14159265/180)*(angle) ));
-			particle[i].type 			= type;
-			particle[i].damage 			= damage;
 			//particle[i].x 				= spawnX + (rand() % 4 + 2 * (cos( (3.14159265/180)*(angle) )));
 			//particle[i].y 				= spawnY + (rand() % 4 + 2 * (sin( (3.14159265/180)*(angle) )));
 			//particle[i].x 				= spawnX + cos( (3.14159265/180)*(angle) );
@@ -155,7 +159,7 @@ void Particle::spawnParticleAngleFollow(Particle particle[], int type,
 		float spawnX, float spawnY,
 		int spawnW, int spawnH,
 		double angle, double speed,
-		double damage,
+		float damage, float dmgToParticles, float health,
 		SDL_Color color, int layer,
 		int angleSpe, int angleDir,
 		int alpha, int alphaspeed,
@@ -167,6 +171,11 @@ void Particle::spawnParticleAngleFollow(Particle particle[], int type,
 	{
 		if (!particle[i].alive)
 		{
+
+			particle[i].type 			= type;
+			particle[i].damage 			= damage;
+			particle[i].dmgToParticles 	= dmgToParticles;
+			particle[i].health 			= health;
 			particle[i].follow 			= follow;
 			particle[i].xFollow 		= xFollow;
 			particle[i].yFollow 		= yFollow;
@@ -181,13 +190,10 @@ void Particle::spawnParticleAngleFollow(Particle particle[], int type,
 			particle[i].speed 			= speed;
 			particle[i].vX 				= (cos( (3.14159265/180)*(angle) ));
 			particle[i].vY 				= (sin( (3.14159265/180)*(angle) ));
-			particle[i].type 			= type;
-			particle[i].damage 			= damage;
 			//particle[i].x 				= spawnX + (rand() % 4 + 2 * (cos( (3.14159265/180)*(angle) )));
 			//particle[i].y 				= spawnY + (rand() % 4 + 2 * (sin( (3.14159265/180)*(angle) )));
 			//particle[i].x 				= spawnX + cos( (3.14159265/180)*(angle) );
 			//particle[i].y 				= spawnY + sin( (3.14159265/180)*(angle) );
-
 
 			particle[i].side 			= "";
 
@@ -224,7 +230,7 @@ void Particle::spawnExplosion(Particle particle[], float x, float y, int size) {
 							y-size/2,
 							size, size,
 						   j, num,
-						   0.0,
+						   0.0, 0, 100,
 						   {255, 0, 255, 255}, 1,
 						   1, 1,
 						   rand() % 100 + 150, rand() % 2 + 5,
@@ -453,8 +459,21 @@ void Particle::updateBulletParticles(Particle particle[], int mapX, int mapY, in
 					count--;
 				}
 
+				// Particle health death
+				if (particle[i].health <= 0) {
+					particle[i].alive = false;
+					count--;
+				}
+
 				// Particle death
 				if (particle[i].time > particle[i].deathTimer) {
+					particle[i].alive = false;
+					count--;
+				}
+
+				// Particle death timer, transparency
+				particle[i].alpha -= particle[i].alphaspeed;
+				if (particle[i].alpha < 0) {
 					particle[i].alive = false;
 					count--;
 				}
@@ -561,9 +580,9 @@ void Particle::renderBulletParticle(Particle particle[], int camX, int camY, flo
 			if (particle[i].type == 0) {
 
 				// Render texture
-				spr_bullet.setBlendMode(SDL_BLENDMODE_BLEND);
-				spr_bullet.setAlpha(255);
-				spr_bullet.render(gRenderer, particle[i].x - camX,
+				gSlash.setBlendMode(SDL_BLENDMODE_BLEND);
+				gSlash.setAlpha(255);
+				gSlash.render(gRenderer, particle[i].x - camX,
 										     particle[i].y - camY, particle[i].w,
 											 particle[i].h,
 										     NULL, particle[i].angle);
@@ -573,9 +592,9 @@ void Particle::renderBulletParticle(Particle particle[], int camX, int camY, flo
 			if (particle[i].type == 1) {
 
 				// Render texture
-				spr_bullet_blue.setBlendMode(SDL_BLENDMODE_BLEND);
-				spr_bullet_blue.setAlpha(255);
-				spr_bullet_blue.render(gRenderer, particle[i].x - camX,
+				gBullet.setBlendMode(SDL_BLENDMODE_BLEND);
+				gBullet.setAlpha(255);
+				gBullet.render(gRenderer, particle[i].x - camX,
 										     particle[i].y - camY, particle[i].w,
 											 particle[i].h,
 										     NULL, particle[i].angle);

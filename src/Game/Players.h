@@ -127,8 +127,8 @@ public:	// variables
 	double barrelH		= 0;
 	double bulletW 		= 92;	// position the bullet will come out of the player ONLY if player
 	double bulletH 		= 21;	// is centered (have angle at 0.0 to test)
-	double particleW 	= 32;
-	double particleH 	= 32;
+	double particleW 	= 48;
+	double particleH 	= 48;
 	float delayT 		= 0;
 	bool delay 			= false;
 	bool initialshot 	= false;
@@ -172,7 +172,7 @@ public: // attack variables
 	SDL_RendererFlip flipW;
 	int jumps;
 	int attackTimer;
-	int attackTimerSpe = 15;	// default: 1
+	int attackTimerSpe = 3;	// default: 1
 	int attackFrame;
 	int attackType;	// 0: slash, 1: down stab
 	int stunTimer;
