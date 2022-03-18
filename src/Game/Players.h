@@ -69,6 +69,12 @@ public:	// resources
 	 */
 	int sprite_index;
 
+	/*
+	 * 0: Keyboard
+	 * 1: Keyboard + Mouse
+	 */
+	int ControlsPreference = 1;	// default: 0
+
 public:	// variables
 	std::string name;
 	int timer = 0;
@@ -121,8 +127,8 @@ public:	// variables
 	double barrelH		= 0;
 	double bulletW 		= 92;	// position the bullet will come out of the player ONLY if player
 	double bulletH 		= 21;	// is centered (have angle at 0.0 to test)
-	double particleW 	= 30;
-	double particleH 	= 30;
+	double particleW 	= 32;
+	double particleH 	= 32;
 	float delayT 		= 0;
 	bool delay 			= false;
 	bool initialshot 	= false;
@@ -166,6 +172,7 @@ public: // attack variables
 	SDL_RendererFlip flipW;
 	int jumps;
 	int attackTimer;
+	int attackTimerSpe = 15;	// default: 1
 	int attackFrame;
 	int attackType;	// 0: slash, 1: down stab
 	int stunTimer;
@@ -285,6 +292,9 @@ public:	// Mutator functions
 	// Stops parry but reset cool down to 0
 	void ResetParry();
 
+	// Extend parry duration
+	void ExtendParryDuration();
+
 	// Stop movement
 	void StopMovement();
 
@@ -346,6 +356,9 @@ public:	// Accessor functions
 
 	// Get status of parrying
 	float getParryStatus();
+
+	// Get status of dashing
+	float getDashStatus();
 
 public:	// Controls
 	// Player controls

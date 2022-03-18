@@ -20,16 +20,20 @@ public:
     bool cap 					= true;
 	int frame 					= 0;
     const int FRAMES_PER_SECOND = 60;
-    //const int screenWidth = 1920;
-    //const int screenHeight = 1080;
+    //int screenWidth = 1920;
+    //int screenHeight = 1080;
+    const int screenWidth = 1280;
+    const int screenHeight = 720;
+
+    static const int UniqueTileBarTiles = 288;
     //const int screenWidth = 1008;
     // const int screenHeight = 624;
 	//const int screenWidth = 2304;
 	//const int screenHeight = 1296;
 	//const int screenWidth = 2880;
-	//const int screenHeight = 1620;
-    const int screenWidth = 1280;
-    const int screenHeight = 720;
+    //const int screenHeight = 1620;
+    //const int screenWidth = 1280;
+    //const int screenHeight = 720;
      //const int screenWidth = 640;
     //const int screenHeight = 360;
     //const int screenWidth = 480;
@@ -47,6 +51,9 @@ public:
 	bool checkCollision(int x, int y, int w, int h, int x2, int y2, int w2, int h2);
 
 	bool checkCollisionRect( SDL_Rect a, SDL_Rect b );
+
+	// Doesnt work properly (3/17/2022)
+	void ChangeRenderResolution(SDL_Renderer *gRenderer, int changeTo);
 
 };
 

@@ -107,6 +107,69 @@ void Particle::spawnParticleAngle(Particle particle[], int type,
 	{
 		if (!particle[i].alive)
 		{
+			particle[i].follow 			= false;
+			particle[i].x 				= spawnX;
+			particle[i].y 				= spawnY;
+			particle[i].w 				= spawnW;
+			particle[i].h 				= spawnH;
+			particle[i].x2 				= spawnX + spawnW/2;
+			particle[i].y2 				= spawnY + spawnH/2;
+			particle[i].time 			= 0;
+			particle[i].angle 			= angle;
+			particle[i].speed 			= speed;
+			particle[i].vX 				= (cos( (3.14159265/180)*(angle) ));
+			particle[i].vY 				= (sin( (3.14159265/180)*(angle) ));
+			particle[i].type 			= type;
+			particle[i].damage 			= damage;
+			//particle[i].x 				= spawnX + (rand() % 4 + 2 * (cos( (3.14159265/180)*(angle) )));
+			//particle[i].y 				= spawnY + (rand() % 4 + 2 * (sin( (3.14159265/180)*(angle) )));
+			//particle[i].x 				= spawnX + cos( (3.14159265/180)*(angle) );
+			//particle[i].y 				= spawnY + sin( (3.14159265/180)*(angle) );
+
+
+			particle[i].side 			= "";
+
+			particle[i].onScreen 		= false;
+			particle[i].collide 		= false;
+			particle[i].splatDistance 	= splatDistance;
+			particle[i].splatSpeed 		= splatSpeed;
+			particle[i].color 			= color;
+			particle[i].layer 			= layer;
+
+			particle[i].alphaspeed 		= alphaspeed;
+			particle[i].alpha 			= alpha;
+			particle[i].deathTimer 		= deathTimer;
+			particle[i].deathTimerSpeed = deathTimerSpeed;
+			particle[i].angleSpe		= angleSpe;
+			particle[i].angleDir		= angleDir;
+			particle[i].sizeDeath 		= sizeDeath;
+			particle[i].deathSpe 		= deathSpe;
+			particle[i].alive 			= true;
+			count++;
+			break;
+		}
+	}
+}
+
+void Particle::spawnParticleAngleFollow(Particle particle[], int type,
+		float spawnX, float spawnY,
+		int spawnW, int spawnH,
+		double angle, double speed,
+		double damage,
+		SDL_Color color, int layer,
+		int angleSpe, int angleDir,
+		int alpha, int alphaspeed,
+		int deathTimer, int deathTimerSpeed,
+		bool sizeDeath, float deathSpe,
+		double splatDistance, double splatSpeed,
+		bool follow, float *xFollow, float *yFollow) {
+	for (int i = 0; i < max; i++)
+	{
+		if (!particle[i].alive)
+		{
+			particle[i].follow 			= follow;
+			particle[i].xFollow 		= xFollow;
+			particle[i].yFollow 		= yFollow;
 			particle[i].x 				= spawnX;
 			particle[i].y 				= spawnY;
 			particle[i].w 				= spawnW;
@@ -334,12 +397,33 @@ void Particle::updateBulletParticles(Particle particle[], int mapX, int mapY, in
 			// Enemy particle
 			if (particle[i].type == 1)
 			{
+
+
 				// get particle radius
 				particle[i].radius = particle[i].w;
 
-				// Particle movement
-				particle[i].x += particle[i].vX * particle[i].speed;
-				particle[i].y += particle[i].vY * particle[i].speed;
+				// Follow target
+				if (particle[i].follow) {
+					float bmx = *particle[i].xFollow;
+					float bmy = *particle[i].yFollow;
+					float bmx2 = particle[i].x + particle[i].w/2;
+					float bmy2 = particle[i].y + particle[i].h/2;
+					float distance = sqrt((bmx - bmx2) * (bmx - bmx2)+
+										  (bmy - bmy2) * (bmy - bmy2));
+					particle[i].vX 	= particle[i].speed * (bmx - bmx2) / distance;
+					particle[i].vY 	= particle[i].speed * (bmy - bmy2) / distance;
+
+
+
+					// Particle movement
+					particle[i].x += particle[i].vX;
+					particle[i].y += particle[i].vY;
+				} else {
+
+					// Particle movement
+					particle[i].x += particle[i].vX * particle[i].speed;
+					particle[i].y += particle[i].vY * particle[i].speed;
+				}
 
 				// Particle spin
 				particle[i].angle += particle[i].angleSpe * particle[i].angleDir;
@@ -349,16 +433,24 @@ void Particle::updateBulletParticles(Particle particle[], int mapX, int mapY, in
 
 				// Particle map collision
 				if (particle[i].x+particle[i].w < mapX) {
-					particle[i].x = mapX+mapW-particle[i].w;
+					//particle[i].x = mapX+mapW-particle[i].w;
+					particle[i].alive = false;
+					count--;
 				}
 				if (particle[i].x > mapX+mapW) {
-					particle[i].x = mapX-particle[i].w;
+					//particle[i].x = mapX-particle[i].w;
+					particle[i].alive = false;
+					count--;
 				}
 				if (particle[i].y+particle[i].h < mapY) {
-					particle[i].y = mapY+mapH-particle[i].h;
+					//particle[i].y = mapY+mapH-particle[i].h;
+					particle[i].alive = false;
+					count--;
 				}
 				if (particle[i].y > mapY+mapH) {
-					particle[i].y = mapY-particle[i].h;
+					//particle[i].y = mapY-particle[i].h;
+					particle[i].alive = false;
+					count--;
 				}
 
 				// Particle death
@@ -472,7 +564,8 @@ void Particle::renderBulletParticle(Particle particle[], int camX, int camY, flo
 				spr_bullet.setBlendMode(SDL_BLENDMODE_BLEND);
 				spr_bullet.setAlpha(255);
 				spr_bullet.render(gRenderer, particle[i].x - camX,
-										     particle[i].y - camY, 20, 20,
+										     particle[i].y - camY, particle[i].w,
+											 particle[i].h,
 										     NULL, particle[i].angle);
 			}
 
@@ -483,7 +576,8 @@ void Particle::renderBulletParticle(Particle particle[], int camX, int camY, flo
 				spr_bullet_blue.setBlendMode(SDL_BLENDMODE_BLEND);
 				spr_bullet_blue.setAlpha(255);
 				spr_bullet_blue.render(gRenderer, particle[i].x - camX,
-										     particle[i].y - camY, 20, 20,
+										     particle[i].y - camY, particle[i].w,
+											 particle[i].h,
 										     NULL, particle[i].angle);
 			}
 		}
@@ -503,7 +597,7 @@ void Particle::renderBulletParticleDebug(Particle particle[], int camX, int camY
 								     particle[i].y - camY,
 								     particle[i].w,
 									 particle[i].h};
-				SDL_SetRenderDrawColor(gRenderer, 0,0,255,255);
+				SDL_SetRenderDrawColor(gRenderer, 0,255,0,255);
 				SDL_RenderDrawRect(gRenderer, &tempRect);
 			}
 
@@ -515,17 +609,19 @@ void Particle::renderBulletParticleDebug(Particle particle[], int camX, int camY
 								     particle[i].y - camY,
 								     particle[i].w,
 									 particle[i].h};
-				SDL_SetRenderDrawColor(gRenderer, 255,0,0,255);
+				SDL_SetRenderDrawColor(gRenderer, 0,255,255,255);
 				SDL_RenderDrawRect(gRenderer, &tempRect);
 			}
 
 			// Render angle Text
-			std::stringstream tempss;
-			tempss << particle[i].type;
-			gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont20);
-			gText.render(gRenderer, particle[i].x - camX,
-									particle[i].y-gText.getHeight() - camY,
-									gText.getWidth(), gText.getHeight());
+			if (particle[i].follow) {
+				//std::stringstream tempss;
+				//tempss << "x: " << *particle[i].xFollow << ", y: " << *particle[i].yFollow;
+				//gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont20);
+				//gText.render(gRenderer, particle[i].x - camX,
+				//						particle[i].y-gText.getHeight() - camY,
+				//						gText.getWidth(), gText.getHeight());
+			}
 		}
 	}
 }

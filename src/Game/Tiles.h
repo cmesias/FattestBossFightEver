@@ -11,15 +11,17 @@
 #include "../LWindow.h"
 #include "../LTexture.h"
 
-class Tile {
+#include "../Helper.h"
+
+class Tile: public Helper {
 public:
 	/* Tile Variables */
 	const int max = 5000;
 	int tileCount = 0;
 	int multiW = 1;
 	int multiH = 1;
-	int tilew = 48;
-	int tileh = 48;
+	int tilew = 96;
+	int tileh = 96;
 	bool hideOtherLayers = false;
 	LTexture gTiles;
 	LTexture gText;
@@ -32,6 +34,14 @@ public:
 	int id;
 	int alpha;
 	SDL_Rect clip;
+
+	/* Layers
+	 *
+	 * 0: Floor
+	 * 1: Appliance			- Only rendered on top of Player when player.y+player.h < tile.x+tile.w
+	 * 2: Top of Appliance	- Always rendered on top of Player
+	 * 3: Roof 				- Always rendered on top of Player
+	 */
 	int layer;
 	int animTimer;
 	int animFrame;
@@ -68,7 +78,11 @@ public:	// editor functions
 	void spawnTile(Tile tile[], int newMx, int newMy, int camx, int camy, SDL_Rect rTiles[]);
 
 public:	// core game functions
-	void updateTile(Tile tile[], LWindow &gWindow, int newMx, int newMy, int mex, int mey, int camx, int camy, SDL_Rect rTiles[]);
+	void updateTile(Tile tile[], LWindow &gWindow,
+			  float targetX, float targetY, float targetW, float targetH,
+			  int newMx, int newMy,
+			  int mex, int mey, int camx, int camy,
+			  SDL_Rect rTiles[]);
 
 	bool checkCollisionRect( SDL_Rect a, SDL_Rect b );
 
@@ -77,8 +91,17 @@ public:	// core game functions
 
 	void renderTile(SDL_Renderer *gRenderer, Tile tile[], int layer_dummy, int camx, int camy);
 
+	bool PlayerBelowTile;
+
+	void RenderBack(SDL_Renderer *gRenderer, Tile tile[], int camx, int camy);
+
+	void RenderFront(SDL_Renderer *gRenderer, Tile tile[], int camx, int camy);
+
 	// Render Tile Debug info
 	void renderTileDebug(SDL_Renderer *gRenderer, Tile tile[], int newMx, int newMy, int mex, int mey, int camx, int camy, SDL_Rect rTiles[]);
+
+	// Render Tile Debug in Hand
+	void RenderHand(SDL_Renderer *gRenderer, Tile tile[], int newMx, int newMy, int mex, int mey, int camx, int camy, SDL_Rect rTiles[]);
 
 public: // tile saving functions
 

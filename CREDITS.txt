@@ -1,2 +1,6 @@
-Programmer:
+[Dungeon Tileset]
+- Author: Rekkimaru
+- Link: https://rekkimaru.itch.io/dungeon-rpg-tileset
+
+[Programmer]
 - Carl Mesias (cmesias)

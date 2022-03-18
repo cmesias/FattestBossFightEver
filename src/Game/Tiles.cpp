@@ -24,7 +24,7 @@
 #include "Tiles.h"
 
 void Tile::load(SDL_Renderer *gRenderer) {
-	gTiles.loadFromFile(gRenderer, "resource/gfx/castle_2.png");
+	gTiles.loadFromFile(gRenderer, "resource/gfx/Rekkimaru/dungeon_tileset.png");
 	gFont12 = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 12);
 }
 
@@ -57,6 +57,7 @@ void Tile::initTile(Tile tile[]) {
 		tile[i].player = false;
 		tile[i].side = "right";
 		tile[i].collisionTile = false;
+		tile[i].PlayerBelowTile = false;
 		tile[i].alive = false;
 	}
 }
@@ -66,11 +67,14 @@ void Tile::placeTile(Tile tile[], float x, float y, int id, int layer, bool coll
 		if (!tile[i].alive){
 			tile[i].x 		= x;
 			tile[i].y 		= y;
+			tile[i].w = tilew;
+			tile[i].h = tileh;
 			tile[i].id 		= id;
 			tile[i].alpha 	= 255;
 			tile[i].clip 	= clip;
 			tile[i].layer 	= layer;
 			tile[i].collisionTile 	= collisionTile;
+			tile[i].PlayerBelowTile = false;
 			tile[i].animTimer = 0;
 			tile[i].animFrame = 0;
 			tile[i].mouse 	= false;
@@ -163,20 +167,39 @@ void Tile::spawnTile(Tile tile[], int newMx, int newMy, int camx, int camy, SDL_
 	}
 }
 
-void Tile::updateTile(Tile tile[], LWindow &gWindow, int newMx, int newMy, int mex, int mey, int camx, int camy, SDL_Rect rTiles[]) {
+void Tile::updateTile(Tile tile[], LWindow &gWindow,
+					  float targetX, float targetY, float targetW, float targetH,
+					  int newMx, int newMy,
+					  int mex, int mey, int camx, int camy,
+					  SDL_Rect rTiles[]) {
+
 	//std::cout << "newMx: " << newMx << std::endl;
 	//std::cout << "newMy: " << newMy << std::endl;
 	int tileW = tilew*multiW;
 	int tileH = tileh*multiH;
-	for (int i = 0; i < max; i++) {
-		if (tile[i].alive){
+	for (int i = 0; i < max; i++)
+	{
+		if (tile[i].alive)
+		{
+
+			// If Tile is not a Floor Tile
+			if (tile[i].layer == 1) {
+				// Check if player is in front of Tile or not
+				if (tile[i].y+tile[i].h > targetY+targetH){
+					tile[i].PlayerBelowTile = true;
+				} else {
+					tile[i].PlayerBelowTile = false;
+				}
+			}
+
 			//If the tile is in the screen
-			if (tile[i].x + tile[i].w > camx-64 && tile[i].x < camx + gWindow.getWidth()+64
-			 && tile[i].y + tile[i].h > camy-64 && tile[i].y < camy + gWindow.getHeight()+64) {
+			if (tile[i].x + tile[i].w > camx-64 && tile[i].x < camx + screenWidth+64
+			 && tile[i].y + tile[i].h > camy-64 && tile[i].y < camy + screenHeight+64) {
 				tile[i].screen = true;
 			} else {
 				tile[i].screen = false;
 			}
+
 			//If the mouse+size is on the tile
 			if (newMx+tileW-4 > tile[i].x && newMx+2 < tile[i].x + tile[i].w &&
 					newMy+tileH-4 > tile[i].y && newMy+2 < tile[i].y + tile[i].h) {
@@ -184,6 +207,7 @@ void Tile::updateTile(Tile tile[], LWindow &gWindow, int newMx, int newMy, int m
 			} else {
 				tile[i].mouseBox = false;
 			}
+
 			//If the mouse is on the tile
 			if (mex > tile[i].x && mex < tile[i].x + tile[i].w &&
 				mey > tile[i].y && mey < tile[i].y + tile[i].h) {
@@ -191,12 +215,14 @@ void Tile::updateTile(Tile tile[], LWindow &gWindow, int newMx, int newMy, int m
 			} else {
 				tile[i].mouse = false;
 			}
+
 			// Reset layer if goes higher
 			if (tile[i].layer > 6) {
 				tile[i].layer = 0;
 			}
+
 			// Animations
-			if (tile[i].id == 143) {
+			/*if (tile[i].id == 143) {
 				tile[i].animTimer++;
 				if (tile[i].animTimer > 30) {
 					tile[i].animTimer = 0;
@@ -247,7 +273,7 @@ void Tile::updateTile(Tile tile[], LWindow &gWindow, int newMx, int newMy, int m
 					tile[i].id = 166;
 					tile[i].clip = rTiles[166];
 				}
-			}
+			}*/
 		}
 	}
 }
@@ -313,20 +339,37 @@ void Tile::checkCollisionXY(Tile tile[],
 		// Player Velocity X Axis
 		x += vX;
 		SDL_Rect rectA;
-		rectA.x = x-6;
-		rectA.y = y+8;
-		rectA.w = w+12;
-		rectA.h = h/2;
+		rectA.x = x;
+		rectA.y = y + (h/2)- 10;
+		rectA.w = w;
+		rectA.h = h/2 + 20;
 		bool moveBack;
 		moveBack = false;
 		for (int i = 0; i < max; i++) {
 			if (tile[i].alive){
 				if (tile[i].collisionTile) {
 					SDL_Rect rectB;
-					rectB.x = tile[i].x;
-					rectB.y = tile[i].y;
-					rectB.w = tile[i].w;
-					rectB.h = tile[i].h;
+					if (tile[i].id == 198) {
+						rectB.x = tile[i].x;
+						rectB.y = tile[i].y;
+						rectB.w = tile[i].w/2;
+						rectB.h = tile[i].h;
+					}else if (tile[i].id == 200) {
+						rectB.x = tile[i].x+ (tile[i].w/2);
+						rectB.y = tile[i].y;
+						rectB.w = tile[i].w/2;
+						rectB.h = tile[i].h;
+					} else if (tile[i].id == 223) {
+						rectB.x = tile[i].x+48;
+						rectB.y = tile[i].y+48;
+						rectB.w = 48;
+						rectB.h = 48;
+					} else {
+						rectB.x = tile[i].x;
+						rectB.y = tile[i].y;
+						rectB.w = tile[i].w;
+						rectB.h = tile[i].h;
+					}
 					if  ( checkCollisionRect( rectA, rectB )) {
 						/*// If Player has more than 0 keys, then unlock door, otherwise continue collision check
 						if (keys > 0 && useKey) {
@@ -351,19 +394,38 @@ void Tile::checkCollisionXY(Tile tile[],
 
 		// Player Velocity Y Axis
 		y += vY;;
-		rectA.x = x+4;
-		rectA.y = y+8;
-		rectA.w = w-8;
-		rectA.h = h/2;
+		rectA.x = x;
+		rectA.y = y + (h/2) - 10;
+		rectA.w = w;
+		rectA.h = h/2 + 20;
 		moveBack = false;
 		for (int i = 0; i < max; i++) {
 			if (tile[i].alive){
 				if (tile[i].collisionTile) {
 					SDL_Rect rectB;
-					rectB.x = tile[i].x;
-					rectB.y = tile[i].y;
-					rectB.w = tile[i].w;
-					rectB.h = tile[i].h;
+					if (tile[i].id == 198) {
+						rectB.x = tile[i].x;
+						rectB.y = tile[i].y;
+						rectB.w = tile[i].w/2;
+						rectB.h = tile[i].h;
+					}else if (tile[i].id == 200) {
+						rectB.x = tile[i].x+ (tile[i].w/2);
+						rectB.y = tile[i].y;
+						rectB.w = tile[i].w/2;
+						rectB.h = tile[i].h;
+
+						// TODO [ ]- this doesnt work right
+					} else if (tile[i].id == 223) {
+						rectB.x = tile[i].x+48;
+						rectB.y = tile[i].y+48;
+						rectB.w = 48;
+						rectB.h = 48;
+					} else {
+						rectB.x = tile[i].x;
+						rectB.y = tile[i].y;
+						rectB.w = tile[i].w;
+						rectB.h = tile[i].h;
+					}
 					if  ( checkCollisionRect( rectA, rectB )) {
 						// If Player has more than 0 keys, then unlock door, otherwise continue collision check
 						/*if (keys > 0 && useKey) {
@@ -403,6 +465,7 @@ void Tile::renderTile(SDL_Renderer *gRenderer, Tile tile[], int layer_dummy, int
 				}else{
 					//tile[i].alpha = 255;
 				}
+
 				// Render layer in hand
 				if (hideOtherLayers)
 				{
@@ -411,6 +474,7 @@ void Tile::renderTile(SDL_Renderer *gRenderer, Tile tile[], int layer_dummy, int
 						gTiles.setAlpha(tile[i].alpha);
 						gTiles.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &tile[i].clip);
 					}
+
 				// Render all tiles
 				}else{
 					if (layer_dummy == tile[i].layer) {
@@ -422,8 +486,93 @@ void Tile::renderTile(SDL_Renderer *gRenderer, Tile tile[], int layer_dummy, int
 		}
 	}
 }
-// Render Tile Debug info
+
+
+void Tile::RenderBack(SDL_Renderer *gRenderer, Tile tile[], int camx, int camy) {
+	for (int i = 0; i < max; i++) {
+		if (tile[i].alive) {
+
+
+			// Render layer in hand
+			if (hideOtherLayers)
+			{
+				if (layer == tile[i].layer)
+				{
+					gTiles.setAlpha(tile[i].alpha);
+					gTiles.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &tile[i].clip);
+				}
+			} else {
+
+				// If player is below Tile
+				if (tile[i].PlayerBelowTile)
+				{
+					// Do nothing
+				}
+				// If player is above Tile
+				else if (!tile[i].PlayerBelowTile)
+				{
+					// Render all Tiles that are layer 1 and above
+					if (tile[i].layer == 1) {
+						// Render tile
+						gTiles.setAlpha(tile[i].alpha);
+						gTiles.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &tile[i].clip);
+					}
+				}
+			}
+		}
+	}
+}
+
+void Tile::RenderFront(SDL_Renderer *gRenderer, Tile tile[], int camx, int camy) {
+	for (int i = 0; i < max; i++) {
+		if (tile[i].alive) {
+
+			// Render layer in hand
+			if (hideOtherLayers)
+			{
+				if (layer == tile[i].layer)
+				{
+					gTiles.setAlpha(tile[i].alpha);
+					gTiles.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &tile[i].clip);
+				}
+			} else {
+
+				// If player is below Tile
+				if (tile[i].PlayerBelowTile)
+				{
+					// Render all Tiles that are layer 1 and above
+					if (tile[i].layer == 1) {
+						// Render tile
+						gTiles.setAlpha(tile[i].alpha);
+						gTiles.render(gRenderer, tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h, &tile[i].clip);
+					}
+				}
+
+
+				// If player is above Tile
+				else if (!tile[i].PlayerBelowTile)
+				{
+					// Do nothing
+				}
+			}
+		}
+	}
+}
+
 void Tile::renderTileDebug(SDL_Renderer *gRenderer, Tile tile[], int newMx, int newMy, int mex, int mey, int camx, int camy, SDL_Rect rTiles[]){
+	for (int i = 0; i < max; i++) {
+		if (tile[i].alive){
+			// If its a collision tile, render filled blue square on top left inside the Tile
+			if (tile[i].collisionTile) {
+				SDL_Rect tempr = {tile[i].x - camx, tile[i].y - camy, tile[i].w, tile[i].h};
+				SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
+				SDL_RenderDrawRect(gRenderer, &tempr);
+			}
+		}
+	}
+}
+
+void Tile::RenderHand(SDL_Renderer *gRenderer, Tile tile[], int newMx, int newMy, int mex, int mey, int camx, int camy, SDL_Rect rTiles[]){
 	// Render Tile info
 	for (int i = 0; i < max; i++) {
 		if (tile[i].alive){
@@ -464,12 +613,6 @@ void Tile::renderTileDebug(SDL_Renderer *gRenderer, Tile tile[], int newMx, int 
 			SDL_Rect tempr = {newMx, newMy, tilew*multiW, tileh*multiH};
 			SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
 			SDL_RenderDrawRect(gRenderer, &tempr);
-
-			// Render mouse + size * multiplied
-			// Render mouse coordinates unsnapped
-			/*tempr = {mex, mey, tilew*multiW, tileh*multiH};
-			SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
-			SDL_RenderDrawRect(gRenderer, &tempr);*/
 		}
 	}
 }

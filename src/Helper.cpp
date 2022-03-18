@@ -78,3 +78,26 @@ bool Helper::checkCollisionRect( SDL_Rect a, SDL_Rect b )
     //If none of the sides from A are outside B
     return true;
 }
+
+void Helper::ChangeRenderResolution(SDL_Renderer *gRenderer, int changeTo) {
+
+	/*if (changeTo == 1) {
+	    screenWidth = 1920;
+	    screenHeight = 1080;
+	}
+
+	else if (changeTo == 2) {
+	    screenWidth = 1600;
+	    screenHeight = 900;
+	}
+
+	else if (changeTo == 3) {
+	    screenWidth = 1280;
+	    screenHeight = 720;
+	}
+
+	else if (changeTo == 4) {
+	    screenWidth = 800;
+	    screenHeight = 600;
+	}*/
+}

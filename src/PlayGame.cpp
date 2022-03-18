@@ -35,16 +35,23 @@ void PlayGame::Init() {
 	frame 				= 0;
     cap 				= true;
 	int i = 0;
-	for (int h = 0; h < 21; h++) {
-		for (int w = 0; w < 8; w++) {
-			rTiles[i].x = 0 + w * 32;
-			rTiles[i].y = 0 + h * 32;
-			rTiles[i].w = 32;
-			rTiles[i].h = 32;
-			//std::cout << "i: " << i << ", x: " << rTiles[i].x << ", y: " << rTiles[i].y << std::endl;
-			i++;
+
+
+	// Tiles
+	{
+		int HowManyTilesVertical   = 12, HowManyTilesHorizontal = 24;
+		int endW = 16, endH = 16;
+		for (int h = 0; h < HowManyTilesVertical; h++) {
+			for (int w = 0; w < HowManyTilesHorizontal; w++) {
+				rTiles[i].x = 0 + w * endW;
+				rTiles[i].y = 0 + (h * endH);
+				rTiles[i].w = endW;
+				rTiles[i].h = endH;
+				i++;
+			}
 		}
 	}
+
 	// Initial camera center
 	//camx = map.x + map.w / 2 - screenWidth/2;
 	//camy = map.y + map.h / 2 - screenHeight/2;
@@ -52,7 +59,7 @@ void PlayGame::Init() {
 	camy = map.y + screenHeight/2 + 100;
 
 	// Initialize
-	sli.Init(slime);
+	sli.Init(boss);
 	part.init(particles);
 	enem.init(enemy);
 	spaw.init(spawner);
@@ -121,6 +128,7 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 {
 	// load textures
 	gBG.loadFromFile(gRenderer, 		"resource/gfx/bg.png");
+	gBG2.loadFromFile(gRenderer, 		"resource/gfx/bg2.png");
 	gCircle.loadFromFile(gRenderer, 	"resource/gfx/circle.png");
 	gCursor.loadFromFile(gRenderer, "resource/gfx/cursor.png");
 
@@ -134,8 +142,8 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 	sRockBreak 			= Mix_LoadWAV("sounds/bfxr/rock_break.wav");
 	sAtariBoom 			= Mix_LoadWAV("sounds/bfxr/atari_boom.wav");
 	sDownStabHitTilec	= Mix_LoadWAV("sounds/bfxr/snd_downStabHitTilec.wav");
-	sSlashHitSlime		= Mix_LoadWAV("sounds/bfxr/snd_slashHitSlime.wav");
-	sCastHitSlime		= Mix_LoadWAV("sounds/bfxr/snd_castHitSlime.wav");
+	sSlashHitBoss		= Mix_LoadWAV("sounds/bfxr/snd_slashHitBoss.wav");
+	sCastHitBoss		= Mix_LoadWAV("sounds/bfxr/snd_castHitBoss.wav");
 	sSlashTilec			= Mix_LoadWAV("sounds/bfxr/snd_slashTilec.wav");
 	sParrySuccess		= Mix_LoadWAV("sounds/bfxr/snd_parrySuccess.wav");
 
@@ -161,6 +169,7 @@ void PlayGame::Free() {
 	gParticles.free();
 	gText.free();
 	gBG.free();
+	gBG2.free();
 	gCircle.free();
 	gCursor.free();
 
@@ -177,8 +186,8 @@ void PlayGame::Free() {
 	Mix_FreeMusic(sAmbientMusic);
 	Mix_FreeChunk(sAtariBoom);
 	Mix_FreeChunk(sDownStabHitTilec);
-	Mix_FreeChunk(sSlashHitSlime);
-	Mix_FreeChunk(sCastHitSlime);
+	Mix_FreeChunk(sSlashHitBoss);
+	Mix_FreeChunk(sCastHitBoss);
 	Mix_FreeChunk(sSlashTilec);
 	Mix_FreeChunk(sParrySuccess);
 
@@ -186,8 +195,8 @@ void PlayGame::Free() {
 	sAmbientMusic 		= NULL;
 	sAtariBoom 			= NULL;
 	sDownStabHitTilec	= NULL;
-	sSlashHitSlime		= NULL;
-	sCastHitSlime		= NULL;
+	sSlashHitBoss		= NULL;
+	sCastHitBoss		= NULL;
 	sSlashTilec			= NULL;
 	sParrySuccess		= NULL;
 
@@ -276,6 +285,18 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 							break;
 						case SDLK_ESCAPE:	// pause menu
 							start(gWindow, gRenderer);
+							break;
+						case SDLK_F1:							// Set render size 1
+							SDL_RenderSetLogicalSize(gRenderer,1920,1080);
+							break;
+						case SDLK_F2:							// Set render size 2
+							SDL_RenderSetLogicalSize(gRenderer,1600,900);
+							break;
+						case SDLK_F3:							// Set render size 3
+							SDL_RenderSetLogicalSize(gRenderer,1280,720);
+							break;
+						case SDLK_F4:							// Set render size 4
+							SDL_RenderSetLogicalSize(gRenderer,800,600);
 							break;
 					}
 
@@ -378,14 +399,12 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 		gTargetTexture.setAsRenderTarget(gRenderer);
 
 		// Clear render screen
-		SDL_SetRenderDrawColor(gRenderer, 10, 10, 10, 255);
+		SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
 		SDL_RenderClear(gRenderer);
 
-			// Render background
-			//gBG.render( gRenderer, 0, 0, screenWidth, screenHeight, NULL, 0.0);
-			SDL_Rect backgroundRect = {0, 0, screenWidth, screenHeight};
-			SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0);
-			SDL_RenderFillRect(gRenderer, &backgroundRect);
+			//SDL_Rect backgroundRect = {0, 0, screenWidth, screenHeight};
+			//SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0);
+			//SDL_RenderFillRect(gRenderer, &backgroundRect);
 
 			// Render particles
 			part.renderStarParticle(particles, camx, camy, 1, gRenderer);
@@ -400,6 +419,17 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 
 			// Render objects
 			Render(gRenderer, gWindow);
+
+			// TODO [ ] - fix lights 3/17/2022
+			///gBG2.setBlendMode(SDL_BLENDMODE_ADD);
+			//gBG2.render( gRenderer, 0, 0, 1280, 720, NULL, 0.0);
+
+			//gBG.setBlendMode(SDL_BLENDMODE_BLEND);
+			//gBG.render( gRenderer, 0, 0, 1280, 720, NULL, 0.0);
+
+			// Render background
+			//gBG2.setBlendMode(SDL_BLENDMODE_ADD);
+			//gBG2.render( gRenderer, 0, 0, 1280, 720, NULL, 0.0);
 
 			// Render UI for objects
 			RenderUI(gRenderer, gWindow);
@@ -439,11 +469,11 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 // Update everything
 void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 	// Variable limits
-	if (tl.layer < 0) {
-		tl.layer = 0;
+	if (tl.layer < -1) {
+		tl.layer = 6;
 	}
 	if (tl.layer > 6) {
-		tl.layer = 0;
+		tl.layer = -1;
 	}
 	if (tlc.layer < 0) {
 		tlc.layer = 0;
@@ -452,9 +482,9 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		tlc.layer = 0;
 	}
 	if (tl.id < 0) {
-		tl.id = 168;
+		tl.id = tb.TILES_UNIQUE;
 	}
-	if (tl.id > 168) {
+	if (tl.id > tb.TILES_UNIQUE) {
 		tl.id = 0;
 	}
 	if (tlc.id > 2) {
@@ -497,15 +527,15 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 	//int mey = (720*my)/gWindow.getHeight();
 	int oldMX = mex+camx;								// New mouse coordinates, relation to camera
 	int oldMY = mey+camy;								// New mouse coordinates, relation to camera
-	int clampSize = 48;									// Magnet pixel size
+	int clampSize = tl.tilew;									// Magnet pixel size
 	if (editor) {
 		if (place_type == 0) {
-			clampSize = 48;
+			clampSize = tl.tilew;
 		}else if (place_type == 1) {
 			if (shift) {
 				clampSize = 4;
 			}else{
-				clampSize = 48;
+				clampSize = tl.tilew;
 			}
 		}
 	}
@@ -524,7 +554,11 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 	}
 
 	// Update tiles
-	tl.updateTile(tile, gWindow, newMx+camx, newMy+camy, mex+camx, mey+camy, camx, camy, &rTiles[0]);
+	tl.updateTile(tile, gWindow, player.getX(), player.getY(), player.getW(), player.getH(),
+			newMx+camx, newMy+camy,
+			mex+camx, mey+camy,
+			camx, camy,
+			&rTiles[0]);
 
 	// Update tiles
 	tlc.Update(tilec, map, newMx+camx, newMy+camy, mex+camx, mey+camy, camx, camy);
@@ -534,37 +568,73 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 
 	// Editor
 	if (editor) {
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+		//------------------------------------------------------------------------------------------------//
+		//--------------------------- Update editor Updates from other classes ---------------------------//
+
+		// Boss.cpp class
+
+		// Update Editor boss
+		sli.UpdateEditor(boss, mex+camx, mey+camy, camx, camy);
+
+		//--------------------------- Update editor Updates from other classes ---------------------------//
+		//------------------------------------------------------------------------------------------------//
+		////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		// If Left Mouse Button is being held down
 		if (leftClick) {
-			/* If not on Tile-bar, place other tiles */
+			// If not on Tile-bar, place other tiles
 			if (!tb.touching) {
-				if (editor) {
-					if (place_type == 0) {
-						tl.spawnTile(tile, newMx, newMy, camx, camy, &rTiles[0]);
-					}else if (place_type == 1) {
-						tlc.SpawnAll(tilec, newMx, newMy, camx, camy);
-					}
+
+				// If removing Tiles
+				if (place_type == 0) {
+
+					// Remove Tiles if left clicking, "0" in second argument
+					// Also removes them by how many Tiles we are going to place horiz. and verti.
+					tl.removeTile(tile, 0);
+				}
+
+				// If removing Tilecs
+				else if (place_type == 1) {
+					//tlc.SpawnAll(tilec, newMx, newMy, camx, camy);
+				}
+
+				// If removing Bosses
+				else if (place_type == 2) {
+					sli.Remove(boss);
 				}
 			}else{
 				if (shift) {
 					tb.selectBlockMultiple(tilebar, tl.id, mex, mey);
-				/* Pen Tool, select a Tile from the TileBar */
+				// Pen Tool, select a Tile from the TileBar
 				}else{
 					tb.selectBlock(tilebar, tl.id);
 				}
 			}
 		}
-		if (rightClick) {
-			/* If not on Tile-bar, place other tiles */
+
+		// If Right Mouse Button is being held down
+		if (rightClick)
+		{
+			// If not on Tile-bar, place other tiles
 			if (!tb.touching) {
-				if (editor) {
-					if (place_type == 0) {
-						tl.removeTile(tile, 1);
-					}else if (place_type == 1) {
-						tlc.RemoveTile(tilec, 1);
-					}
+				// Tiles
+				if (place_type == 0) {
+					tl.spawnTile(tile, newMx, newMy, camx, camy, &rTiles[0]);
+				}
+
+				// Tilecs
+				else if (place_type == 1) {
+					// Do nothing here
+				}
+
+				// Boss
+				else if (place_type == 2) {
+					// Do nothing here
 				}
 			}else{
-				/* Pen Tool, select a Tile from the TileBar */
+				// Pen Tool, select a Tile from the TileBar
 				tb.selectBlock(tilebar, tl.id);
 			}
 		}
@@ -626,9 +696,6 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		// Collision, particle & zombie
 		/*checkCollisionParticleZombie();
 
-		// Update Enemy Particle & Player collision check
-		checkCollisionParticlePlayer(particles, part, player);
-
 		// Update Asteroids: Wave re-spawn
 		spawnAsteroidsNow2();*/
 
@@ -642,11 +709,11 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		 *
 		 */
 
-		// Move slime towards player
-		sli.GetDistanceOfPlayer(slime, player.getX(), player.getY(), player.getW(), player.getH());
+		// Move boss towards player
+		sli.GetDistanceOfPlayer(boss, player.getX(), player.getY(), player.getW(), player.getH(), &player.x2, &player.y2);
 
-		// Update slime
-		sli.Update(slime, obj, object, map, camx, camy);
+		// Update boss
+		sli.Update(boss, obj, object, particles, part, map, mex+camx, mey+camy, camx, camy);
 
 		// Update Player
 		player.update(map,
@@ -667,20 +734,29 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		// Check collision between Particle & Tile
 		checkCollisionParticleTile();
 
-		// Check collision between Particle & Slime
-		checkCollisionParticleSlime();
+		// Check collision between Particle & Boss
+		checkCollisionParticleBoss();
 
-		// Check collision between Slime & Tile
-		checkSlimeTileCollision();
+		// Check collision between Boss & Tile
+		checkBossTileCollision();
 
-		// Check collision between Player attacks & Slime
-		checkPlayerAttacksCollisionSlime();
+		// Check collision between Player attacks & Boss
+		checkPlayerAttacksCollisionBoss();
 
 		// Check collision between Player attacks & Tile
 		checkPlayerAttacksTileCollision();
 
-		// Check collision between Slime attacks & Player
-		checkSlimeAttacksCollisionPlayer();
+		// Check collision between Boss attacks & Player
+		checkBossAttacksCollisionPlayer();
+
+		// Check collision between Boss & Player
+		//checkCollisionBossPlayer();
+
+		// Update Enemy Particle & Player collision check
+		checkCollisionParticlePlayer();
+
+		// Check collision between Player Particle & Boss Particle
+		checkCollisionParticleParticle();
 
 		// Damage text: for zombie
 		tex.updateDamageText(text);
@@ -780,45 +856,63 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 
 	// Render different layers
 	{
+
+		/* Layers
+		 *
+		 * 0: Floor
+		 * 1: Appliance			- Only rendered on top of Player when player.y+player.h < tile.x+tile.w
+		 * 2: Top of Appliance	- Always rendered on top of Player
+		 * 3: Roof 				- Always rendered on top of Player
+		 */
+
+
+		// Render tile, ground below ground
+		tl.renderTile(gRenderer, tile, -1, camx, camy);
+
+
 		// Render tile, ground
 		tl.renderTile(gRenderer, tile, 0, camx, camy);
 
-		tl.renderTile(gRenderer, tile, 1, camx, camy);
+		// Render tile, appliances
+		//tl.renderTile(gRenderer, tile, 2, camx, camy);
 
-		// Render Star particles
-		part.renderStarParticle(particles, camx, camy, 1, gRenderer);
+		// Render Tile in back of player
+		tl.RenderBack(gRenderer, tile, camx, camy);
 
-		// Render Slime
-		sli.RenderBack(gRenderer, slime, gFont13, gText, camx, camy);
+		// Render Boss
+		sli.RenderBack(gRenderer, boss, gFont13, gText, camx, camy);
 
 		// Render our player
 		player.Render(mex, mey, camx, camy, gWindow,
 					  gRenderer, {255,255,255}, part.count, gText);
 
-		// Render Slime
-		sli.RenderFront(gRenderer, slime, gFont13, gText, camx, camy);
+		// Render Boss
+		sli.RenderFront(gRenderer, boss, gFont13, gText, camx, camy);
 
-		// Render tile, appliances
-		tl.renderTile(gRenderer, tile, 2, camx, camy);
+		// Render Star particles
+		part.renderStarParticle(particles, camx, camy, 1, gRenderer);
 
+		// Render Particles
+		part.renderBulletParticle(particles, camx, camy, 1, gRenderer);
+
+		// Render Tile in front of player
+		tl.RenderFront(gRenderer, tile, camx, camy);
+
+		// Render tile, ceiling
 		tl.renderTile(gRenderer, tile, 3, camx, camy);
 
-		tl.renderTile(gRenderer, tile, 4, camx, camy);
-
-		tl.renderTile(gRenderer, tile, 5, camx, camy);
-
-		tl.renderTile(gRenderer, tile, 6, camx, camy);
 	}
-
-	// Render particles
-	part.renderBulletParticle(particles, camx, camy, 1, gRenderer);
 }
 
 
 // Render everything
 void PlayGame::RenderUI(SDL_Renderer *gRenderer, LWindow &gWindow)
 {
-	// Render our player
+
+	// Render Boss Health
+	sli.RenderUI(gRenderer, boss, camx, camy);
+
+	// Render Player Health
 	player.RenderUI(gRenderer, camx, camy);
 }
 
@@ -840,8 +934,8 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 		// Render collision tiles
 		tlc.Render(gRenderer, tilec, camx, camy);
 
-		// Render Slime text
-		sli.RenderDebug(gRenderer, slime, gFont13, gText, camx, camy);
+		// Render Boss text
+		sli.RenderDebug(gRenderer, boss, gFont13, gText, camx, camy);
 
 		// Render Player spawn point
 		SDL_Rect tempRect = {spawnX-camx, spawnY-camy, 48, 48};
@@ -913,6 +1007,8 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 
 			}
 		}
+		// Render Tile debug
+		tl.renderTileDebug(gRenderer, tile, newMx, newMy, mex, mey, camx, camy, &rTiles[0]);
 	}
 
 	// Editor debug menu
@@ -920,26 +1016,32 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 
 		// Render hand debug info
 		std::stringstream tempss;
-		tempss << "Tiles: " << tl.tileCount << ", Tilecs: " << tlc.count << ", Slimes: " << sli.count;
-		tempss << "place_type: " 	<< place_type << ", tl.id: " << tl.id << ", tlc.id: " << tlc.id;
-		tempss << ", layer: " 	<< tl.layer;
+		tempss << "Tiles: " 				<< tl.tileCount 		<< ", Tilecs: " 	<< tlc.count 		<< ", Bosss: " << sli.count;
+		tempss << "place_type: " 			<< place_type 			<< ", tl.id: " 		<< tl.id 			<< ", tlc.id: " << tlc.id;
+		tempss << ", tl.collisionTile: " 	<< tl.collisionTile 	<< ", layer: " 		<< tl.layer;
+		tempss << ", tilew: " 				<< tl.tilew 			<< ", tileh: " 		<< tl.tileh;
 				/*	   << ", layer: " 		<< tl.layer<< ", tlc.layer: " << tlc.layer << ", editor: " << editor
 			   << ", tl.multiW: " 	<< tl.multiW << ", tl.multiH: " << tl.multiH << ", tl.count: " << tl.tileCount;
 		tempss << ", tlc.multiW: " 	<< tlc.multiW << ", tlc.multiH: " << tlc.multiH << ", tlc.count: " << tlc.count;*/
 		gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont26, 200);
 		gText.setAlpha(255);
-		gText.render(gRenderer, 0+screenWidth-gText.getWidth(), 0, gText.getWidth(), gText.getHeight());
+		gText.render(gRenderer, 0+screenWidth-gText.getWidth(), 100, gText.getWidth(), gText.getHeight());
 
 		// Render tile debug
 		if (debug){
 			if (place_type == 0) {
-				// Render Tile debug
-				tl.renderTileDebug(gRenderer, tile, newMx, newMy, mex, mey, camx, camy, &rTiles[0]);
+				// Render Tile in hand
+				tl.RenderHand(gRenderer, tile, newMx, newMy, mex, mey, camx, camy, &rTiles[0]);
 			}else if (place_type == 1) {
 				// Render collision tiles
 				//rendercTile(ctile);
 				// Render Collision Tile debug
 				//rendercTileDebug(ctile, newMx, newMy);
+			}else if (place_type == 2) {
+				// Render collision tiles
+				//rendercTile(ctile);
+				// Render Collision Tile debug
+				sli.RenderHand(gRenderer, boss, newMx, newMy, mex, mey, camx, camy);
 			}
 		}
 
@@ -1025,7 +1127,7 @@ void PlayGame::checkCollisionParticleTile()
 	{
 		if (particles[i].alive)
 		{
-			if (particles[i].type == 0)
+			if (particles[i].type == 0 || particles[i].type == 1)
 			{
 				for (int j = 0; j < tl.max; j++)
 				{
@@ -1043,23 +1145,25 @@ void PlayGame::checkCollisionParticleTile()
 							float distance = sqrt((bmx - bmx2) * (bmx - bmx2)+
 												  (bmy - bmy2) * (bmy - bmy2));
 
-							// If distance of tile is less than 50 pixels
-							if (distance < 50)
+							// Circle Collision
+							if (distance < tile[j].w/2 + particles[i].w/2)
 							{
+								// Square Collision
 								// Check collision between particle and tile
-								if (checkCollision(particles[i].x, particles[i].y, particles[i].w, particles[i].h, tile[j].x, tile[j].y, tile[j].w, tile[j].h)) {
+								/*if (checkCollision(particles[i].x, particles[i].y, particles[i].w, particles[i].h, tile[j].x, tile[j].y, tile[j].w, tile[j].h)) {
 									particles[i].collide = true;
 								} else {
 									particles[i].collide = false;
-								}
+								}*/
 
 								// If there was a collision
-								if (particles[i].collide)
-								{
+								//if (particles[i].collide)
+								//{
 									// Remove particle
 									particles[i].time = 0;
 									particles[i].alive = false;
 									part.count--;
+
 
 									// Spawn particle effect
 									for (double h=0.0; h< 180.0; h+=rand() % 10 + 40){
@@ -1067,24 +1171,24 @@ void PlayGame::checkCollisionParticleTile()
 										int rands = rand() % 3 + 8;
 										float newX = tile[j].x+tile[j].w/2;
 										float newY = tile[j].y+tile[j].h/2;
-										part.spawnParticleAngle(particles,
-														   3,									// Type
-														   newX-rands/2,						// X
-														   newY-rands/2,						// Y
-														   rands, rands,						// width, height
-														   -h, randDouble(0.1, 1.4),			// angle, speed
-														   0.0,									// damage
-														   {200, 144, 40, 255}, 1,				// color and layer
-														   1, 1,								// angleSpe, angleDir
-														   rand() % 100 + 150, rand() % 2 + 5,	// alpha, alphaSpeed
-														   rand() % 50 + 20, 0,					// deathtimer, deathtimerSpeed
-														   false, 0,							// size death, death speed
-														   rand() % 35 + 5);
+
+										part.spawnParticleAngle(particles, 2,
+															newX-rands/2,
+															newY-rands/2,
+														   rands, rands,
+														   i, randDouble(2.1, 5.1),
+														   0.0,
+														   {210, 144, 40, 255}, 1,
+														   1, 1,
+														   rand() % 100 + 150, rand() % 2 + 5,
+														   rand() % 50 + 90, 0,
+														   true, randDouble(0.1, 0.7),
+														   100, 10);
 									}
 
 									// Play hit sound effect
-					                Mix_PlayChannel(-1, sDownStabHitTilec, 0);
-								}
+					                //Mix_PlayChannel(-1, sSlashTilec, 0);
+								//}
 							}
 						}
 					}
@@ -1094,7 +1198,7 @@ void PlayGame::checkCollisionParticleTile()
 	}		// end Zombie
 }
 
-void PlayGame::checkCollisionParticleSlime()
+void PlayGame::checkCollisionParticleBoss()
 {
 
 	for (int j = 0; j < part.max; j++)
@@ -1105,11 +1209,11 @@ void PlayGame::checkCollisionParticleSlime()
 			{
 				for (int i = 0; i < sli.max; i++)
 				{
-					if (slime[i].alive)
+					if (boss[i].alive)
 					{
 						// Get center of attack-particle (spawned by the player attacking)
-						float bmx = slime[i].x+slime[i].w/2;
-						float bmy = slime[i].y+slime[i].h/2;
+						float bmx = boss[i].x+boss[i].w/2;
+						float bmy = boss[i].y+boss[i].h/2;
 
 						// Get center of particles
 						float bmx2 = particles[j].x+particles[j].w/2;
@@ -1122,7 +1226,7 @@ void PlayGame::checkCollisionParticleSlime()
 						// If distance is less than 50 pixels
 						if (distance < 50)
 						{
-							// Get angle of slime relative to attack-particle
+							// Get angle of boss relative to attack-particle
 							float angle = atan2(bmy - bmy2,bmx - bmx2);
 							angle = angle * (180 / 3.1416);
 							if (angle < 0) {
@@ -1136,41 +1240,42 @@ void PlayGame::checkCollisionParticleSlime()
 
 							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							//--------------------------------------------------------------------------------------------------------------------------------//
-							//----------------------------- Collision Detection based on player-attack hit-box and Slime hit-box -----------------------------//
-							// If particle slash if within X distance then move the slime away
-							if (checkCollision(particles[j].x, particles[j].y, particles[j].w, particles[j].h, slime[i].x, slime[i].y, slime[i].w, slime[i].h))
+							//----------------------------- Collision Detection based on player-attack hit-box and Boss hit-box -----------------------------//
+							// If particle slash if within X distance then move the boss away
+							// collision occurred
+							if (distance < boss[i].w/2 + particles[j].w/2)
 							{
 								// Remove particle
 								particles[j].time = 0;
 								particles[j].alive = false;
 								part.count--;
 
-								// If particle is coming from the right of Slime
+								// If particle is coming from the right of Boss
 								int xDir;
 								if (bmx > bmx2) {
 									xDir = -1;
 								}
-								// If particle is coming from the left of Slime
+								// If particle is coming from the left of Boss
 								else {
 									xDir = 1;
 								}
 
-								// Move the slime in someway
-								slime[i].vX += player.getKnockBackPower()/2 * xDir;
-								slime[i].vY = -1;
+								// Move the boss in someway
+								boss[i].vX += player.getKnockBackPower()/2 * xDir;
+								boss[i].vY = -1;
 
 								// Play hit sound effect
-				                Mix_PlayChannel(-1, sCastHitSlime, 0);
+				                Mix_PlayChannel(-1, sCastHitBoss, 0);
 
-				                // Subtract slime health
-				                slime[i].health -= player.getCastDamage();
+				                // Subtract boss health
+				                boss[i].health -= player.getCastDamage();
 
-				                // Show damage text (it will print how much damage the player did to the slime)
+				                // Show damage text (it will print how much damage the player did to the boss)
 				    			std::stringstream tempss;
 				    			tempss << player.getCastDamage();
-				    			tex.spawn(text, slime[i].x+slime[i].w/2, slime[i].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
+				    			tex.spawn(text, boss[i].x+boss[i].w/2, boss[i].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
 							}
-							//----------------------------- Collision Detection based on player-attack hit-box and Slime hit-box -----------------------------//
+							//----------------------------- Collision Detection based on player-attack hit-box and Boss hit-box -----------------------------//
 							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							//--------------------------------------------------------------------------------------------------------------------------------//
 						}
@@ -1181,24 +1286,24 @@ void PlayGame::checkCollisionParticleSlime()
 	}
 }
 
-void PlayGame::checkSlimeTileCollision()
+void PlayGame::checkBossTileCollision()
 {
-	// Slime and Tile Collision
+	// Boss and Tile Collision
 	// X Axis Collision
 	for (int i = 0; i < sli.max; i++) {
-		if (slime[i].alive) {
+		if (boss[i].alive) {
 
 			// X Collision
 			{
 				// Player Velocity Y Axis
-				slime[i].x += slime[i].vX;
+				boss[i].x += boss[i].vX;
 
-				// Correct slime position
+				// Correct boss position
 				SDL_Rect rectA;
-				rectA.x = slime[i].x;
-				rectA.y = slime[i].y;
-				rectA.w = slime[i].w;
-				rectA.h = slime[i].h;
+				rectA.x = boss[i].x;
+				rectA.y = boss[i].y;
+				rectA.w = boss[i].w;
+				rectA.h = boss[i].h;
 				bool moveBack;
 				moveBack = false;
 
@@ -1206,13 +1311,13 @@ void PlayGame::checkSlimeTileCollision()
 				for (int j = 0; j < tl.max; j++) {
 					if (tile[j].alive){
 						if (tile[j].collisionTile) {
-							// Slime target center
+							// Boss target center
 							float bmx = tile[j].x + tile[j].w/2;
 							float bmy = tile[j].y + tile[j].h/2;
 
-							// Slime center
-							float bmx2 = slime[i].x + slime[i].w/2;
-							float bmy2 = slime[i].y + slime[i].h/2;
+							// Boss center
+							float bmx2 = boss[i].x + boss[i].w/2;
+							float bmy2 = boss[i].y + boss[i].h/2;
 							float distance = sqrt((bmx - bmx2) * (bmx - bmx2)+
 												  (bmy - bmy2) * (bmy - bmy2));
 
@@ -1225,31 +1330,31 @@ void PlayGame::checkSlimeTileCollision()
 								rectB.h = tile[j].h;
 								if  ( checkCollisionRect( rectA, rectB )) {
 									moveBack = true;
-									slime[i].collision = true;
+									boss[i].collision = true;
 								}else{
-									slime[i].collision = false;
+									boss[i].collision = false;
 								}
 							}
 						}
 					}
 				}
 				if (moveBack){
-					// Reverse Slime walking direction
-					slime[i].vX -= slime[i].vX;
+					// Reverse Boss walking direction
+					boss[i].vX -= boss[i].vX;
 				}
 			}
 
 			// Y Collision
 			{
 				// Player Velocity Y Axis
-				slime[i].y += slime[i].vY;
+				boss[i].y += boss[i].vY;
 
-				// Correct slime position
+				// Correct boss position
 				SDL_Rect rectA;
-				rectA.x = slime[i].x;
-				rectA.y = slime[i].y;
-				rectA.w = slime[i].w;
-				rectA.h = slime[i].h;
+				rectA.x = boss[i].x;
+				rectA.y = boss[i].y;
+				rectA.w = boss[i].w;
+				rectA.h = boss[i].h;
 				bool moveBack;
 				moveBack = false;
 
@@ -1257,13 +1362,13 @@ void PlayGame::checkSlimeTileCollision()
 				for (int j = 0; j < tl.max; j++) {
 					if (tile[j].alive){
 						if (tile[j].collisionTile) {
-							// Slime target center
+							// Boss target center
 							float bmx = tile[j].x + tile[j].w/2;
 							float bmy = tile[j].y + tile[j].h/2;
 
-							// Slime center
-							float bmx2 = slime[i].x + slime[i].w/2;
-							float bmy2 = slime[i].y + slime[i].h/2;
+							// Boss center
+							float bmx2 = boss[i].x + boss[i].w/2;
+							float bmy2 = boss[i].y + boss[i].h/2;
 							float distance = sqrt((bmx - bmx2) * (bmx - bmx2)+
 												  (bmy - bmy2) * (bmy - bmy2));
 
@@ -1276,24 +1381,24 @@ void PlayGame::checkSlimeTileCollision()
 								rectB.h = tile[j].h;
 								if  ( checkCollisionRect( rectA, rectB )) {
 									moveBack = true;
-									slime[i].collision = true;
+									boss[i].collision = true;
 								}else{
-									slime[i].collision = false;
+									boss[i].collision = false;
 								}
 							}
 						}
 					}
 				}
 				if (moveBack){
-					// Reverse Slime walking direction
-					slime[i].vY -= slime[i].vY;
+					// Reverse Boss walking direction
+					boss[i].vY -= boss[i].vY;
 				}
 			}
 		}
 	}
 }
 
-void PlayGame::checkPlayerAttacksCollisionSlime() {
+void PlayGame::checkPlayerAttacksCollisionBoss() {
 	// Objects
 	for (int j = 0; j < obj.max; j++)
 	{
@@ -1301,14 +1406,14 @@ void PlayGame::checkPlayerAttacksCollisionSlime() {
 		{
 			if (object[j].id != 2)
 			{
-				// Slimes
+				// Bosss
 				for (int i = 0; i < sli.max; i++)
 				{
-					if (slime[i].alive)
+					if (boss[i].alive)
 					{
 						// Get center of attack-particle (spawned by the player attacking)
-						float bmx = slime[i].x+slime[i].w/2;
-						float bmy = slime[i].y+slime[i].h/2;
+						float bmx = boss[i].x+boss[i].w/2;
+						float bmy = boss[i].y+boss[i].h/2;
 
 						// Get center of object
 						float bmx2 = object[j].x+object[j].w/2;
@@ -1319,19 +1424,19 @@ void PlayGame::checkPlayerAttacksCollisionSlime() {
 											  (bmy - bmy2) * (bmy - bmy2));
 
 						// If distance is less than 50 pixels
-						if (distance < 50)
+						if (distance < 384/2 +  50)
 						{
 							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							//--------------------------------------------------------------------------------------------------------------------------------//
-							//----------------------------- Collision Detection based on player-attack hit-box and Slime hit-box -----------------------------//
-							// Check collision between object and slime
-							if (checkCollision(object[j].x, object[j].y, object[j].w, object[j].h, slime[i].x, slime[i].y, slime[i].w, slime[i].h))
+							//----------------------------- Collision Detection based on player-attack hit-box and Boss hit-box -----------------------------//
+							// Check collision between object and boss
+							if (checkCollision(object[j].x, object[j].y, object[j].w, object[j].h, boss[i].x, boss[i].y, boss[i].w, boss[i].h))
 							{
 								// If attack-type: Slash
 								if (player.attackType == 0)
 								{
 									// Play hit sound effect: Slash attack
-					                Mix_PlayChannel(-1, sSlashHitSlime, 0);
+					                Mix_PlayChannel(-1, sSlashHitBoss, 0);
 								}
 
 								// If attack-type: Down-stab
@@ -1345,36 +1450,50 @@ void PlayGame::checkPlayerAttacksCollisionSlime() {
 									//player.vY = -8;
 								}
 
-								// If particle is coming from the right of Slime
-								int xDir, yDir;
-								if (player.getCenterX() > object[j].x+object[j].w/2) {
-									xDir = -1;
-								}
-								// If particle is coming from the left of Slime
-								else {
-									xDir = 1;
-								}
-								if (player.getCenterY() > object[j].y+object[j].h/2) {
-									yDir = -1;
-								}
-								// If particle is coming from the left of Slime
-								else {
-									yDir = 1;
+								// Knockback Boss
+								{
+									float distanceW = sqrt((bmx - bmx2) * (bmx - bmx2));
+									float distanceH = sqrt((bmy - bmy2) * (bmy - bmy2));
+									float tempVX 	= 5 * (bmx - bmx2) / distanceW;
+									float tempVY 	= 5 * (bmy - bmy2) / distanceH;
+
+									boss[i].vX += tempVX;
+									boss[i].vY += tempVY;
 								}
 
-								// Knockback enemy
-								slime[i].vX += player.getKnockBackPower() * xDir;
-								slime[i].vY += player.getKnockBackPower() * yDir;
+								// Knockback Boss - Depracated
+								{
+									/*// If particle is coming from the right of Boss
+									int xDir, yDir;
+									if (player.getCenterX() > object[j].x+object[j].w/2) {
+										xDir = -1;
+									}
+									// If particle is coming from the left of Boss
+									else {
+										xDir = 1;
+									}
+									if (player.getCenterY() > object[j].y+object[j].h/2) {
+										yDir = -1;
+									}
+									// If particle is coming from the left of Boss
+									else {
+										yDir = 1;
+									}
 
-				                // Subtract slime health
-				                slime[i].health -= player.getDamage();
+									// Knockback enemy
+									boss[i].vX += player.getKnockBackPower() * xDir;
+									boss[i].vY += player.getKnockBackPower() * yDir;*/
+								}
 
-				                // Show damage text (it will print how much damage the player did to the slime)
+				                // Subtract boss health
+				                boss[i].health -= player.getDamage();
+
+				                // Show damage text (it will print how much damage the player did to the boss)
 				    			std::stringstream tempss;
 				    			tempss << player.getDamage();
-				    			tex.spawn(text, slime[i].x+slime[i].w/2, slime[i].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
+				    			tex.spawn(text, boss[i].x+boss[i].w/2, boss[i].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
 							}
-							//----------------------------- Collision Detection based on player-attack hit-box and Slime hit-box -----------------------------//
+							//----------------------------- Collision Detection based on player-attack hit-box and Boss hit-box -----------------------------//
 							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 							//--------------------------------------------------------------------------------------------------------------------------------//
 						}
@@ -1495,7 +1614,7 @@ void PlayGame::checkPlayerAttacksTileCollision() {
 	}
 }
 
-void PlayGame::checkSlimeAttacksCollisionPlayer() {
+void PlayGame::checkBossAttacksCollisionPlayer() {
 	for (int j = 0; j < obj.max; j++)
 	{
 		if (object[j].alive)
@@ -1548,21 +1667,21 @@ void PlayGame::checkSlimeAttacksCollisionPlayer() {
 											   100, 10);
 						}
 
-						// Reference to exact slime (this was stored in the object when it was created
+						// Reference to exact boss (this was stored in the object when it was created
 						int i = object[j].CreatorIndex;
 
-						// If that slime is still alive
-						if (slime[i].alive)
+						// If that boss is still alive
+						if (boss[i].alive)
 						{
-							// If particle is coming from the right of Slime
+							// If particle is coming from the right of Boss
 							int xDir;
 
-							// Determine which side the player is from the Slime
-							if (player.getCenterX() > slime[i].x+slime[i].w/2) xDir = -1; else xDir = 1;
+							// Determine which side the player is from the Boss
+							if (player.getCenterX() > boss[i].x+boss[i].w/2) xDir = -1; else xDir = 1;
 
-							// Knockback slime
-							slime[i].vX += player.getKnockBackPower() * xDir;
-							slime[i].vY = -4;
+							// Knockback boss
+							boss[i].vX += player.getKnockBackPower() * xDir;
+							boss[i].vY = -4;
 
 							// play sound effect
 							Mix_PlayChannel(-1, sParrySuccess, 0);
@@ -1624,8 +1743,8 @@ void PlayGame::checkSlimeAttacksCollisionPlayer() {
 
 					////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					//--------------------------------------------------------------------------------------------------------------------------------//
-					//----------------------------- Collision Detection based on Slime-attack hit-box and Player hit-box -----------------------------//
-					// Check collision between object and slime
+					//----------------------------- Collision Detection based on Boss-attack hit-box and Player hit-box -----------------------------//
+					// Check collision between object and boss
 					else if (checkCollision(object[j].x, object[j].y, object[j].w, object[j].h, player.x, player.y, player.w, player.h))
 					{
 						// If player is on right side of object
@@ -1679,14 +1798,14 @@ void PlayGame::checkSlimeAttacksCollisionPlayer() {
 						}
 
 						// play sound effect
-						Mix_PlayChannel(-1, sSlashHitSlime, 0);
+						Mix_PlayChannel(-1, sSlashHitBoss, 0);
 
-						// Show damage text (it will print how much damage the player did to the slime)
+						// Show damage text (it will print how much damage the player did to the boss)
 						std::stringstream tempss;
 						tempss << 20;
 						tex.spawn(text, player.x+player.w/2, player.y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
 					}
-					//----------------------------- Collision Detection based on Slime-attack hit-box and Player hit-box -----------------------------//
+					//----------------------------- Collision Detection based on Boss-attack hit-box and Player hit-box -----------------------------//
 					////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 					//--------------------------------------------------------------------------------------------------------------------------------//
 				}
@@ -1695,63 +1814,279 @@ void PlayGame::checkSlimeAttacksCollisionPlayer() {
 	}
 }
 
+void PlayGame::checkCollisionBossPlayer() {
+
+	// boss circle collision check with other bosss
+	for (int i = 0; i < sli.max; i++) {
+		if (boss[i].alive) {
+
+			// Center of Boss target for collision
+			float bmx = player.x+player.w/2;
+			float bmy = player.y+player.h/2;
+
+			// Center of Boss
+			float bmx2 = boss[i].x+boss[i].w/2;
+			float bmy2 = boss[i].y+boss[i].h/2;
+
+			// Angel stuff
+			float angle = atan2(bmy - bmy2,bmx - bmx2);
+			angle = angle * (180 / 3.1416);
+			if (angle < 0) {
+				angle = 360 - (-angle);
+			}
+
+			// Radiands stuff
+			float radians = (3.1415926536/180)*(angle);
+			float Cos = floor(cos(radians)*10+0.5)/10;
+			float Sin = floor(sin(radians)*10+0.5)/10;
+
+			// Distance
+			float distance = sqrt((bmx - bmx2) * (bmx - bmx2)+
+								  (bmy - bmy2) * (bmy - bmy2));
+
+
+			float distanceW = sqrt((bmx - bmx2) * (bmx - bmx2));
+			float distanceH = sqrt((bmy - bmy2) * (bmy - bmy2));
+
+			// Do this or you will crash
+			if (distance <= 0.01) {
+				distance = 0.01;
+			}
+			if (distanceW <= 0.01) {
+				distanceW = 0.01;
+			}
+			if (distanceH <= 0.01) {
+				distanceH = 0.01;
+			}
+
+			//float tempVX = (cos( (3.14159265/180)*(angle) ));;
+			//float tempVY = (sin( (3.14159265/180)*(angle) ));
+			//float tempVel = 5 * (bmx - bmx2) / distance;
+
+			////////////////////////////////////////////////////////////////////////
+			//--------------------------------------------------------------------//
+			//-------------------- Circle Collision Detection --------------------//
+			{
+				// Get new direction for Player to go
+				float tempVX 	= player.velMax * (bmx - bmx2) / distanceW;
+				float tempVY 	= player.velMax * (bmy - bmy2) / distanceH;
+
+				// If distance between both is lower than X, then have them go away from each other
+				if (distance < boss[i].w/4 + player.w/2)
+				{
+					// Apply new direction to Player's x & y velocity
+					player.vX = tempVX;
+					//player.x += tempVX;
+
+					player.vY = tempVY;
+					//player.y += tempVY;
+				}
+			}
+			//-------------------- Circle Collision Detection --------------------//
+			//--------------------------------------------------------------------//
+			////////////////////////////////////////////////////////////////////////
+		}
+	}
+}
+
 // Check collision: Enemy Particle and Player
-void PlayGame::checkCollisionParticlePlayer(Particle particle[], Particle &part, Players &player) {
+void PlayGame::checkCollisionParticlePlayer() {
 	// Player
-	if (player.alive && !player.getInvurnerableStatus()){
+	if (player.alive && !player.getInvurnerableStatus() && !player.getDashStatus()){
 		// Particle
-		for (int i = 0; i < part.max; i++) {
-			if (particle[i].alive) {
+		for (int i = 0; i < part.max; i++)
+		{
+			if (particles[i].alive)
+			{
 				// enemy particle hitting Player
-				if (particle[i].type == 1){
+				if (particles[i].type == 1)
+				{
 					// particle collision with player using a CIRCLE
-					float bmx = player.x2 + player.w/2;
-					float bmy = player.y2 + player.h/2;
-					float bmx2 = particle[i].x + particle[i].w/2;
-					float bmy2 = particle[i].y + particle[i].h/2;
+					float bmx = player.x + player.w/2;
+					float bmy = player.y + player.h/2;
+					float bmx2 = particles[i].x + particles[i].w/2;
+					float bmy2 = particles[i].y + particles[i].h/2;
 					float distance = sqrt((bmx - bmx2) * (bmx - bmx2)+
 										  (bmy - bmy2) * (bmy - bmy2));
 					// collision occurred
-					if (distance < player.radius + particle[i].w/2) {
-						// reduce player health
-						player.health -= particle[i].damage;
-						// spawn blood particle effect
-						for (double i=0.0; i< 360.0; i+=rand() % 10 + 10){
-							int rands = rand() % 11 + 3;
-							float newX = player.x2+player.w/2;
-							float newY = player.y2+player.h/2;
-							part.spawnParticleAngle(particle, 2,
-												newX-rands/2,
-												newY-rands/2,
-											   rands, rands,
-											   i, randDouble(2.1, 5.1),
-											   0.0,
-											   {255, 0, 255, 255}, 1,
-											   1, 1,
-											   rand() % 100 + 150, rand() % 2 + 5,
-											   rand() % 50 + 90, 0,
-											   true, 0.1,
-											   rand() % 15 + 2, 1);
+					if (distance < player.getW()/2 + particles[i].w/2)
+					{
+						///////////////////////////////////////////////////////////////////
+						//---------------------------------------------------------------//
+						//------------------------ Parry Successful ---------------------//
+
+						// If player is currently parrying
+						if (player.getParryStatus())
+						{
+							// Change Enemy bullet into a Player bullet!
+							particles[i].type = 0;
+
+							// Knock back enemy bullet particles
+							{
+								float distanceW = sqrt((bmx - bmx2) * (bmx - bmx2));
+								float distanceH = sqrt((bmy - bmy2) * (bmy - bmy2));
+								float tempVX 	= 5 * (bmx - bmx2) / distanceW;
+								float tempVY 	= 5 * (bmy - bmy2) / distanceH;
+
+								particles[i].vX += particles[i].vX * -2;
+								particles[i].vY += particles[i].vY * -2;
+							}
+
+							// Extend Parry duration
+							player.ExtendParryDuration();
+
+							// Spawn particle effect
+							for (double i=0.0; i< 360.0; i+=rand() % 10 + 40){
+								int rands = rand() % 11 + 3;
+								float newX = player.x+player.w/2;
+								float newY = player.y+player.h/2;
+								part.spawnParticleAngle(particles, 2,
+													newX-rands/2,
+													newY-rands/2,
+												   rands, rands,
+												   i, randDouble(2.1, 5.1),
+												   0.0,
+												   {210, 144, 40, 255}, 1,
+												   1, 1,
+												   rand() % 100 + 150, rand() % 2 + 5,
+												   rand() % 50 + 90, 0,
+												   true, randDouble(0.1, 0.7),
+												   100, 10);
+							}
+
+							// play sound effect
+							Mix_PlayChannel(-1, sParrySuccess, 0);
 						}
-						// remove particle
-						particle[i].alive = false;
-						part.count--;
+						//------------------------ Parry Successful ---------------------//
+						//---------------------------------------------------------------//
+						///////////////////////////////////////////////////////////////////
+
+						///////////////////////////////////////////////////////////////////
+						//---------------------------------------------------------------//
+						//---------------- NOT Parrying, so hurt the Player -------------//
+						else {
+
+							// remove particle
+							particles[i].alive = false;
+							part.count--;
+
+							// Knock back player
+							{
+								float distanceW = sqrt((bmx - bmx2) * (bmx - bmx2));
+								float distanceH = sqrt((bmy - bmy2) * (bmy - bmy2));
+								float tempVX 	= 5 * (bmx - bmx2) / distanceW;
+								float tempVY 	= 5 * (bmy - bmy2) / distanceH;
+
+								player.vX += tempVX;
+								player.vY += tempVY;
+							}
+
+							// spawn blood particle effect
+							for (double i=0.0; i< 360.0; i+=rand() % 10 + 10){
+								int rands = rand() % 11 + 3;
+								float newX = player.x+player.w/2;
+								float newY = player.y+player.h/2;
+								part.spawnParticleAngle(particles, 2,
+													newX-rands/2,
+													newY-rands/2,
+												   rands, rands,
+												   i, randDouble(2.1, 5.1),
+												   0.0,
+												   {255, 0, 255, 255}, 1,
+												   1, 1,
+												   rand() % 100 + 150, rand() % 2 + 5,
+												   rand() % 50 + 90, 0,
+												   true, 0.1,
+												   rand() % 15 + 2, 1);
+							}
+
+							// play sound effect
+							Mix_PlayChannel(-1, sSlashHitBoss, 0);
+
+							// Subtract player health
+							player.health -= 1;
+						}
+						//---------------- NOT Parrying, so hurt the Player -------------//
+						//---------------------------------------------------------------//
+						///////////////////////////////////////////////////////////////////
 					}
-
-					// particle collision with player using a BOX
-					/*if (particle[i].x + particle[i].w > player.x && particle[i].x < player.x + player.w
-							&& particle[i].y + particle[i].h > player.y
-							&& particle[i].y < player.y + player.h) {
-						particle[i].time = 0;
-						particle[i].alive = false;
-						part.count--;
-
-						player.health -= particle[i].damage;
-					}*/
 				}
 			}
 		}	// end Particle
 	}	// end Player
+}
+
+
+void PlayGame::checkCollisionParticleParticle() {
+	// Player particle
+	for (int i = 0; i < part.max; i++)
+	{
+		if (particles[i].alive)
+		{
+			if (particles[i].type == 0)
+			{
+				for (int j = 0; j < part.max; j++)
+				{
+					// Make sure we are not comparing the same particle
+					if (i != j) {
+						if (particles[j].alive)
+						{
+							if (particles[j].type == 1)
+							{
+								// Particle target center
+								float bmx = particles[j].x + particles[j].w/2;
+								float bmy = particles[j].y + particles[j].h/2;
+
+								// Particle center
+								float bmx2 = particles[i].x + particles[i].w/2;
+								float bmy2 = particles[i].y + particles[i].h/2;
+								float distance = sqrt((bmx - bmx2) * (bmx - bmx2)+
+													  (bmy - bmy2) * (bmy - bmy2));
+
+
+									// Circle Collision
+									if (distance < particles[j].w/2 + particles[i].w/2)
+									{
+										// Remove Enemy particle first
+										particles[j].time = 0;
+										particles[j].alive = false;
+										part.count--;
+
+										// Remove Player particle next
+										particles[i].time = 0;
+										particles[i].alive = false;
+										part.count--;
+
+										// Spawn particle effect
+										for (double i=0.0; i< 360.0; i+=rand() % 10 + 40){
+											int rands = rand() % 11 + 3;
+											float newX = bmx;
+											float newY = bmy;
+											part.spawnParticleAngle(particles, 2,
+																newX-rands/2,
+																newY-rands/2,
+															   rands, rands,
+															   i, randDouble(2.1, 5.1),
+															   0.0,
+															   {210, 144, 40, 255}, 1,
+															   1, 1,
+															   rand() % 100 + 150, rand() % 2 + 5,
+															   rand() % 50 + 90, 0,
+															   true, randDouble(0.1, 0.7),
+															   100, 10);
+										}
+
+
+										// play sound effect
+										Mix_PlayChannel(-1, sParrySuccess, 0);
+									}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1829,17 +2164,17 @@ PlayGame::Result PlayGame::mousePressed(SDL_Event event){
 			//zom.spawn(zombie, mx+camx-80/2, my+camy-80/2, 80, 80, 0.0, randDouble(3.6, 4.4), 0);
 			//spaw.spawn(spawner, newMx+camx-48/2, newMy+camy-48/2, 48, 48);
 
-			// If not on Tile-bar, place other tiles
-			if (!tb.touching) {
 
-				// If we are on editor mode
-				if (editor) {
+			// If we are on editor mode
+			if (editor) {
+				// If not on Tile-bar, place other tiles
+				if (!tb.touching) {
 
-					// If slimes is our placement selection
+					// If bosss is our placement selection
 					if (place_type == 2) {
 
-						// Spawn slimes
-						sli.Spawn(slime, mex+camx, mey+camy, 32, 19, 0.0, randDouble(3.6, 4.4), 0);
+						// Spawn bosss
+						sli.Spawn(boss, mex+camx, mey+camy, 256, 256, 0.0, randDouble(3.6, 4.4), 0);
 					}
 				}
 			}
@@ -1950,7 +2285,12 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 	case SDLK_TAB:								// Toggle hide other layers
 		tl.hideOtherLayers = (!tl.hideOtherLayers);
 		break;
-	case SDLK_l:{
+	case SDLK_k:{								// Change collisionTile, if we should place a Tile with Collision
+
+			tl.collisionTile = (!tl.collisionTile);
+			break;
+		}
+	case SDLK_l:{								// Change layer, if shoudl place a Tile at this certain layer
 			if (shift){
 				if (place_type==0) {
 					tl.layer--;
@@ -2019,11 +2359,11 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 					tlc.Clear(tilec);
 				}
 
-				// Currently selected: Slime Objects
+				// Currently selected: Boss Objects
 				else if (place_type == 2)
 				{
-					// Remove slimes
-					sli.Clear(slime);
+					// Remove bosss
+					sli.Clear(boss);
 				}
 			}
 			// Remove all tiles
@@ -2032,10 +2372,10 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 				tl.removeAllTiles(tile);
 
 				// Remove collision tiles
-				tlc.Clear(tilec);
+				//tlc.Clear(tilec);
 
-				// Remove slimes
-				sli.Clear(slime);
+				// Remove bosss
+				sli.Clear(boss);
 			}
 		}
 		break;
@@ -2099,8 +2439,8 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 				// Save Tilec data
 				aVeryLongString << tlc.SaveData(tilec);
 
-				// Save Slime data
-				aVeryLongString << sli.SaveData(slime);
+				// Save Boss data
+				aVeryLongString << sli.SaveData(boss);
 
 				// Save Player spawn point
 				aVeryLongString << saveSpawnPoint();
@@ -2160,6 +2500,7 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 			}
 		}
 		break;
+		// Set render size
 	case SDLK_F5:							// Spawn player on spawner
 		player.x = spawnX;
 		player.y = spawnY;
@@ -2260,8 +2601,8 @@ void PlayGame::LoadLevel()
 		// Remove collision tiles
 		tlc.Clear(tilec);
 
-		// Remove slimes
-		sli.Clear(slime);
+		// Remove bosss
+		sli.Clear(boss);
 	}
 
 	// Set file path and name
@@ -2281,8 +2622,8 @@ void PlayGame::LoadLevel()
 		// Load Tilec data
 		tlc.LoadData(tilec, fileTileDataL);
 
-		// Load Slime data
-		sli.LoadData(slime, fileTileDataL);
+		// Load Boss data
+		sli.LoadData(boss, fileTileDataL);
 
 		// Load Player spawn point
 		fileTileDataL >>  spawnX >> spawnY;

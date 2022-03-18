@@ -88,13 +88,12 @@ int main(int argc, char *argv[]) {
 // TODO [x] (3-15-2022) - Make walk VFX nicer
 // TODO [x] (3-15-2022) - Give dash a sound effect
 // TODO [x] (3-15-2022) - Fix collision check with Slimer and Tiles
-// TODO [ ] (3-15-2022) - Create sprite in photoshop for Player that animates when the Player uses teh Dash ability
-// TODO [ ] (3-16-2022) - Make player invulnerable when dashing
+// TODO [x] (3-15-2022) - Create sprite in photoshop for Player that animates when the Player uses teh Dash ability
+// TODO [x] (3-16-2022) - Make player invulnerable when dashing
+// TODO [ ] (3-18-2022) - Change Player bullet texture to Slash Textures instead of Bullet textures
 
 // Focus here
 // TODO [x] (3-10-2022) - Create level selection Scene
-// TODO (2) [ ] - Roll ability
-// TODO (2) [ ] - Wall jumping ability
-// TODO (2) [ ] - Wall sliding ability
+// TODO (2) [x] - Dash ability
 
 

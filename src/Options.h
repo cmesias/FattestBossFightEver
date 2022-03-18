@@ -38,8 +38,8 @@ public:	// Exclusive for this game
 	Mix_Chunk *sRockBreak 			= NULL;
 	Mix_Chunk *sAtariBoom 			= NULL;
 	Mix_Chunk *sDownStabHitTilec 	= NULL;
-	Mix_Chunk *sSlashHitSlime 		= NULL;
-	Mix_Chunk *sCastHitSlime 		= NULL;
+	Mix_Chunk *sSlashHitBoss 		= NULL;
+	Mix_Chunk *sCastHitBoss 		= NULL;
 	Mix_Chunk *sSlashTilec 			= NULL;
 	Mix_Chunk *sParrySuccess 		= NULL;
 

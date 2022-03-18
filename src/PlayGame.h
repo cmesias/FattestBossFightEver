@@ -8,11 +8,11 @@
 #ifndef PLAYGAME_H_
 #define PLAYGAME_H_
 
+#include "Game/Boss.h"
 #include "Game/Enemies.h"
 #include "Game/Maps.h"
 #include "Game/Players.h"
 #include "Game/Spawners.h"
-#include "Game/Slime.h"
 #include "Game/Object.h"
 #include "Game/TileBar.h"
 #include "Game/Tiles.h"
@@ -34,7 +34,7 @@ public:	// globals
 	bool debug;
 	/* 0: Textured tiles
 	 * 1: Collision Tiles
-	 * 2: Slime objects
+	 * 2: Boss objects
 	 *
 	 */
 	int place_type;
@@ -47,9 +47,6 @@ public:	// globals
 	bool leftClick = false;
 	bool rightClick = false;
 
-public: // Tile Variables
-	SDL_Rect rTiles[168];
-
 public: // System variables
 	enum Result { Back, Nothing, StartGame, ShowingMenu, Exit };
 	void Show(LWindow &gWindow, SDL_Renderer *gRenderer,
@@ -59,6 +56,7 @@ public: // System variables
 
 public:	// Scene textures
 	LTexture gBG;
+	LTexture gBG2;
 	LTexture gTargetTexture;
 	LTexture gCircle;
 
@@ -162,6 +160,23 @@ public:	// Other classes
 	//Controls cont;
 	//static Items items[10];
 
+	// Objects (Player attack collisions
+	Object obj;
+	Object object[10];
+
+	// Boss
+	Boss sli;
+	Boss boss[100];
+
+public: // Tile Variables
+
+	// Tilebar
+	TileBar tb;
+	TileBar tilebar[UniqueTileBarTiles];
+
+	// For Tiles.cpp
+	SDL_Rect rTiles[UniqueTileBarTiles];
+
 	// Tiles
 	Tile tl;
 	Tile tile[5000];
@@ -169,18 +184,6 @@ public:	// Other classes
 	// Collision Tiles
 	Tilec tlc;
 	Tilec tilec[1000];
-
-	// Tilebar
-	TileBar tb;
-	TileBar tilebar[168];
-
-	// Objects (Player attack collisions
-	Object obj;
-	Object object[10];
-
-	// Slime
-	Slime sli;
-	Slime slime[100];
 
 public:	// Player variables
 	// Player spawn point
@@ -231,23 +234,29 @@ public:	// Functions mixed with other classes
 	// Check collision between Particle & Tile
 	void checkCollisionParticleTile();
 
-	// Check collision between Particle & Slime
-	void checkCollisionParticleSlime();
+	// Check collision between Particle & Boss
+	void checkCollisionParticleBoss();
 
-	// Check collision between Slime & Tile
-	void checkSlimeTileCollision();
+	// Check collision between Boss & Tile
+	void checkBossTileCollision();
 
-	// Check collision between Player attacks & Slime
-	void checkPlayerAttacksCollisionSlime();
+	// Check collision between Player attacks & Boss
+	void checkPlayerAttacksCollisionBoss();
 
 	// Check collision between Player attacks & Tile
 	void checkPlayerAttacksTileCollision();
 
-	// Check collision between Slime attacks & Player
-	void checkSlimeAttacksCollisionPlayer();
+	// Check collision between Boss attacks & Player
+	void checkBossAttacksCollisionPlayer();
+
+	// Check collision between Boss & Player
+	void checkCollisionBossPlayer();
 
 	// Check collision between Particle & Player
-	void checkCollisionParticlePlayer(Particle particle[], Particle &part, Players &player);
+	void checkCollisionParticlePlayer();
+
+	// Check collision between Player Particle & Boss Particle
+	void checkCollisionParticleParticle();
 
 public:	// Controls
 	// Editor controls

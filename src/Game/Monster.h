@@ -15,10 +15,12 @@ public:
 	int radius;
 	float x,y,w,h;
 	float angle;
+	float angleFacingTarget;
 	float vX,vY;
 	float speed;
 	int type;
-	int health;
+	float health;
+	float maxHealth;
 	int damage;
 	int timer;			// Used for shooting
 	float distance;

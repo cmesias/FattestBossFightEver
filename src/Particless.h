@@ -30,6 +30,9 @@ public:	// variables
 	int radius;								// particle radius
 	float x, y;
 	float w, h;
+	float *xFollow;
+	float *yFollow;
+	bool follow = false;
 	int alpha;
 	int alphaspeed;
 	int time;
@@ -78,6 +81,21 @@ public:	// functions
 			int deathTimer, int deathTimerSpeed,
 			bool sizeDeath, float deathSpe,
 			double splatDistance = 1, double splatSpeed = 0.0);
+
+	// Follows the target
+	void spawnParticleAngleFollow(Particle particle[], int type,
+			float spawnX, float spawnY,
+			int spawnW, int spawnH,
+			double angle, double speed,
+			double damage,
+			SDL_Color color, int layer,
+			int angleSpe, int angleDir,
+			int alpha, int alphaspeed,
+			int deathTimer, int deathTimerSpeed,
+			bool sizeDeath, float deathSpe,
+			double splatDistance = 1, double splatSpeed = 0.0,
+			bool follow=false, float *xFollow=NULL, float *yFollow=NULL);
+
 
 	void spawnExplosion(Particle particle[], float x, float y, int size);
 

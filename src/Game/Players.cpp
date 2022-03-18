@@ -26,6 +26,7 @@
 
 // Reset game
 void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn){
+	ControlsPreference  = 1;
 	x 					= spawnX;
 	y 					= spawnY;
 	name				= newName;
@@ -344,8 +345,6 @@ void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, 
 	//y2 = (y+h/2 + (41 * (-radianSin)) - radius);
 	/////int newW = 41 * (-radianCos);
 	//////int newH = 41 * (-radianSin);
-	x2 = x+w/2;
-	y2 = y+h/2;
 
 	/* If the object is at a rotation of 0.0 (facing right),
 	 * then this will be the distance the particle
@@ -398,51 +397,70 @@ void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, 
 					// play audio
 					Mix_PlayChannel(1, sCastSFX, 0);
 
-					// spawn particle
-					float tempParticleW = 20;
-					float tempParticleH = 20;
-
-					// Which way player is facing
-					int angleToGo = 0;
-					if (facing == "right") {
-						angleToGo = 3.0;
-					} else {
-						angleToGo = 177.0;
-					}
-
-					// Cast spell
-					// Spawn particle damage
-					p_dummy.spawnParticleAngle(particle, 0,
-							x+w/2,
-							y+h/2 - 10,
-							tempParticleW, tempParticleH,
-							angleToGo, 15,
-						   this->castDamage,					// particle spawning damage
-						   {255, 255,0}, 1,
-						   1, 1,
-						   255, 0,
-						   100, 10,
-						   false, 0);
-
-					// Subtract mana
-					this->mana -= 25;
 
 					// depracated
-					/*// spawn particle
+					// spawn particle
 					p_dummy.spawnParticleAngle(particle, 0,
-							barrelX,
-							barrelY,
+							x+w/2,
+							y+w/2,
 							particleW, particleH,
-						   angle, 65,
+						   angle, 21,
 						   25,
 						   {255, 255,0}, 1,
 						   1, 1,
 						   255, 0,
 						   100, 2,
-						   false, 0);*/
+						   false, 0);
+
+					// Subtract mana
+					this->mana -= 1;
 
 					// muzzle flash
 					renderFlash = true;
+
+
+					// depracated?
+					{
+						// spawn particle
+						float tempParticleW = 20;
+						float tempParticleH = 20;
+
+						// Which way player is facing
+						int angleToGo = 0;
+						if (facing == "right") {
+							angleToGo = 3.0;
+						} else {
+							angleToGo = 177.0;
+						}
+
+						// Cast spell
+						// Spawn particle damage
+						/*p_dummy.spawnParticleAngle(particle, 0,
+								x+w/2,
+								y+h/2 - 10,
+								tempParticleW, tempParticleH,
+								angleToGo, 15,
+							   this->castDamage,					// particle spawning damage
+							   {255, 255,0}, 1,
+							   1, 1,
+							   255, 0,
+							   100, 10,
+							   false, 0);*/
+
+						// depracated
+						// spawn particle
+						/*p_dummy.spawnParticleAngle(particle, 0,
+								barrelX,
+								barrelY,
+								particleW, particleH,
+							   angle, 65,
+							   25,
+							   {255, 255,0}, 1,
+							   1, 1,
+							   255, 0,
+							   100, 2,
+							   false, 0);*/
+					}
 				}
 			}
 		}
@@ -540,12 +558,17 @@ void Players::update(Map &map,
 					Tile &tl, Tile tile[],
 					Tilec &tlc, Tilec tilec[],
 					Object &obj, Object object[],
-					int mx, int my, int camx, int camy,
+					int mex, int mey, int camx, int camy,
 					float spawnX, float spawnY,
 					LWindow gWindow, SDL_Renderer* gRenderer,
 					LTexture gText, TTF_Font *gFont, SDL_Color color,
 					Mix_Chunk *sAtariBoom)
 {
+
+	// Player center
+	x2 = x+w/2;
+	y2 = y+h/2;
+
 	// Reset upon leaving pause menu
 	if (returned){
 		returned 		= false;
@@ -584,6 +607,7 @@ void Players::update(Map &map,
 		//--------------------------------------------------------------------------------//
 		//----------------------------------- Movement -----------------------------------//
 		{
+
 			// X Axis movement
 			{
 				// Move left
@@ -607,6 +631,16 @@ void Players::update(Map &map,
 			        }
 				}
 			}
+
+			// Direction facing
+			if (this->ControlsPreference == 1) {
+				if (mex+camx > this->x) {
+		        	this->facing = "right";
+				}else {
+		        	this->facing = "left";
+				}
+			}
+
 
 			// Y Axis movement
 			{
@@ -864,7 +898,7 @@ void Players::update(Map &map,
 					StopMovement();
 
 					// Increase attack timer/frames
-					this->attackTimer++;
+					this->attackTimer += this->attackTimerSpe;
 
 					// If attack timer below 15 frames
 					if (this->attackTimer < 15)
@@ -1100,7 +1134,7 @@ void Players::update(Map &map,
 		////////////////////////////////////////////////////////////////////////////////////
 
 		// Player shoot
-		fire(particle, p_dummy, sCast, mx+camx, my+camy);
+		fire(particle, p_dummy, sCast, mex+camx, mey+camy);
 
 		// Player shield
 		if (invurnerable){
@@ -1249,7 +1283,7 @@ void Players::update(Map &map,
 			if (leftclick)
 			{
 				// Option: Yes, reset everything
-				if (checkCollision(mx, my, 1, 1, continueButton[0].x, continueButton[0].y, continueButton[0].w, continueButton[0].h))
+				if (checkCollision(mex, mey, 1, 1, continueButton[0].x, continueButton[0].y, continueButton[0].w, continueButton[0].h))
 				{
 					leftclick			= false;
 
@@ -1265,7 +1299,7 @@ void Players::update(Map &map,
 				}
 
 				// Option: No, go to Main Menu
-				if (checkCollision(mx, my, 1, 1, continueButton[1].x, continueButton[1].y, continueButton[1].w, continueButton[1].h))
+				if (checkCollision(mex, mey, 1, 1, continueButton[1].x, continueButton[1].y, continueButton[1].w, continueButton[1].h))
 				{
 					score = 0;
 					leftclick  = false;
@@ -1273,7 +1307,7 @@ void Players::update(Map &map,
 				}
 
 				// Option: Reset high scores
-				if (checkCollision(mx, my, 1, 1, continueButton[2].x, continueButton[2].y, continueButton[2].w, continueButton[2].h))
+				if (checkCollision(mex, mey, 1, 1, continueButton[2].x, continueButton[2].y, continueButton[2].w, continueButton[2].h))
 				{
 					// Reset high scores
 					resetHighScore();
@@ -1297,7 +1331,7 @@ void Players::update(Map &map,
 			if (leftclick)
 			{
 				// Option: Play
-				if (checkCollision(mx, my, 1, 1, continueButton[0].x, continueButton[0].y, continueButton[0].w, continueButton[0].h))
+				if (checkCollision(mex, mey, 1, 1, continueButton[0].x, continueButton[0].y, continueButton[0].w, continueButton[0].h))
 				{
 					// Reset Player
 					std::string newName;
@@ -1311,7 +1345,7 @@ void Players::update(Map &map,
 				}
 
 				// Option: Reset high scores
-				if (checkCollision(mx, my, 1, 1, continueButton[2].x, continueButton[2].y, continueButton[2].w, continueButton[2].h))
+				if (checkCollision(mex, mey, 1, 1, continueButton[2].x, continueButton[2].y, continueButton[2].w, continueButton[2].h))
 				{
 					// Reset high scores
 					resetHighScore();
@@ -1579,24 +1613,24 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY)
 
 	// Highscore text
 	std::stringstream tempsi;
-	tempsi << "moving: " << moving;
+	tempsi << "parry: " << this->parry;
 	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {244, 144, 20}, gFont24);
 	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 0, gText.getWidth(), gText.getHeight());
 
 	tempsi.str( std::string() );
-	tempsi << "attack: " << attack;
+	tempsi << "parryTimer: " << this->parryTimer;
 	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
 	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 24*1, gText.getWidth(), gText.getHeight());
 
 	tempsi.str( std::string() );
-	tempsi << "dashCoolCounter: " << dashCoolCounter;
+	tempsi << "parryCDTimer: " << this->parryCDTimer;
 	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
 	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 24*2, gText.getWidth(), gText.getHeight());
 
-	//tempsi.str( std::string() );
-	//tempsi << "dmg x " << this->damageMultipler;
-	//gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255,255,255}, gFont13);
-	//gText.render(gRenderer, this->x-camX, this->y-gText.getHeight()-camY, gText.getWidth(), gText.getHeight());
+	tempsi.str( std::string() );
+	tempsi << "dmg x " << this->damageMultipler;
+	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255,255,255}, gFont13);
+	gText.render(gRenderer, this->x+this->w/2-gText.getWidth()/2-camX, this->y-gText.getHeight()-camY, gText.getWidth(), gText.getHeight());
 
 }
 
@@ -1702,7 +1736,7 @@ void Players::OnKeyDown(SDL_Keycode sym )
 	case SDLK_m:						// Dodge
 		// Future code to dodge
 	case SDLK_j:						// Attack (spell attack? This is not finalized.)
-		this->initialshot = true;
+
 		break;
 	case SDLK_LSHIFT:
 		this->shift = true;
@@ -1712,7 +1746,7 @@ void Players::OnKeyDown(SDL_Keycode sym )
 		// Attack
 		SlashAttack();
 		break;
-	case SDLK_b:						// Parry
+	case SDLK_c:						// Parry
 
 		// Activate Parry
 		ActivateParry();
@@ -1742,7 +1776,7 @@ void Players::OnKeyUp(SDL_Keycode sym )
 		this->movedown = false;
 		break;
 	case SDLK_j:
-		this->initialshot = false;
+
 		break;
 	case SDLK_LSHIFT:
 		this->shift 		= false;
@@ -1759,6 +1793,12 @@ void Players::mouseClickState(SDL_Event &e){
 		if (e.button.button == SDL_BUTTON_LEFT) {
 			this->controls = 0;
 			this->leftclick = true;
+
+			// Attack
+			SlashAttack();
+
+			// Shoot bullet
+			this->initialshot = true;
 		}
 		if (e.button.button == SDL_BUTTON_RIGHT) {
 			this->controls = 0;
@@ -1768,6 +1808,9 @@ void Players::mouseClickState(SDL_Event &e){
 	}else if (e.type == SDL_MOUSEBUTTONUP) {
 		if (e.button.button == SDL_BUTTON_LEFT) {
 			this->leftclick = false;
+
+			// Shoot bullet
+			this->initialshot = false;
 		}
 		if (e.button.button == SDL_BUTTON_RIGHT) {
 			this->rightclick = false;
@@ -1999,7 +2042,16 @@ void Players::ResetParry()
 	this->parryCDTimer = 0;
 
 	// Increase damage multiplier
-	this->damageMultipler += 1.5;
+	this->damageMultipler += 0.1;
+}
+
+void Players::ExtendParryDuration()
+{
+	//  Extend parry
+	this->parryTimer = 0;
+
+	// Increase damage multiplier
+	this->damageMultipler += 0.1;
 }
 
 void Players::StopMovement()
@@ -2113,6 +2165,10 @@ float Players::getInvurnerableStatus() {
 // Get status of parrying
 float Players::getParryStatus() {
 	return this->parry;
+}
+// Get status of dashing
+float Players::getDashStatus() {
+	return this->dash;
 }
 
 

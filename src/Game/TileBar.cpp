@@ -36,7 +36,7 @@ bool TileBar::checkCollision(int x, int y, int w, int h, int x2, int y2, int w2,
 }
 
 void TileBar::load(SDL_Renderer *gRenderer) {
-	gTileBar.loadFromFile(gRenderer, "resource/gfx/castle_2.png");
+	gTileBar.loadFromFile(gRenderer, "resource/gfx/Rekkimaru/dungeon_tileset.png");
 	gRect.loadFromFile(gRenderer, "resource/gfx/rect.png");
 	rRect[0] = { 0, 0, 64, 64 };
 	rRect[1] = { 64, 0, 64, 64 };
@@ -109,12 +109,14 @@ void TileBar::placeTile(TileBar tilebar[], int x, int y, int w, int h,
 }
 //Declare tile values
 void TileBar::placeTileBar(TileBar tilebar[]) {
-	for (int h = 0; h < tilesHeight; h++) {
-		for (int w = 0; w < tilesWidth; w++) {
-			//for (int j = 0; j < 26; j++) {
-				//for (int i = 0; i < 8; i++) {
-			placeTile(tilebar, 0 + w * 48, 0 + (h * 48), 48, 48,
-							   0 + w * 32, 0 + (h * 32), 32, 32,
+	for (int h = 0; h < HowManyTilesVertical; h++) {
+		for (int w = 0; w < HowManyTilesHorizontal; w++) {
+
+			int endW = 16;
+			int endH = 16;
+
+			placeTile(tilebar, 0 + w * tileSizeInWorldW, 0 + (h * tileSizeInWorldH), tileSizeInWorldW, tileSizeInWorldH,
+							   0 + w * endW, 0 + (h * endH), endW, endH,
 							   "off");
 		}
 		// Reset x margin
@@ -185,8 +187,8 @@ void TileBar::render(SDL_Renderer *gRenderer, TileBar tilebar[], int tile_select
 		if (tilebar[i].alive){
 			//if (tilebar[i].screen){
 
-				gRect.setAlpha(45);
-				gRect.render(gRenderer, tilebar[i].x, tilebar[i].y,tilebar[i].w, tilebar[i].h, &rRect[5], 0);
+				//gRect.setAlpha(45);
+				//gRect.render(gRenderer, tilebar[i].x, tilebar[i].y,tilebar[i].w, tilebar[i].h, &rRect[5], 0);
 
 				gTileBar.setAlpha(90);
 				gTileBar.render(gRenderer, tilebar[i].x, tilebar[i].y,
@@ -219,5 +221,10 @@ void TileBar::render(SDL_Renderer *gRenderer, TileBar tilebar[], int tile_select
 				}
 		}
 	}
+
+	// Rect around whole tilebar
+	SDL_Rect tempr = {tilebar[0].x, tilebar[0].y,tilebar[0].w *HowManyTilesHorizontal , tilebar[0].h * HowManyTilesVertical};
+	SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+	SDL_RenderDrawRect(gRenderer, &tempr);
 }
 
