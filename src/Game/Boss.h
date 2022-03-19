@@ -90,7 +90,7 @@ public:	// Animations
 	 * 0: Attack 1
 	 * 1: Attack 2
 	 */
-	int randomAttack;
+	int randomAttack;	// Depracated, get rid of this
 
 
 
@@ -98,7 +98,9 @@ public:	// Animations
 	 * -1: 	Cooldown state (can't attack)
 	 * 0: 	Walking around
 	 * 1: 	Moving towards player
-	 * 2: 	Start charging-attack animation
+	 * 2: 	Normal 4 shot Attack
+	 * 3: 	Pre BARRAGE Attack!!!		- Part 1 of Barrage Attack
+	 * 4: 	BARRAGE Attack!				- Part 2 of Barrage Attack
 	 */
 	int animState;
 	bool chargingAttack;

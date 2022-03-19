@@ -274,6 +274,9 @@ private:	// Load level
 	// Load config files
 	void LoadCFG();
 
+	// Load previous high-score for Level
+	void LoadHighScore();
+
 	// Load level
 	void LoadLevel();
 };

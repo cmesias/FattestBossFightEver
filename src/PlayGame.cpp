@@ -726,7 +726,8 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 					  spawnX, spawnY,
 					  gWindow, gRenderer,
 					  gText, gFont26, {255,255,255},
-					  sAtariBoom, RestartLevel);
+					  sAtariBoom, RestartLevel,
+					  LevelToLoad);
 
 		// If we get a true from Player.cpp that we should restart the levelm then restart the level
 		if (RestartLevel) {
@@ -1276,6 +1277,14 @@ void PlayGame::checkCollisionParticleBoss()
 				                // Subtract boss health
 				                boss[i].health -= player.getCastDamage();
 
+				                // Increase player score
+				                if (particles[j].type == -1) {
+					                player.IncreaseScore(10);
+				                }
+				                if (particles[j].type == 0) {
+					                player.IncreaseScore(5);
+				                }
+
 				                // Show damage text (it will print how much damage the player did to the boss)
 				    			std::stringstream tempss;
 				    			tempss << player.getCastDamage();
@@ -1549,6 +1558,9 @@ void PlayGame::checkPlayerAttacksCollisionBoss() {
 
 				                // Subtract boss health
 				                boss[i].health -= player.getDamage();
+
+				                // Increase player score
+				                player.IncreaseScore(10);
 
 				                // Show damage text (it will print how much damage the player did to the boss)
 				    			std::stringstream tempss;
@@ -2000,6 +2012,39 @@ void PlayGame::checkCollisionParticlePlayer() {
 							// Extend Parry duration
 							player.ExtendParryDuration();
 
+							// Increase score depending on size of bullet parried
+							{
+								// Small blue bullet from Boss
+								if (particles[i].w == 20)
+								{
+									// Increase health
+									player.IncreaseHealth(1);
+
+					                // Increase player score
+					                player.IncreaseScore(1);
+								}
+
+								// Small red bullet from Boss
+								if (particles[i].w == 32)
+								{
+									// Increase health
+									player.IncreaseHealth(2);
+
+					                // Increase player score
+					                player.IncreaseScore(4);
+								}
+
+								// Large red bullet from Boss
+								if (particles[i].w == 96)
+								{
+									// Increase health
+									player.IncreaseHealth(25);
+
+					                // Increase player score
+					                player.IncreaseScore(4);
+								}
+							}
+
 							// Spawn particle VFX
 							for (double i=0.0; i< 360.0; i+=rand() % 10 + 40){
 								int rands = rand() % 11 + 3;
@@ -2052,7 +2097,7 @@ void PlayGame::checkCollisionParticlePlayer() {
 												   rands, rands,
 												   i, randDouble(2.1, 5.1),
 												   0.0, 0, 0,
-												   {255, 0, 255, 255}, 1,
+												   {255, 0, 0, 255}, 1,
 												   1, 1,
 												   rand() % 100 + 150, rand() % 2 + 5,
 												   rand() % 50 + 90, 0,
@@ -2662,9 +2707,50 @@ void PlayGame::LoadCFG() {
 	//applyVideoCFG(gWindow);
 }
 
+void PlayGame::LoadHighScore() {
+	std::stringstream filePath;
+	filePath << "data/maps/highscore";
+	filePath << LevelToLoad;
+	filePath << ".txt";
+
+	int previousHighScore = -1;
+	std::fstream fileTileDataL(filePath.str().c_str());
+
+	// File exists, load last high score
+	if (fileTileDataL.is_open()) {
+		fileTileDataL >> previousHighScore;
+		fileTileDataL.close();
+
+		// Apply that high score to current level for Render
+		player.ApplyHighScore(previousHighScore);
+	}
+
+	// File does NOT exist, create file with default of 0 high score
+	else {
+		std::cout<< "File does not exist\n";
+		{
+			std::stringstream filePath;
+			filePath << "data/maps/highscore";
+			filePath << LevelToLoad;
+			filePath << ".txt";
+
+			std::ofstream fileSave;
+			fileSave.open(filePath.str().c_str());
+			fileSave << 0;
+			fileSave.close();
+
+			// Apply that high score to current level for Render
+			player.ApplyHighScore(0);
+		}
+	}
+}
+
 // Load level
 void PlayGame::LoadLevel()
 {
+	// Load Player last high score for current Level
+	LoadHighScore();
+
 	// Remove everything
 	{
 		// Remove particles tiles

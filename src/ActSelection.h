@@ -8,21 +8,20 @@
 #ifndef ACTSELECTION_H_
 #define ACTSELECTION_H_
 
-#include "Game/TextNFont.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "LWindow.h"
 #include "LTexture.h"
 #include "Helper.h"
 #include "Game/Button.h"
+#include "Game/TextNFont.h"
 
 #include <fstream>
 #include <limits>
 #include <sstream>
 #include <iostream>
-
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
 
 
 class ActSelection: public TextNFont, public Helper {
@@ -58,6 +57,7 @@ private:
 	bool leftClick;
 	bool quit;
 	bool shift;
+	bool debug;
 	SDL_Event event;
 	float camx, camy;
 

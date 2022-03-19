@@ -14,6 +14,7 @@
 #include "MainMenu.h"
 #include "CustomizeCharacter.h"
 #include "ActSelection.h"
+#include "Credits.h"
 #include "PlayGame.h"
 
 #include "stdlib.h"
@@ -319,6 +320,34 @@ void Game::ShowPlayGame() {
 	}
 }
 
+void Game::ShowCredits() {
+	// Play Room Music
+	//Mix_PlayMusic( sRelaxingInterlude, -1);
+	// Create Main Menu
+	Credits credits;
+	// Show Main Menu
+	Credits::CreditsResult result;
+	credits.Show(gWindow, gRenderer, result);
+	// Do something on Main Menu return
+	switch(result)
+	{
+	case Credits::Back:						// Back
+		//Mix_HaltMusic();
+		_gameState = Game::ShowingMenu;
+		break;
+	case Credits::StartGame:				// Start a certain scene/level
+		//
+		break;
+	case Credits::Nothing:					// Nothing
+		//
+		break;
+	case Credits::Exit:						// Exit Game
+		//Mix_HaltMusic();
+		_gameState = Game::Exiting;
+		break;
+	}
+}
+
 // Loop Game
 void Game::GameLoop()
 {
@@ -347,6 +376,11 @@ void Game::GameLoop()
 		case Game::ShowingPlayGame:							// Play Game
 			{
 				ShowPlayGame();
+				break;
+			}
+		case Game::CreditScene:							// Play Game
+			{
+				ShowCredits();
 				break;
 			}
 		case Game::Exiting:									// Quit

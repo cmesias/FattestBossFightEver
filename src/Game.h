@@ -54,6 +54,9 @@ private:
 	// Actual game play
 	void ShowPlayGame();
 
+	// Credits scene
+	void ShowCredits();
+
 	enum GameState {Uninitialized, ShowingSplash, ShowingMenu, ShowingCustomizeCharacter, ShowingActSelection, ShowingPlayGame,
 					NewGameScene, LoadGameScene, OptionScene, CreditScene, Exiting };
 	static GameState _gameState;

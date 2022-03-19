@@ -101,6 +101,13 @@ int main(int argc, char *argv[]) {
  * [ ] applying damage multiplier for player
  * [ ] rendering text for damage multiplier above player
  * [ ] Players.cpp - Play SFX when Player has no more mana, but is still trying to shoot out SlashAttack particles
+ * [ ] Players.cpp (2) - Create summary page after defeating the boss and add things like:
+ * 					 1. How many bullets the Player shot
+ * 					 2. How many bullets the Player took
+ * 					 3. How many bullets the Player destroyed
+ * 					 4. How many bullets the Player blocked/parried
+ * 					 5. How many times the Player died
+ * [ ] - SaveHighScore in Player.cpp not working
  *
  */
 

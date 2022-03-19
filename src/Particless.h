@@ -33,8 +33,8 @@ public:	// variables
 	float *xFollow;
 	float *yFollow;
 	bool follow = false;
-	int alpha;
-	int alphaspeed;
+	float alpha;
+	float alphaspeed;
 	int time;
 	int deathTimer;
 	int deathTimerSpeed;
@@ -80,7 +80,7 @@ public:	// functions
 			float damage, float dmgToParticles, float health,
 			SDL_Color color, int layer,
 			int angleSpe, int angleDir,
-			int alpha, int alphaspeed,
+			float alpha, float alphaspeed,
 			int deathTimer, int deathTimerSpeed,
 			bool sizeDeath, float deathSpe,
 			double splatDistance = 1, double splatSpeed = 0.0);

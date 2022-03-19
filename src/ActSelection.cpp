@@ -9,6 +9,7 @@
 
 void ActSelection::Init()
 {
+	debug = false;
 	levelsUnlocked = -1;	// How many levels player has unlocked
 	levelIndex = 1;			// Current index for level
 	selectedLevel = -1;		// Current index for level selected
@@ -175,6 +176,9 @@ void ActSelection::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 				// Key Released
 				else if (event.type == SDL_KEYUP && event.key.repeat == 0) {
 					switch (event.key.keysym.sym) {
+					case SDLK_h:
+						//debug = (!debug);
+						break;
 					case SDLK_LSHIFT:
 						shift = false;
 						break;
@@ -364,53 +368,55 @@ void ActSelection::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 			//-----------------------------------------------------------------------//
 			//----------------------------- Render text -----------------------------//
 			{
-				// Render text: Current scene
-				{
-					std::stringstream tempss;
-					tempss << "_gameState: Act Selection Scene.";
-					gText.loadFromRenderedText(gRenderer, tempss.str().c_str(),
-											   {255,255,255}, gFont13);
-					gText.setAlpha(255);
-					gText.render(gRenderer, gWindow.getWidth() - gText.getWidth(),
-											0,
-											gText.getWidth(),
-											gText.getHeight());
-				}
+				if (debug) {
+					// Render text: Current scene
+					{
+						std::stringstream tempss;
+						tempss << "_gameState: Act Selection Scene.";
+						gText.loadFromRenderedText(gRenderer, tempss.str().c_str(),
+												   {255,255,255}, gFont13);
+						gText.setAlpha(255);
+						gText.render(gRenderer, gWindow.getWidth() - gText.getWidth(),
+												0,
+												gText.getWidth(),
+												gText.getHeight());
+					}
 
-				// Render text: Levels unlocked
-				{
-					std::stringstream tempss;
-					tempss << "Completed Levels: " << levelsUnlocked;
-					gText.loadFromRenderedText(gRenderer, tempss.str().c_str(),
-											   {255,255,255}, gFont13);
-					gText.setAlpha(255);
-					gText.render(gRenderer, gWindow.getWidth()/2 - gText.getWidth(),
-											gWindow.getHeight() * 0.90 - gText.getHeight(),
-											gText.getWidth(),
-											gText.getHeight());
-				}
+					// Render text: Levels unlocked
+					{
+						std::stringstream tempss;
+						tempss << "Completed Levels: " << levelsUnlocked;
+						gText.loadFromRenderedText(gRenderer, tempss.str().c_str(),
+												   {255,255,255}, gFont13);
+						gText.setAlpha(255);
+						gText.render(gRenderer, gWindow.getWidth()/2 - gText.getWidth(),
+												gWindow.getHeight() * 0.90 - gText.getHeight(),
+												gText.getWidth(),
+												gText.getHeight());
+					}
 
-				// Render text: Current level selected
-				{
-					std::stringstream tempss;
-					tempss << "Level hovered: " << levelIndex;
-					gText.loadFromRenderedText(gRenderer, tempss.str().c_str(),
-											   {255,255,255}, gFont13);
-					gText.setAlpha(255);
-					gText.render(gRenderer, gWindow.getWidth()/2 - gText.getWidth(),
-											gWindow.getHeight() * 0.90 - gText.getHeight() + 14,
-											gText.getWidth(),
-											gText.getHeight());
+					// Render text: Current level selected
+					{
+						std::stringstream tempss;
+						tempss << "Level hovered: " << levelIndex;
+						gText.loadFromRenderedText(gRenderer, tempss.str().c_str(),
+												   {255,255,255}, gFont13);
+						gText.setAlpha(255);
+						gText.render(gRenderer, gWindow.getWidth()/2 - gText.getWidth(),
+												gWindow.getHeight() * 0.90 - gText.getHeight() + 14,
+												gText.getWidth(),
+												gText.getHeight());
 
-					tempss.str(std::string());
-					tempss << "this->controls: " << this->controls;
-					gText.loadFromRenderedText(gRenderer, tempss.str().c_str(),
-											   {255,255,255}, gFont13);
-					gText.setAlpha(255);
-					gText.render(gRenderer, gWindow.getWidth()/2 - gText.getWidth(),
-											gWindow.getHeight() * 0.90 - gText.getHeight() + 28,
-											gText.getWidth(),
-											gText.getHeight());
+						tempss.str(std::string());
+						tempss << "this->controls: " << this->controls;
+						gText.loadFromRenderedText(gRenderer, tempss.str().c_str(),
+												   {255,255,255}, gFont13);
+						gText.setAlpha(255);
+						gText.render(gRenderer, gWindow.getWidth()/2 - gText.getWidth(),
+												gWindow.getHeight() * 0.90 - gText.getHeight() + 28,
+												gText.getWidth(),
+												gText.getHeight());
+					}
 				}
 			}
 			//----------------------------- Render text -----------------------------//

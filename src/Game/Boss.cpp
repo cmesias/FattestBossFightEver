@@ -308,7 +308,7 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 					boss[i].chargingAttack = true;
 
 					// Change animation state
-					boss[i].animState = 2;
+					boss[i].animState = rand()% 1 + 2;	// random number from 2-3
 
 					// Stop moving boss
 					boss[i].vX = 0.0;
@@ -330,93 +330,35 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 				// If Charge attack animation
 				if (boss[i].chargingAttack)
 				{
-
-					// Boss shoots based on what our chargeTime is
+					// Typical Boss Attack
+					for (int j=0; j<5; j++)
 					{
-						// Random Boss attack 1
-						// Typical Boss shoot
-						if (boss[i].randomAttack) {
-							for (int j=0; j<5; j++) {
-								if (boss[i].chargeTime == j * 6) {
-
-									// Spawn particle effect
-									int rands = 32;
-									float tempX = boss[i].x + boss[i].w/2 - rands/2;
-									float tempY = boss[i].y + boss[i].h/2 - rands/2;
-									for (double h=0.0; h< 360.0; h+=rand() % 10 + 10){
-
-										//int rands = rand() % 11 + 3;
-
-
-										p_dummy.spawnParticleAngle(particle, 1,
-														   tempX,
-														   tempY,
-														   rands, rands,
-														   h, randDouble(5, 5),
-														   10, 0, 20,
-														   {144, 144, 144, 255}, 1,
-														   1, 1,
-														   rand() % 100 + 150, 0,
-														   rand() % 50 + 90, 0,
-														   true, randDouble(0.1, 0.7),
-														   100, 10);
-									}
-
-									// Play SFX
-									Mix_PlayChannel(-1, sCast, 0);
-								}
+						// Boss shoots based on what our chargeTime is
+						if (boss[i].chargeTime == j * 6)
+						{
+							// Spawn particle effect
+							int rands = 32;
+							float tempX = boss[i].x + boss[i].w/2 - rands/2;
+							float tempY = boss[i].y + boss[i].h/2 - rands/2;
+							for (double h=0.0; h< 360.0; h+=rand() % 10 + 10){
+								p_dummy.spawnParticleAngle(particle, 1,
+												   tempX,
+												   tempY,
+												   rands, rands,
+												   h, randDouble(5, 5),
+												   10, 0, 20,
+												   {255, 255, 255, 255}, 1,
+												   1, 1,
+												   255, 0,
+												   rand() % 50 + 90, 0,
+												   true, randDouble(0.1, 0.7),
+												   100, 10);
 							}
+
+							// Play SFX
+							Mix_PlayChannel(-1, sCast, 0);
 						}
-
-						// Random Boss attack 2
-						// FAST BARRAGE!!!!!!!!!!
-						else {
-							for (int j=0; j<10; j++) {
-								if (boss[i].chargeTime == j * 5) {
-
-									// Spawn particle effect
-									int rands = 32;
-									float tempX = boss[i].x + boss[i].w/2 - rands/2;
-									float tempY = boss[i].y + boss[i].h/2 - rands/2;
-									for (double h=0.0; h< 360.0; h+=rand() % 10 + 5){
-
-										//int rands = rand() % 11 + 3;
-
-
-										p_dummy.spawnParticleAngle(particle, 1,
-														   tempX,
-														   tempY,
-														   rands, rands,
-														   h, randDouble(12, 14),
-														   5, 0, 20,
-														   {144, 144, 144, 255}, 1,
-														   1, 1,
-														   255, 0,
-														   randDouble(20, 30), 1,
-														   true, randDouble(0.1, 0.7),
-														   100, 10);
-									}
-
-									// Play SFX
-									Mix_PlayChannel(-1, sCast, 0);
-								}
-							}
-						}
-
-
-
-
-
-
-
-
-
-
-
-
 					}
-
-
 
 					// If count down has not reached 0 seconds
 					if (boss[i].chargeTime > 0) {
@@ -511,6 +453,131 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 				}
 			}
 
+			///////////////////////////////////////////////////////////////////////////////////
+			//-------------------------------------------------------------------------------//
+			//---------------------------- Barrage Attack Part 1 ----------------------------//
+			else if (boss[i].animState == 3) {
+
+				// If Charge attack animation
+				if (boss[i].chargingAttack)
+				{
+					for (int j=0; j<3; j++) {
+						if (boss[i].chargeTime == j * 10) {
+
+							// Spawn particle effect
+							int rands = 20;
+							float tempX = boss[i].x + boss[i].w/2 - rands/2;
+							float tempY = boss[i].y + boss[i].h/2 - rands/2;
+							for (double h=0.0; h< 360.0; h+=rand() % 10 + 5){
+
+								//int rands = rand() % 11 + 3;
+
+								p_dummy.spawnParticleAngle(particle, 1,
+												   tempX,
+												   tempY,
+												   rands, rands,
+												   h, 5,
+												   5, 0, 20,
+												   {0, 254, 254, 255}, 1,
+												   1, 1,
+												   255, 0,
+												   15, 1,
+												   false, 0.0,
+												   100, 10);
+							}
+
+							// Play SFX
+							Mix_PlayChannel(-1, sCast, 0);
+						}
+					}
+
+					// If count down has not reached 0 seconds
+					if (boss[i].chargeTime > 0) {
+
+						// Start counting down charge-attack animation
+						boss[i].chargeTime--;
+					}
+
+					// Countdown reached 0 seconds.
+					else {
+
+						// Attack has 2 parts
+
+						// Reset charge-attack count down
+						boss[i].chargeTime = this->chargeTimeStart;
+
+						// Set animation state
+						boss[i].animState = 4;
+					}
+				}
+			}
+			//---------------------------- Barrage Attack Part 1 ----------------------------//
+			//-------------------------------------------------------------------------------//
+			///////////////////////////////////////////////////////////////////////////////////
+
+
+			///////////////////////////////////////////////////////////////////////////////////
+			//-------------------------------------------------------------------------------//
+			//---------------------------- Barrage Attack Part 2 ----------------------------//
+			else if (boss[i].animState == 4) {
+
+				// If Charge attack animation
+				if (boss[i].chargingAttack)
+				{
+					for (int j=0; j<5; j++) {
+						if (boss[i].chargeTime == j * 6) {
+
+							// Spawn particle effect
+							int rands = 20;
+							float tempX = boss[i].x + boss[i].w/2 - rands/2;
+							float tempY = boss[i].y + boss[i].h/2 - rands/2;
+							for (double h=0.0; h< 360.0; h+=rand() % 10 + 5){
+
+								//int rands = rand() % 11 + 3;
+
+								p_dummy.spawnParticleAngle(particle, 1,
+												   tempX,
+												   tempY,
+												   rands, rands,
+												   h, randDouble(14, 16),
+												   5, 0, 20,
+												   {0, 254, 254, 255}, 1,
+												   1, 1,
+												   255, 0,
+												   randDouble(5, 30), 1,
+												   true, randDouble(0.1, 0.7),
+												   100, 10);
+							}
+
+							// Play SFX
+							Mix_PlayChannel(-1, sCast, 0);
+						}
+					}
+
+					// If count down has not reached 0 seconds
+					if (boss[i].chargeTime > 0) {
+
+						// Start counting down charge-attack animation
+						boss[i].chargeTime--;
+					}
+
+					// Countdown reached 0 seconds.
+					else {
+
+						// Stop charge attack animation
+						boss[i].chargingAttack = false;
+
+						// Reset charge-attack count down
+						boss[i].chargeTime = this->chargeTimeStart;
+
+						// Set animation state to cooldown (-1)
+						boss[i].animState = -1;
+					}
+				}
+			}
+			//---------------------------- Barrage Attack Part 2 ----------------------------//
+			//-------------------------------------------------------------------------------//
+			///////////////////////////////////////////////////////////////////////////////////
 
 			// At all states, constantaly fire a barage of bullets from the side
 			if (boss[i].animState == -1)
@@ -539,7 +606,7 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 									   rands, rands,
 									   boss[i].angleFacingTarget, speed,
 									   25, 0, 100,
-									   {144, 144, 144, 255}, 1,
+									   {255, 255, 255, 255}, 1,
 									   1, 1,
 									   255, 0,
 									   60*6, 1,
@@ -884,7 +951,30 @@ void Boss::RenderUI(SDL_Renderer *gRenderer, Boss boss[], int camx, int camy) {
 				gText.render(gRenderer, uiX, uiY, gText.getWidth(), gText.getHeight());
 			}
 
-			// Health
+			// Health bar on Bosses
+			{
+				// Render health
+				int barWidth = boss[i].w;
+
+				int uiX = boss[i].x + boss[i].w/2 - barWidth/2;
+				int uiY = boss[i].y - 35 - 18;
+
+				// Health bar, bg
+				SDL_Rect tempRect = {uiX-camx, uiY-camy, (barWidth*boss[i].maxHealth)/boss[i].maxHealth, 35};
+				SDL_SetRenderDrawColor(gRenderer, 60, 60, 60, 255);
+
+				// Render health
+				tempRect = {uiX-camx, uiY-camy, (barWidth*boss[i].health)/boss[i].maxHealth, 35};
+				SDL_SetRenderDrawColor(gRenderer, 200, 30, 30, 255);
+				SDL_RenderFillRect(gRenderer, &tempRect);
+
+				// Render health, border
+				tempRect = {uiX-camx, uiY-camy, (barWidth*boss[i].maxHealth)/boss[i].maxHealth, 35};
+				SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+				SDL_RenderDrawRect(gRenderer, &tempRect);
+			}
+
+			// Health top of screen
 			{
 				// Render health
 				int barWidth = screenWidth * 0.85;
@@ -906,7 +996,6 @@ void Boss::RenderUI(SDL_Renderer *gRenderer, Boss boss[], int camx, int camy) {
 				SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
 				SDL_RenderDrawRect(gRenderer, &tempRect);
 			}
-
 
 		}
 	}

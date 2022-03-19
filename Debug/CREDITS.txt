@@ -1,0 +1,118 @@
+#####################################################################
+####################### Programmer/ Developer #######################
+#####################################################################
+#
+# + Cmesias
+#   - https://cmesias.itch.io
+#
+#####################################################################
+
+#####################################################################
+############################## Graphics #############################
+#####################################################################
+#
+# + By José Luis Peiró Lima
+#   - See the folder "José Luis Peiró Lima"
+#
+#####################################################################
+#
+# + By Scott Matott
+#   - See the folder "By Scott Matott"
+#
+#####################################################################
+#
+# + Buch (https://opengameart.org/users/buch)
+#   - see folder "By Buch"
+#
+#####################################################################
+#
+# + https://opengameart.org/users/ar
+#   - cursors.png
+#
+#####################################################################
+#
+# + Cmesias
+#   - spell-icons.png
+#   - fireball animation
+#	- buttons.png
+#	- tile-break.png
+#	- cc-buttons.png
+#   - fireball[x].png
+#	- I included a mana pot, and a health pot in Scott Matott's
+#     "torch_key_gems.png"
+#
+#####################################################################
+#####################################################################
+########################### Audio Credits ###########################
+#####################################################################
+#
+# + Pant0don (https://opengameart.org/users/pant0don)
+#   - Relaxing Interlude.mp3
+#
+#####################################################################
+#
+# + Cmesias (Using Bfxr program, here: http://www.bfxr.net/)
+#   - snd_hurt.wav
+#   - snd_hitting_wall.wav
+#   - snd_spell_explode.wav
+#   - snd_skeleton_hurt.wav
+#   - snd_typing.wav
+#
+#####################################################################
+#
+# + https://www.youtube.com/watch?v=jzxVXDNGwZc
+#   - grenadePickup
+#
+#####################################################################
+#
+# + Pixel-boy: https://twitter.com/2pblog1
+#   - snd_gun_1.wav
+#   - snd_gun_4.wav
+#
+#####################################################################
+#
+# + artisticdude: https://opengameart.org/users/qubodup
+#   - snd_spell_fire.wav (Fire.aif)
+#
+#####################################################################
+#
+# + Timbre: http://freesound.org/people/Timbre/sounds/131263/
+#   - snd_spell_explode.wav
+#
+#####################################################################
+#
+# + http://www.bfxr.net/ (Bfxr program)
+#   - snd_hitting_wall.wav
+#
+#####################################################################
+#
+# + https://opengameart.org/users/horrorpen
+#   - Menu Music.mp3
+#
+#####################################################################
+#
+# + https://opengameart.org/users/bbandrage
+#   - Strange Dungeon.mp3
+#
+#####################################################################
+#
+# + https://opengameart.org/users/artisticdude
+#   - snd_bottle.wav
+#
+#####################################################################
+#
+# + Trevor Lentz (https://soundcloud.com/trevor-d-lentz)
+#   - Element.mp3
+#
+#####################################################################
+
+#####################################################################
+############################### Fonts ###############################
+#####################################################################
+#
+# + press-start-2p - http://www.fontspace.com/codeman38/press-start-2p
+# + Viga-Regular.ttf
+# + FredokaOne-Regular.ttf
+#
+#####################################################################
+

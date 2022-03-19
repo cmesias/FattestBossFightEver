@@ -113,6 +113,15 @@ public:	// variables
 	bool deathScreen	= false;
 	bool alive;
 	bool returned		= false;
+
+	/*
+	 * Parrying small blue Bullet from Boss:		score += 1;
+	 * Parrying small red Bullet from Boss:			score += 2;
+	 * Parrying large red Bullet from Boss:			score += 4;
+	 * Hitting Boss directly w/ Slash Projectile: 	score += 5
+	 * Hitting Boss directly w/ Sword: 				score += 5
+	 * Hitting Boss with counter is:				score += 10
+	 */
 	unsigned int score	= 0;
 	unsigned int highscore = 0;
 
@@ -210,7 +219,8 @@ public:	// functions
 				float spawnX, float spawnY,
 				LWindow gWindow, SDL_Renderer* gRenderer,
 				LTexture gText, TTF_Font *gFont, SDL_Color color,
-				Mix_Chunk *sAtariBoom, bool &RestartLevel);
+				Mix_Chunk *sAtariBoom, bool &RestartLevel,
+				int LevelToLoad);
 
 	void Render(int mx, int my, int camX, int camY, LWindow gWindow,
 				SDL_Renderer* gRenderer,
@@ -237,6 +247,7 @@ private:	// Private variables
 	float mana;				// Mana
 	float manaRegenSpeed;	// Mana
 	float manaRegenTimer;	// 1 second timer for mana regen;
+	float manaGainOnParry;	// Gain mana if you parry successfully
 
 	float damage;			// Sword damage
 	float damageMultipler;	// Parrying will increase damage multiplier
@@ -294,8 +305,17 @@ public:	// Mutator functions
 	// Stops parry but reset cool down to 0
 	void ResetParry();
 
-	// Extend parry duration
+	// Extend parry duration, and Gain mana back
 	void ExtendParryDuration();
+
+	// Health
+	void IncreaseHealth(float value);
+
+	// Score
+	void IncreaseScore(float value);
+
+	// Load previous high score from PlayGame.cpp
+	void ApplyHighScore(float previousHighScore);
 
 	// Stop movement
 	void StopMovement();
@@ -362,6 +382,9 @@ public:	// Accessor functions
 	// Get status of dashing
 	float getDashStatus();
 
+	// Get score
+	float getScore();
+
 public:	// Controls
 	// Player controls
 	int controls;		// [0] Keyboard, [1] Xbox 360 Controller
@@ -387,6 +410,11 @@ public:	// Controls
 	bool leftclick;
 	bool rightclick;
 	bool test;
+
+public:
+
+	// Save current highs-core for current Level
+	void SaveHighScore(int LevelToLoad);
 
 };
 

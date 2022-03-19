@@ -100,7 +100,7 @@ void Particle::spawnParticleAngle(Particle particle[], int type,
 		float damage, float dmgToParticles, float health,
 		SDL_Color color, int layer,
 		int angleSpe, int angleDir,
-		int alpha, int alphaspeed,
+		float alpha, float alphaspeed,
 		int deathTimer, int deathTimerSpeed,
 		bool sizeDeath, float deathSpe,
 		double splatDistance, double splatSpeed) {
@@ -600,7 +600,8 @@ void Particle::renderBulletParticle(Particle particle[], int camX, int camY, flo
 
 				// Render texture
 				gBullet.setBlendMode(SDL_BLENDMODE_BLEND);
-				gBullet.setAlpha(255);
+				gBullet.setColor(particle[i].color.r, particle[i].color.g, particle[i].color.b);
+				gBullet.setAlpha(particle[i].alpha);
 				gBullet.render(gRenderer, particle[i].x - camX,
 										     particle[i].y - camY, particle[i].w,
 											 particle[i].h,

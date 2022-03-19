@@ -121,6 +121,7 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 	this->maxMana				= 100;
 	this->mana					= this->maxMana;
 	this->manaRegenSpeed		= 8.75;
+	this->manaGainOnParry		= 5.25;
 	this->damage				= 75;
 	this->damageMultipler		= 1;
 	this->castDamage			= 25;
@@ -547,7 +548,8 @@ void Players::Update(Map &map,
 					float spawnX, float spawnY,
 					LWindow gWindow, SDL_Renderer* gRenderer,
 					LTexture gText, TTF_Font *gFont, SDL_Color color,
-					Mix_Chunk *sAtariBoom, bool &RestartLevel)
+					Mix_Chunk *sAtariBoom, bool &RestartLevel,
+					int LevelToLoad)
 {
 	// Player center
 	x2 = x+w/2;
@@ -1149,6 +1151,8 @@ void Players::Update(Map &map,
 		// Player death
 		if (health <=0)
 		{
+			SaveHighScore(LevelToLoad);
+
 			//Spawn explosion after asteroid death
 			// spawn blood particle effect
 			for (double i=0.0; i< 360.0; i+=rand() % 10 + 10){
@@ -1190,7 +1194,7 @@ void Players::Update(Map &map,
 				deathScreen 	= true;
 
 				// SAVE HIGH SCORE
-				saveHighScore();
+				//saveHighScore();
 			}
 		}
 
@@ -1602,12 +1606,12 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY)
 	std::stringstream tempsi;
 	tempsi << "Highscore: " << this->highscore;
 	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {244, 144, 20}, gFont24);
-	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 0, gText.getWidth(), gText.getHeight());
+	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75, gText.getWidth(), gText.getHeight());
 
 	tempsi.str( std::string() );
 	tempsi << "Score: " << this->score;
 	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
-	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 24*1, gText.getWidth(), gText.getHeight());
+	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 75+28*1, gText.getWidth(), gText.getHeight());
 
 	//tempsi.str( std::string() );
 	//tempsi << "dmg x " << this->damageMultipler;
@@ -2041,9 +2045,26 @@ void Players::ExtendParryDuration()
 	//  Extend parry
 	this->parryTimer = 0;
 
+	// Gain mana back
+	this->mana += this->manaGainOnParry;
+
 	// Increase damage multiplier
 	//this->damageMultipler += 0.1;
 }
+
+void Players::IncreaseHealth(float value) {
+	this->health += value;
+}
+
+void Players::IncreaseScore(float value) {
+	this->score += value;
+}
+
+void Players::ApplyHighScore(float previousHighScore) {
+	this->highscore = previousHighScore;
+}
+
+
 
 void Players::StopMovement()
 {
@@ -2149,20 +2170,51 @@ float Players::getKnockBackPower() {
 	return this->knockBackPower;
 }
 
-// Get status of invurnerability
+
 float Players::getInvurnerableStatus() {
 	return this->invurnerable;
 }
-// Get status of parrying
+
 float Players::getParryStatus() {
 	return this->parry;
 }
-// Get status of dashing
+
 float Players::getDashStatus() {
 	return this->dash;
 }
 
+float Players::getScore() {
+	return this->score;
+}
 
+void Players::SaveHighScore(int LevelToLoad) {
+	bool saveHighscore = false;
+
+	// Open highscore first to check value
+	int tempScore = -1;
+	std::fstream fileOpen("data/highscore.txt");
+	fileOpen >> tempScore;
+	fileOpen.close();
+
+	// If current score is higher than previously saved score, save it
+	if (this->score > tempScore) {
+		saveHighscore = true;
+	}
+
+	// Now save high score
+	if (saveHighscore) {
+
+		std::stringstream filePath;
+		filePath << "data/maps/highscore";
+		filePath << LevelToLoad;
+		filePath << ".txt";
+
+		std::ofstream fileSave;
+		fileSave.open(filePath.str().c_str());
+		fileSave << this->score;
+		fileSave.close();
+	}
+}
 
 
 
