@@ -24,6 +24,7 @@ class PlayGame : public Helper, public Options {
 public:	// Global World Variables
 	double gravity = 0.6;
 	int LevelToLoad;
+	bool RestartLevel = false;
 
 public: // global functions
 	bool checkCollisionRect( SDL_Rect a, SDL_Rect b );

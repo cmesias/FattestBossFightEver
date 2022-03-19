@@ -49,7 +49,7 @@ public:	// Collision functions
 public: // Editor functions
 	void RemoveTile(Tilec tilec[], int click);
 	void Copy(Tilec tilec[]);
-	void Clear(Tilec tilec[]);
+	void RemoveAll(Tilec tilec[]);
 	void Spawn(Tilec tilec[], float x, float y, int w, int h);
 	void SpawnAll(Tilec tilec[], int newMx, int newMy, int camx, int camy);
 

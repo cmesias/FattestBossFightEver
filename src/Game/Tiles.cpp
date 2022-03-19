@@ -146,7 +146,7 @@ void Tile::removeTile(Tile tile[], int click) {
 	}
 }
 
-void Tile::removeAllTiles(Tile tile[]) {
+void Tile::RemoveAll(Tile tile[]) {
 	for (int i = 0; i < max; i++) {
 		if (tile[i].alive){
 			tile[i].alive = false;

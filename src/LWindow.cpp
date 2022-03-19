@@ -40,7 +40,7 @@ bool LWindow::create(std::string newName, int RESOLUTION, int ANTI_ALIS, int FUL
 	// Resolution
 	if (RESOLUTION==1){
 		Width 	= 1024;
-		Height 	= 768;
+		Height 	= 576;
 	}else if (RESOLUTION==2){
 		Width 	= 1280;
 		Height 	= 720;
@@ -208,7 +208,7 @@ void LWindow::applySettings(int RESOLUTION, int ANTI_ALIS, int FULLSCREEN, int V
 
 	// Resolution
 	if (RESOLUTION==1){
-		SDL_SetWindowSize(mWindow, 1024, 768);
+		SDL_SetWindowSize(mWindow, 1024, 576);
 	}else if (RESOLUTION==2){
 		SDL_SetWindowSize(mWindow, 1280, 720);
 	}else if (RESOLUTION==3){

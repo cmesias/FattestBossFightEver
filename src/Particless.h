@@ -46,7 +46,8 @@ public:	// variables
 	bool alive;
 	bool collide;
 	std::string side;
-	/* 0: damages enemies
+	/* -1: damages enemies, counter attack from Player, does NOT damage enemy Particles
+	 * 0: damages enemies, damages enemy Particles
 	 * 1: damages player
 	 * 2: stars, no damage
 	 * 3: blue block bits, no damage
@@ -100,6 +101,8 @@ public:	// functions
 
 
 	void spawnExplosion(Particle particle[], float x, float y, int size);
+
+	void RemoveAll(Particle particle[]);
 
 	/*void fireParticle(Particle particle[], int type, int damage,
 										   int spawnx, int spawny, int w, int h,

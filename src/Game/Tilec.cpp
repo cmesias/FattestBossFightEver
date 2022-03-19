@@ -67,7 +67,7 @@ void Tilec::RemoveTile(Tilec tilec[], int click) {
 	}
 }
 
-void Tilec::Clear(Tilec tilec[]) {
+void Tilec::RemoveAll(Tilec tilec[]) {
 	count = 0;
 	multiW = 1;
 	multiH = 1;

@@ -35,9 +35,6 @@ void ActSelection::Init()
 		levelbox[i].selected = false;
 	}
 
-	// Hide cursor
-	SDL_ShowCursor(0);
-
 	// Center camera
 	camx = 0;
 	camy = 0;

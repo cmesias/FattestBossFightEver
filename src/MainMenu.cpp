@@ -58,6 +58,10 @@ void MainMenu::Free() {
 
 void MainMenu::Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuResult &result) {
 
+	// Mouse cursor
+	LTexture gCursor;
+	gCursor.loadFromFile(gRenderer, "resource/gfx/cursor.png");
+
 	// Upon entry
 	quit = false;
 	leftClick = false;
@@ -68,9 +72,6 @@ void MainMenu::Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuRes
 	key	= 0;
 	menuIndex = -1;
 	result = Nothing;
-
-	// Show cursor
-	SDL_ShowCursor(1);
 
 	// Load resources
 	Load(gRenderer);
@@ -97,8 +98,11 @@ void MainMenu::Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuRes
 		SDL_GetRendererOutputSize(gRenderer,&renderW,&renderHDummy);
 		int en = renderW * 0.4375;
 		int renderH = renderW - en;
-		mx = (screenWidth*mx)/renderW;	// New mouse coordinates, no relation to camera
-		my = (screenHeight*my)/renderH;	// New mouse coordinates, no relation to camera
+		//mx = (screenWidth*mx)/renderW;	// New mouse coordinates, no relation to camera
+		//my = (screenHeight*my)/renderH;	// New mouse coordinates, no relation to camera
+
+		mex = (helper.screenWidth*mx)/gWindow.getWidth();				// New mouse coordinates, no relation to camera
+		mey = (helper.screenHeight*my)/gWindow.getHeight();				// New mouse coordinates, no relation to camera
 
 		// Handle Events
 		while (SDL_PollEvent(&event)) {
@@ -119,6 +123,7 @@ void MainMenu::Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuRes
 			if (event.type == SDL_QUIT) {
 				result = Exit;
 				quit = true;
+				gCursor.free();
 				Free();
 				return;
 			}else{
@@ -287,11 +292,15 @@ void MainMenu::Show(LWindow &gWindow, SDL_Renderer *gRenderer, MainMenu::MenuRes
 
 			Render(gRenderer);
 
+			// Render mouse location
+			gCursor.render(gRenderer, mex, mey, 20, 20);
+
 		// Update screen
 		SDL_RenderPresent(gRenderer);
 	}
 
 	// Free everything
+	gCursor.free();
 	Free();
 }
 

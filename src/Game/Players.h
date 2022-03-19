@@ -200,7 +200,7 @@ public:	// functions
 	// Player shoot
 	void fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, int mx, int my);
 
-	void update(Map &map,
+	void Update(Map &map,
 				Enemy enemy[], Enemy &e_dummy,
 				Particle particle[], Particle &p_dummy,
 				Tile &tl, Tile tile[],
@@ -210,7 +210,7 @@ public:	// functions
 				float spawnX, float spawnY,
 				LWindow gWindow, SDL_Renderer* gRenderer,
 				LTexture gText, TTF_Font *gFont, SDL_Color color,
-				Mix_Chunk *sAtariBoom);
+				Mix_Chunk *sAtariBoom, bool &RestartLevel);
 
 	void Render(int mx, int my, int camX, int camY, LWindow gWindow,
 				SDL_Renderer* gRenderer,
@@ -276,6 +276,8 @@ public:	// Functions to do stuff?
 
 public:	// Mutator functions
 
+	// Restore Player for the Level
+	void RestorePlayer(float spawnX, float spawnY);
 
 	// Move x pos
 	float moveX(float value);

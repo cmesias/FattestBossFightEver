@@ -120,10 +120,10 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 	this->AttackSpeed 			= 6.87;
 	this->maxMana				= 100;
 	this->mana					= this->maxMana;
-	this->manaRegenSpeed		= 19.87;
-	this->damage				= 25;
+	this->manaRegenSpeed		= 8.75;
+	this->damage				= 75;
 	this->damageMultipler		= 1;
-	this->castDamage			= 50;
+	this->castDamage			= 25;
 	this->knockBackPower		= 1.58;
 
 }
@@ -383,7 +383,7 @@ void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, 
 	if (trigger)
 	{
 		// If we have enough mana
-		if (this->mana >= 25) {
+		if (this->mana >= 5) {
 			if (!delay)
 			{
 				delay = true;
@@ -397,7 +397,7 @@ void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, 
 					// play audio
 					Mix_PlayChannel(1, sCastSFX, 0);
 
-
+					// Offset to spawn the Slash Attack
 					int offSetX =0;
 					if (facing == "left") {
 						offSetX = 32;
@@ -406,8 +406,6 @@ void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, 
 						offSetX = 0;
 					}
 
-
-					// depracated
 					// spawn particle
 					p_dummy.spawnParticleAngle(particle, 0,
 							x+w/2-offSetX,
@@ -422,55 +420,33 @@ void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, 
 						   false, 0);
 
 					// Subtract mana
-					this->mana -= 1;
+					this->mana -= 2;
 
 					// muzzle flash
 					renderFlash = true;
-
-
-					// depracated?
-					{
-						// spawn particle
-						float tempParticleW = 20;
-						float tempParticleH = 20;
-
-						// Which way player is facing
-						int angleToGo = 0;
-						if (facing == "right") {
-							angleToGo = 3.0;
-						} else {
-							angleToGo = 177.0;
-						}
-
-						// Cast spell
-						// Spawn particle damage
-						/*p_dummy.spawnParticleAngle(particle, 0,
-								x+w/2,
-								y+h/2 - 10,
-								tempParticleW, tempParticleH,
-								angleToGo, 15,
-							   this->castDamage,					// particle spawning damage
-							   {255, 255,0}, 1,
-							   1, 1,
-							   255, 0,
-							   100, 10,
-							   false, 0);*/
-
-						// depracated
-						// spawn particle
-						/*p_dummy.spawnParticleAngle(particle, 0,
-								barrelX,
-								barrelY,
-								particleW, particleH,
-							   angle, 65,
-							   25,
-							   {255, 255,0}, 1,
-							   1, 1,
-							   255, 0,
-							   100, 2,
-							   false, 0);*/
-					}
 				}
+			}
+		}
+
+		// We dont have enough mana, just spew out Particles from the Player instead
+		else {
+			// Spawn particle effect
+			for (double i=0.0; i< 90.0; i+= rand() % 10 + 20){
+				int rands = rand() % 11 + 3;
+				float newX = x2;
+				float newY = y2;
+				p_dummy.spawnParticleAngle(particle, 2,
+									newX-rands/2,
+									newY-rands/2,
+								   rands, rands,
+								   angle -45 + i, randDouble(2.1, 5.1),
+								   0.0, 0, 0,
+								   {244, 144, 0, 255}, 1,
+								   1, 1,
+								   rand() % 100 + 150, rand() % 2 + 5,
+								   rand() % 50 + 90, 0,
+								   true, randDouble(0.1, 0.7),
+								   100, 10);
 			}
 		}
 	}
@@ -561,7 +537,7 @@ void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, 
 }
 
 // Update Player
-void Players::update(Map &map,
+void Players::Update(Map &map,
 					Enemy enemy[], Enemy &e_dummy,
 					Particle particle[], Particle &p_dummy,
 					Tile &tl, Tile tile[],
@@ -571,9 +547,8 @@ void Players::update(Map &map,
 					float spawnX, float spawnY,
 					LWindow gWindow, SDL_Renderer* gRenderer,
 					LTexture gText, TTF_Font *gFont, SDL_Color color,
-					Mix_Chunk *sAtariBoom)
+					Mix_Chunk *sAtariBoom, bool &RestartLevel)
 {
-
 	// Player center
 	x2 = x+w/2;
 	y2 = y+h/2;
@@ -1239,20 +1214,23 @@ void Players::update(Map &map,
 			this->y = map.h-this->realh;
 		}
 
-		// Every frame player regenerates mana
-		if (this->mana < this->maxMana)
-		{
-			// Start timer
-			this->manaRegenTimer += 1;
+		// Regain mana if not attacking
+		if (!this->attack) {
+			// Every frame player regenerates mana
+			if (this->mana < this->maxMana)
+			{
+				// Start timer
+				this->manaRegenTimer += 1;
 
-			// After 1 second or 60 frames
-			if (this->manaRegenTimer > 60) {
+				// After 1 second or 60 frames
+				if (this->manaRegenTimer > 60) {
 
-				// Reset timer
-				this->manaRegenTimer = 0;
+					// Reset timer
+					this->manaRegenTimer = 0;
 
-				// Increase mana based on mana regen speed
-				this->mana += this->manaRegenSpeed;
+					// Increase mana based on mana regen speed
+					this->mana += this->manaRegenSpeed;
+				}
 			}
 		}
 
@@ -1281,7 +1259,6 @@ void Players::update(Map &map,
 		// Continue YES or NO Screen
 		if (this->deathScreen)
 		{
-			SDL_ShowCursor(true);
 			// Set button position
 			continueButton[0] = {0 + screenWidth/2 -96/2-100, screenHeight/2-gText.getHeight()/2, 96, 33};
 			continueButton[1] = {0 + screenWidth/2 -96/2+100, screenHeight/2-gText.getHeight()/2, 96, 33};
@@ -1297,17 +1274,13 @@ void Players::update(Map &map,
 				// Option: Yes, reset everything
 				if (checkCollision(mex, mey, 1, 1, continueButton[0].x, continueButton[0].y, continueButton[0].w, continueButton[0].h))
 				{
+					// Restores players base stats and health
 					leftclick			= false;
-
-					// Reset Player
-					std::string newName;
-					newName="AAA";
-					/////////input.getInput(gameLoop, quit, newName, gWindow, gRenderer);
-					Init(spawnX, spawnY, newName, false);
+					RestorePlayer(spawnX, spawnY);
+					RestartLevel = true;
 
 					// Clear Asteroids & Enemies
 					e_dummy.clear(enemy);
-					SDL_ShowCursor(false);
 				}
 
 				// Option: No, go to Main Menu
@@ -1345,15 +1318,13 @@ void Players::update(Map &map,
 				// Option: Play
 				if (checkCollision(mex, mey, 1, 1, continueButton[0].x, continueButton[0].y, continueButton[0].w, continueButton[0].h))
 				{
-					// Reset Player
-					std::string newName;
-					newName="AAA";
-					///////////input.getInput(gameLoop, quit, newName, gWindow, gRenderer);
-					Init(spawnX, spawnY, newName, false);
+					// Restores players base stats and health
+					leftclick			= false;
+					RestorePlayer(spawnX, spawnY);
+					RestartLevel = true;
 
 					// Clear Asteroids & Enemies
 					e_dummy.clear(enemy);
-					SDL_ShowCursor(false);
 				}
 
 				// Option: Reset high scores
@@ -1454,97 +1425,6 @@ void Players::Render(int mx, int my, int camx, int camy, LWindow gWindow, SDL_Re
 		/*SDL_Rect tempRect = {mx-24-wedth, my-24+hedth, 48, 48};
 		SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
 		SDL_RenderDrawRect(gRenderer, &tempRect);*/
-	}else{
-		// Continue YES or NO Screen
-		if (deathScreen)
-		{
-			// Render Text
-			gText.loadFromRenderedText(gRenderer, "You have died. Continue?", color, gFont24);
-			gText.render(gRenderer, screenWidth/2-gText.getWidth()/2, screenHeight/2-gText.getHeight()/2-50, gText.getWidth(), gText.getHeight());
-
-			// Render buttons: Yes
-			SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
-			SDL_RenderDrawRect(gRenderer, &continueButton[0]);
-
-			// Render buttons: No
-			SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
-			SDL_RenderDrawRect(gRenderer, &continueButton[1]);
-
-			// Render buttons: ResetHighScore
-			SDL_SetRenderDrawColor(gRenderer, 0, 255, 255, 255);
-			SDL_RenderDrawRect(gRenderer, &continueButton[2]);
-
-			// Render button texts: Yes or No
-			gText.loadFromRenderedText(gRenderer, "Yes", color, gFont24);
-			gText.render(gRenderer,  continueButton[0].x+continueButton[0].w/2-gText.getWidth()/2,
-									 continueButton[0].y+continueButton[0].h/2-gText.getHeight()/2,
-									 gText.getWidth(), gText.getHeight());
-
-			gText.loadFromRenderedText(gRenderer, "No", color, gFont24);
-			gText.render(gRenderer,  continueButton[1].x+continueButton[1].w/2-gText.getWidth()/2,
-									 continueButton[1].y+continueButton[1].h/2-gText.getHeight()/2,
-									 gText.getWidth(), gText.getHeight());
-
-			// Render Text
-			gText.loadFromRenderedText(gRenderer, "Reset High Scores", color, gFont24);
-			gText.render(gRenderer, continueButton[2].x+continueButton[2].w/2-gText.getWidth()/2,
-									 continueButton[2].y+continueButton[2].h/2-gText.getHeight()/2,
-									 gText.getWidth(), gText.getHeight());
-		// Player Menu screen
-		}else{
-
-			// Render buttons: Play
-			SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
-			SDL_RenderDrawRect(gRenderer, &continueButton[0]);
-
-			// Render buttons: ResetHighScore
-			SDL_SetRenderDrawColor(gRenderer, 0, 255, 255, 255);
-			SDL_RenderDrawRect(gRenderer, &continueButton[2]);
-
-			// Render Text
-			gText.loadFromRenderedText(gRenderer, "PLAY", color, gFont24);
-			gText.render(gRenderer, continueButton[0].x+continueButton[0].w/2-gText.getWidth()/2,
-									 continueButton[0].y+continueButton[0].h/2-gText.getHeight()/2,
-									 gText.getWidth(), gText.getHeight());
-
-			// Render Text
-			gText.loadFromRenderedText(gRenderer, "Reset High Scores", color, gFont24);
-			gText.render(gRenderer, continueButton[2].x+continueButton[2].w/2-gText.getWidth()/2,
-									 continueButton[2].y+continueButton[2].h/2-gText.getHeight()/2,
-									 gText.getWidth(), gText.getHeight());
-		}
-
-		// Render High Score text
-		for (int i=0; i<10; i++){
-			std::stringstream tempString(highList[i].c_str());
-			std::string line;
-			while (getline(tempString, line)) {
-				std::stringstream iss(line);
-				std::string temps[2];
-				iss >> temps[0] >> temps[1];
-
-				// Show Player where they are ranked
-				if (indexSaved==i){
-					gText.loadFromRenderedText(gRenderer, temps[0].c_str(), {244,144,20}, gFont20);
-					gText.setAlpha(255-i*10);
-					gText.render(gRenderer, continueButton[0].x+position,
-							continueButton[0].y+continueButton[0].h+20+i*14,
-							gText.getWidth(), gText.getHeight());
-				}else{
-					gText.loadFromRenderedText(gRenderer, temps[0].c_str(), color, gFont20);
-					gText.setAlpha(255-i*10);
-					gText.render(gRenderer, continueButton[0].x+position,
-							continueButton[0].y+continueButton[0].h+20+i*14,
-							gText.getWidth(), gText.getHeight());
-				}
-
-				gText.loadFromRenderedText(gRenderer, temps[1].c_str(), color, gFont20);
-				gText.setAlpha(255-i*10);
-				gText.render(gRenderer, position2,
-						continueButton[1].y+continueButton[1].h+20+i*14,
-						gText.getWidth(), gText.getHeight());
-			}
-		}
 	}
 }
 
@@ -1552,6 +1432,101 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY)
 {
 	// Player UI
 	{
+		// Show death screen if not alive
+		if (!this->alive){
+			// Continue YES or NO Screen
+			if (deathScreen)
+			{
+				// Render Text
+				gText.loadFromRenderedText(gRenderer, "You have died. Continue?", {255,255,255}, gFont24);
+				gText.render(gRenderer, screenWidth/2-gText.getWidth()/2, screenHeight/2-gText.getHeight()/2-50, gText.getWidth(), gText.getHeight());
+
+				// Render buttons: Yes
+				SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
+				SDL_RenderDrawRect(gRenderer, &continueButton[0]);
+
+				// Render buttons: No
+				SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
+				SDL_RenderDrawRect(gRenderer, &continueButton[1]);
+
+				// Render buttons: ResetHighScore
+				SDL_SetRenderDrawColor(gRenderer, 0, 255, 255, 255);
+				SDL_RenderDrawRect(gRenderer, &continueButton[2]);
+
+				// Render button texts: Yes or No
+				gText.loadFromRenderedText(gRenderer, "Yes", {255,255,255}, gFont24);
+				gText.render(gRenderer,  continueButton[0].x+continueButton[0].w/2-gText.getWidth()/2,
+										 continueButton[0].y+continueButton[0].h/2-gText.getHeight()/2,
+										 gText.getWidth(), gText.getHeight());
+
+				gText.loadFromRenderedText(gRenderer, "No", {255,255,255}, gFont24);
+				gText.render(gRenderer,  continueButton[1].x+continueButton[1].w/2-gText.getWidth()/2,
+										 continueButton[1].y+continueButton[1].h/2-gText.getHeight()/2,
+										 gText.getWidth(), gText.getHeight());
+
+				// Render Text
+				//gText.loadFromRenderedText(gRenderer, "Reset High Scores", color, gFont24);
+				//gText.render(gRenderer, continueButton[2].x+continueButton[2].w/2-gText.getWidth()/2,
+				//						 continueButton[2].y+continueButton[2].h/2-gText.getHeight()/2,
+				//						 gText.getWidth(), gText.getHeight());
+			// Player Menu screen
+			}else{
+
+				// Render buttons: Play
+				SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
+				SDL_RenderDrawRect(gRenderer, &continueButton[0]);
+
+				// Render buttons: ResetHighScore
+				SDL_SetRenderDrawColor(gRenderer, 0, 255, 255, 255);
+				SDL_RenderDrawRect(gRenderer, &continueButton[2]);
+
+				// Render Text
+				gText.loadFromRenderedText(gRenderer, "PLAY", {255,255,255}, gFont24);
+				gText.render(gRenderer, continueButton[0].x+continueButton[0].w/2-gText.getWidth()/2,
+										 continueButton[0].y+continueButton[0].h/2-gText.getHeight()/2,
+										 gText.getWidth(), gText.getHeight());
+
+				// Render Text
+				//gText.loadFromRenderedText(gRenderer, "Reset High Scores", color, gFont24);
+				//gText.render(gRenderer, continueButton[2].x+continueButton[2].w/2-gText.getWidth()/2,
+				//						 continueButton[2].y+continueButton[2].h/2-gText.getHeight()/2,
+				//						 gText.getWidth(), gText.getHeight());
+			}
+
+			// Render High Score text
+			/*for (int i=0; i<10; i++){
+				std::stringstream tempString(highList[i].c_str());
+				std::string line;
+				while (getline(tempString, line)) {
+					std::stringstream iss(line);
+					std::string temps[2];
+					iss >> temps[0] >> temps[1];
+
+					// Show Player where they are ranked
+					if (indexSaved==i){
+						gText.loadFromRenderedText(gRenderer, temps[0].c_str(), {244,144,20}, gFont20);
+						gText.setAlpha(255-i*10);
+						gText.render(gRenderer, continueButton[0].x+position,
+								continueButton[0].y+continueButton[0].h+20+i*14,
+								gText.getWidth(), gText.getHeight());
+					}else{
+						gText.loadFromRenderedText(gRenderer, temps[0].c_str(), color, gFont20);
+						gText.setAlpha(255-i*10);
+						gText.render(gRenderer, continueButton[0].x+position,
+								continueButton[0].y+continueButton[0].h+20+i*14,
+								gText.getWidth(), gText.getHeight());
+					}
+
+					gText.loadFromRenderedText(gRenderer, temps[1].c_str(), color, gFont20);
+					gText.setAlpha(255-i*10);
+					gText.render(gRenderer, position2,
+							continueButton[1].y+continueButton[1].h+20+i*14,
+							gText.getWidth(), gText.getHeight());
+				}
+			}*/
+		}
+
+
 		// Health
 		{
 			// Health bar
@@ -1625,24 +1600,19 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY)
 
 	// Highscore text
 	std::stringstream tempsi;
-	tempsi << "parry: " << this->parry;
+	tempsi << "Highscore: " << this->highscore;
 	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {244, 144, 20}, gFont24);
 	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 0, gText.getWidth(), gText.getHeight());
 
 	tempsi.str( std::string() );
-	tempsi << "parryTimer: " << this->parryTimer;
+	tempsi << "Score: " << this->score;
 	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
 	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 24*1, gText.getWidth(), gText.getHeight());
 
-	tempsi.str( std::string() );
-	tempsi << "parryCDTimer: " << this->parryCDTimer;
-	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255, 255, 255}, gFont24);
-	gText.render(gRenderer, screenWidth-gText.getWidth()-15, 24*2, gText.getWidth(), gText.getHeight());
-
-	tempsi.str( std::string() );
-	tempsi << "dmg x " << this->damageMultipler;
-	gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255,255,255}, gFont13);
-	gText.render(gRenderer, this->x+this->w/2-gText.getWidth()/2-camX, this->y-gText.getHeight()-camY, gText.getWidth(), gText.getHeight());
+	//tempsi.str( std::string() );
+	//tempsi << "dmg x " << this->damageMultipler;
+	//gText.loadFromRenderedText(gRenderer, tempsi.str().c_str(), {255,255,255}, gFont13);
+	//gText.render(gRenderer, this->x+this->w/2-gText.getWidth()/2-camX, this->y-gText.getHeight()-camY, gText.getWidth(), gText.getHeight());
 
 }
 
@@ -2022,6 +1992,15 @@ void Players::ActivateDash() {
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// MUTATOR FUNCTIONS ///////////////////////////////
 
+void Players::RestorePlayer(float spawnX, float spawnY) {
+	// Reset Player
+	std::string newName;
+	newName="AAA";
+	Init(spawnX, spawnY, newName, false);
+	///////////input.getInput(gameLoop, quit, newName, gWindow, gRenderer);
+
+}
+
 float Players::moveX(float value) {
 	return this->x += value;
 }
@@ -2054,7 +2033,7 @@ void Players::ResetParry()
 	this->parryCDTimer = 0;
 
 	// Increase damage multiplier
-	this->damageMultipler += 0.1;
+	//this->damageMultipler += 0.1;
 }
 
 void Players::ExtendParryDuration()
@@ -2063,7 +2042,7 @@ void Players::ExtendParryDuration()
 	this->parryTimer = 0;
 
 	// Increase damage multiplier
-	this->damageMultipler += 0.1;
+	//this->damageMultipler += 0.1;
 }
 
 void Players::StopMovement()

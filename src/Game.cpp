@@ -114,6 +114,12 @@ void Game::Start() {
 
 	Load();
 
+	// Lock cursor
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+
+	// Hide cursor
+	SDL_ShowCursor(false);
+
 	// While loop
 	while (!IsExiting()) {
 		GameLoop();

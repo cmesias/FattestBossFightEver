@@ -713,20 +713,28 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		sli.GetDistanceOfPlayer(boss, player.getX(), player.getY(), player.getW(), player.getH(), &player.x2, &player.y2);
 
 		// Update boss
-		sli.Update(boss, obj, object, particles, part, map, mex+camx, mey+camy, camx, camy);
+		sli.Update(boss, obj, object, particles, part, map, mex+camx, mey+camy, camx, camy, player.alive);
 
 		// Update Player
-		player.update(map,
+		player.Update(map,
 					  enemy, enem,
 					  particles, part,
 					  tl, tile,
 					  tlc, tilec,
 					  obj, object,
 					  mex, mey, camx, camy,
-					  map.x+map.w/2-player.w/2, map.y+map.h/2-player.h/2,
+					  spawnX, spawnY,
 					  gWindow, gRenderer,
 					  gText, gFont26, {255,255,255},
-					  sAtariBoom);
+					  sAtariBoom, RestartLevel);
+
+		// If we get a true from Player.cpp that we should restart the levelm then restart the level
+		if (RestartLevel) {
+			RestartLevel = false;
+
+			// Load level selected from ActSelection.cpp
+			LoadLevel();
+		}
 
 		// Update objects
 		obj.update(object);
@@ -1127,7 +1135,7 @@ void PlayGame::checkCollisionParticleTile()
 	{
 		if (particles[i].alive)
 		{
-			if (particles[i].type == 0 || particles[i].type == 1)
+			if (particles[i].type == -1 || particles[i].type == 0 || particles[i].type == 1)
 			{
 				for (int j = 0; j < tl.max; j++)
 				{
@@ -1205,7 +1213,7 @@ void PlayGame::checkCollisionParticleBoss()
 	{
 		if (particles[j].alive)
 		{
-			if (particles[j].type == 0)
+			if (particles[j].type == -1 || particles[j].type == 0)
 			{
 				for (int i = 0; i < sli.max; i++)
 				{
@@ -1253,19 +1261,14 @@ void PlayGame::checkCollisionParticleBoss()
 								particles[j].alive = false;
 								part.count--;
 
-								// If particle is coming from the right of Boss
-								int xDir;
-								if (bmx > bmx2) {
-									xDir = -1;
-								}
-								// If particle is coming from the left of Boss
-								else {
-									xDir = 1;
-								}
+								// New velocity going away from Bullet Particle
+								float newvX = 0.25 * (bmx - bmx2) / distance;
+								float newvY = 0.25 * (bmy - bmy2) / distance;
 
 								// Move the boss in someway
+								boss[i].vX += newvX;
+								boss[i].vY += newvY;
 								//boss[i].vX += player.getKnockBackPower()/2 * xDir;
-								//boss[i].vY = -1;
 
 								// Play hit sound effect
 				                Mix_PlayChannel(-1, sCastHitBoss, 0);
@@ -1293,14 +1296,70 @@ void PlayGame::checkBossTileCollision()
 {
 	// Boss and Tile Collision
 	// X Axis Collision
+
+	// Boss
 	for (int i = 0; i < sli.max; i++) {
 		if (boss[i].alive) {
+			// Tiles
+			for (int j = 0; j < tl.max; j++) {
+				if (tile[j].alive){
+					if (tile[j].collisionTile)
+					{
+						// Get center of attack-particle (spawned by the player attacking)
+						float bmx = boss[i].x+boss[i].w/2;
+						float bmy = boss[i].y+boss[i].h/2;
+
+						// Get center of particles
+						float bmx2 = tile[j].x+particles[j].w/2;
+						float bmy2 = tile[j].y+particles[j].h/2;
+
+						// Get distance
+						float distance = sqrt((bmx - bmx2) * (bmx - bmx2)+
+											  (bmy - bmy2) * (bmy - bmy2));
+
+						// If distance is less than 50 pixels
+						//if (distance < 50)
+						//{
+							// Get angle of boss relative to attack-particle
+							float angle = atan2(bmy - bmy2,bmx - bmx2);
+							angle = angle * (180 / 3.1416);
+							if (angle < 0) {
+								angle = 360 - (-angle);
+							}
+
+							// Handle radians, cos, sin
+							float radians = (3.1415926536/180)*(angle);
+							float Cos = floor(cos(radians)*10+0.5)/10;
+							float Sin = floor(sin(radians)*10+0.5)/10;
+
+							////////////////////////////////////////////////////////////////////////
+							//--------------------------------------------------------------------//
+							//-------------------- Circle Collision Detection --------------------//
+							// If particle slash if within X distance then move the boss away
+							// collision occurred
+							if (distance < boss[i].w/2 + particles[j].w/2)
+							{
+								// New velocity going away from Bullet Particle
+								float newvX = 2 * (bmx - bmx2) / distance;
+								float newvY = 2 * (bmy - bmy2) / distance;
+
+								// Move the boss away from Tile
+								boss[i].vX = boss[i].vX * -1;
+								boss[i].vY = boss[i].vY * -1;
+							}
+					}
+				}
+			}
+			//-------------------- Circle Collision Detection --------------------//
+			//--------------------------------------------------------------------//
+			////////////////////////////////////////////////////////////////////////
+
 
 			// X Collision
 			{
 				// Player Velocity Y Axis
 				boss[i].x += boss[i].vX;
-
+				/*
 				// Correct boss position
 				SDL_Rect rectA;
 				rectA.x = boss[i].x;
@@ -1344,14 +1403,14 @@ void PlayGame::checkBossTileCollision()
 				if (moveBack){
 					// Reverse Boss walking direction
 					boss[i].vX -= boss[i].vX;
-				}
+				}*/
 			}
 
 			// Y Collision
 			{
 				// Player Velocity Y Axis
 				boss[i].y += boss[i].vY;
-
+				/*
 				// Correct boss position
 				SDL_Rect rectA;
 				rectA.x = boss[i].x;
@@ -1395,7 +1454,7 @@ void PlayGame::checkBossTileCollision()
 				if (moveBack){
 					// Reverse Boss walking direction
 					boss[i].vY -= boss[i].vY;
-				}
+				}*/
 			}
 		}
 	}
@@ -1921,24 +1980,27 @@ void PlayGame::checkCollisionParticlePlayer() {
 						// If player is currently parrying
 						if (player.getParryStatus())
 						{
-							// Change Enemy bullet into a Player bullet!
-							particles[i].type = 0;
-
-							// Knock back enemy bullet particles
+							// Spawn Counter Attack: Slash Attack Wave
 							{
-								float distanceW = sqrt((bmx - bmx2) * (bmx - bmx2));
-								float distanceH = sqrt((bmy - bmy2) * (bmy - bmy2));
-								float tempVX 	= 5 * (bmx - bmx2) / distanceW;
-								float tempVY 	= 5 * (bmy - bmy2) / distanceH;
+								// Change Enemy bullet into a Player bullet!
+								particles[i].type = -1;
 
-								particles[i].vX += particles[i].vX * -2;
-								particles[i].vY += particles[i].vY * -2;
+								// Knock back enemy bullet particles
+								{
+									float distanceW = sqrt((bmx - bmx2) * (bmx - bmx2));
+									float distanceH = sqrt((bmy - bmy2) * (bmy - bmy2));
+									float tempVX 	= 5 * (bmx - bmx2) / distanceW;
+									float tempVY 	= 5 * (bmy - bmy2) / distanceH;
+
+									particles[i].vX += particles[i].vX * -2;
+									particles[i].vY += particles[i].vY * -2;
+								}
 							}
 
 							// Extend Parry duration
 							player.ExtendParryDuration();
 
-							// Spawn particle effect
+							// Spawn particle VFX
 							for (double i=0.0; i< 360.0; i+=rand() % 10 + 40){
 								int rands = rand() % 11 + 3;
 								float newX = player.x+player.w/2;
@@ -2052,45 +2114,44 @@ void PlayGame::checkCollisionParticleParticle() {
 													  (bmy - bmy2) * (bmy - bmy2));
 
 
-									// Circle Collision
-									if (distance < particles[j].w/2 + particles[i].w/2)
-									{
-										// Reduce health of Enemey Particle
-										particles[j].health -= particles[i].dmgToParticles;
+								// Circle Collision
+								if (distance < particles[j].w/2 + particles[i].w/2)
+								{
+									// Reduce health of Enemey Particle
+									particles[j].health -= particles[i].dmgToParticles;
 
-						                // Show damage text (it will print how much damage the player did to the boss)
-						    			std::stringstream tempss;
-						    			tempss << particles[i].dmgToParticles;
-						    			tex.spawn(text, particles[j].x+particles[j].w/2, particles[j].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
+									// Show damage text (it will print how much damage the player did to the boss)
+									std::stringstream tempss;
+									tempss << particles[i].dmgToParticles;
+									tex.spawn(text, particles[j].x+particles[j].w/2, particles[j].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
 
-										// Remove Player particle next
-										particles[i].time = 0;
-										particles[i].alive = false;
-										part.count--;
+									// Remove Player particle next
+									particles[i].time = 0;
+									particles[i].alive = false;
+									part.count--;
 
-										// Spawn particle effect
-										for (double i=0.0; i< 360.0; i+=rand() % 10 + 40){
-											int rands = rand() % 11 + 3;
-											float newX = bmx;
-											float newY = bmy;
-											part.spawnParticleAngle(particles, 2,
-																newX-rands/2,
-																newY-rands/2,
-															   rands, rands,
-															   i, randDouble(2.1, 5.1),
-															   0.0, 0, 0,
-															   {210, 144, 40, 255}, 1,
-															   1, 1,
-															   rand() % 100 + 150, rand() % 2 + 5,
-															   rand() % 50 + 90, 0,
-															   true, randDouble(0.1, 0.7),
-															   100, 10);
-										}
-
-
-										// play sound effect
-										Mix_PlayChannel(-1, sParrySuccess, 0);
+									// Spawn particle effect
+									for (double i=0.0; i< 360.0; i+=rand() % 10 + 40){
+										int rands = rand() % 11 + 3;
+										float newX = bmx;
+										float newY = bmy;
+										part.spawnParticleAngle(particles, 2,
+															newX-rands/2,
+															newY-rands/2,
+														   rands, rands,
+														   i, randDouble(2.1, 5.1),
+														   0.0, 0, 0,
+														   {210, 144, 40, 255}, 1,
+														   1, 1,
+														   rand() % 100 + 150, rand() % 2 + 5,
+														   rand() % 50 + 90, 0,
+														   true, randDouble(0.1, 0.7),
+														   100, 10);
 									}
+
+									// play sound effect
+									Mix_PlayChannel(-1, sParrySuccess, 0);
+								}
 							}
 						}
 					}
@@ -2360,33 +2421,33 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 				if (place_type == 0 )
 				{
 					// Remove textured tiles
-					tl.removeAllTiles(tile);
+					tl.RemoveAll(tile);
 				}
 
 				// Currently selected: Collision tiles
 				else if (place_type == 1)
 				{
 					// Remove collision tiles
-					tlc.Clear(tilec);
+					tlc.RemoveAll(tilec);
 				}
 
 				// Currently selected: Boss Objects
 				else if (place_type == 2)
 				{
 					// Remove bosss
-					sli.Clear(boss);
+					sli.RemoveAll(boss);
 				}
 			}
 			// Remove all tiles
 			else {
 				// Remove textured tiles
-				tl.removeAllTiles(tile);
+				tl.RemoveAll(tile);
 
 				// Remove collision tiles
 				//tlc.Clear(tilec);
 
 				// Remove bosss
-				sli.Clear(boss);
+				sli.RemoveAll(boss);
 			}
 		}
 		break;
@@ -2606,14 +2667,17 @@ void PlayGame::LoadLevel()
 {
 	// Remove everything
 	{
+		// Remove particles tiles
+		part.RemoveAll(particles);
+
 		// Remove textured tiles
-		tl.removeAllTiles(tile);
+		tl.RemoveAll(tile);
 
 		// Remove collision tiles
-		tlc.Clear(tilec);
+		tlc.RemoveAll(tilec);
 
 		// Remove bosss
-		sli.Clear(boss);
+		sli.RemoveAll(boss);
 	}
 
 	// Set file path and name

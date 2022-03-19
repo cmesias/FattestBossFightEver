@@ -83,7 +83,7 @@ void Boss::Free() {
 	FreeFonts();
 }
 
-void Boss::Clear(Boss boss[]) {
+void Boss::RemoveAll(Boss boss[]) {
 	count = 0;
 	for (int i = 0; i < max; i++) {
 		boss[i].alive = false;
@@ -179,7 +179,7 @@ void Boss::Spawn(Boss boss[], float x, float y, float w, float h, float angle, f
 void Boss::Update(Boss boss[], Object &obj, Object object[],
 		Particle particle[], Particle &p_dummy,
 		Map &map, int mex, int mey,
-		int camx, int camy) {
+		int camx, int camy, bool playerAlive) {
 	for (int i = 0; i < this->max; i++) {
 		if (boss[i].alive) {
 
@@ -279,9 +279,13 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 				// If player is within 1000 distance from the boss, boss will follow player
 				if (boss[i].distance < 1000)
 				{
-					// Change x velocity to go towards player
-					boss[i].vX = 5 * (boss[i].bmx - boss[i].bmx2) / boss[i].distance;
-					boss[i].vY = 5 * (boss[i].bmy - boss[i].bmy2) / boss[i].distance;
+					// If player alive, have Boss follow player
+					if (playerAlive) {
+
+						// Change x velocity to go towards player
+						boss[i].vX = 5 * (boss[i].bmx - boss[i].bmx2) / boss[i].distance;
+						boss[i].vY = 5 * (boss[i].bmy - boss[i].bmy2) / boss[i].distance;
+					}
 
 
 					// Boss is on alert !
@@ -534,7 +538,7 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 									   tempY,
 									   rands, rands,
 									   boss[i].angleFacingTarget, speed,
-									   50, 0, 100,
+									   25, 0, 100,
 									   {144, 144, 144, 255}, 1,
 									   1, 1,
 									   255, 0,

@@ -150,6 +150,10 @@ void Options::applyMasterAudioCFG() {
 //Get's input from user and returns it
 void Options::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 {
+	// Mouse cursor
+	LTexture gCursor;
+	gCursor.loadFromFile(gRenderer, "resource/gfx/cursor.png");
+
 	SDL_Event e;
 
 	// Create title bar names
@@ -203,8 +207,6 @@ void Options::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 	bar[5].value 	= VSYNC;
 	bar[6].value 	= FULLSCREEN;
 
-	SDL_ShowCursor(true);
-
 	while (pauseLoop) {
 
 		// Start FPS cap
@@ -212,10 +214,9 @@ void Options::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 
 		// Start FPS cap
 		// fps.start();
-
 		// Main x and y position of Options menu options
 		for (int i=0; i<5; i++) {
-			title[i].x = 20;
+			title[i].x = helper.screenWidth * 0.05;
 			//title[i].y = helper.screenHeight/2-14/2-130+i*29;
 			title[i].y = 80+i*menuTitleNamesMarginsH;
 		}
@@ -223,32 +224,15 @@ void Options::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 		// Apply Audio button
 		applyButton[0].w = barWidth;
 		applyButton[0].h = barHeight/2;
-		applyButton[0].x = helper.screenWidth * 0.20 - applyButton[0].w;				// Set x pos to 20% of the screen minus applybutton width
+		applyButton[0].x = helper.screenWidth * 0.80 - applyButton[0].w;				// Set x pos to 20% of the screen minus applybutton width
 		//applyButton[0].y = helper.screenHeight-applyButton[0].h*2 - 3 - 2;
 		applyButton[0].y = helper.screenHeight * 0.80 - applyButton[0].h - barHeight;	// Set y pos to 80% of the screen minus applybutton height
 
 		// Apply Video button
 		applyButton[1].w = barWidth;
 		applyButton[1].h = barHeight/2;
-		applyButton[1].x = helper.screenWidth * 0.20 - applyButton[0].w;
+		applyButton[1].x = helper.screenWidth * 0.80 - applyButton[0].w;
 		applyButton[1].y = helper.screenHeight * 0.80 - applyButton[1].h;
-
-		// Get mouse coordinates
-		SDL_GetMouseState(&mx, &my);
-
-		/* get render width and height
-		 * but (mostly used to get actual render height)
-		 */
-		int renderW = 0;
-		int renderHDummy = 0;
-		SDL_GetRendererOutputSize(gRenderer,&renderW,&renderHDummy);
-		int en = renderW * 0.4375;
-		int renderH = renderW - en;
-
-		// Grid like coordinates of mouse
-		// get new mouse coordinates based on render size, and actual screen size
-		mx = (helper.screenWidth*mx)/renderW;	// New mouse coordinates, no relation to camera
-		my = (helper.screenHeight*my)/renderH;	// New mouse coordinates, no relation to camera
 
 		while (SDL_PollEvent(&e) != 0) {
 
@@ -257,6 +241,7 @@ void Options::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 				pauseLoop 	= false;
 				//gameLoop 	= false;
 				//selection 	= -1;
+				gCursor.free();
 			}
 
 			// switch key if controller moved
@@ -311,18 +296,36 @@ void Options::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 			updateJoystick(gRenderer, gWindow, &e);
 		}
 
+		// Get mouse coordinates
+		SDL_GetMouseState(&mx, &my);
+
+		/* get render width and height
+		 * but (mostly used to get actual render height)
+		 */
+		int renderW = 0;
+		int renderHDummey = 0;
+		SDL_GetRendererOutputSize(gRenderer,&renderW,&renderHDummey);
+		int en = renderW * 0.4375;
+		int renderH = renderW - en;
+
+		// Grid like coordinates of mouse
+		// get new mouse coordinates based on render size, and actual screen size
+		mex = (helper.screenWidth*mx)/gWindow.getWidth();				// New mouse coordinates, no relation to camera
+		mey = (helper.screenHeight*my)/gWindow.getHeight();				// New mouse coordinates, no relation to camera
+
+
 		// Update
 		int randomSpacingFromCenter = 40;
 		//int yPositionForAudioVideoSliders = 40;
 		au.update(bar,
 					//helper.screenWidth/2-bar[0].rect.w/2 + randomSpacingFromCenter,
-					helper.screenWidth * 0.20,		// x position will be 20% from the left side of the screen
-					title[0].y,
-					mx, my, leftclick,
+					helper.screenWidth * 0.32,		// x position will be 32% from the left side of the screen
+					80,
+					mex, mey, leftclick,
 					HIGHLIGHT_INDEX);
 
 		for (int i=0; i<5; i++) {
-			if (helper.checkCollision(mx, my, 1, 1, title[i].x-3, title[i].y-3, title[i].w+3, title[i].h+3)) {
+			if (helper.checkCollision(mex, mey, 1, 1, title[i].x-3, title[i].y-3, title[i].w+3, title[i].h+3)) {
 				mouseTitle[i] = true;
 				index=i;
 			}else{
@@ -332,7 +335,7 @@ void Options::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 
 		/* Mouse on Apply Bar or Video button */
 		for (int i=0; i<5; i++) {
-			if (helper.checkCollision(mx, my, 1, 1, applyButton[i].x, applyButton[i].y, applyButton[i].w, applyButton[i].h)) {
+			if (helper.checkCollision(mex, mey, 1, 1, applyButton[i].x, applyButton[i].y, applyButton[i].w, applyButton[i].h)) {
 				applyMouse[i] = true; }else{ applyMouse[i] = false;
 			}
 		}
@@ -357,6 +360,9 @@ void Options::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 			// Render everything
 			RenderII(gWindow, gRenderer);
 
+			// Render mouse location
+			gCursor.render(gRenderer, mex, mey, 20, 20);
+
 		// Update screen
 		SDL_RenderPresent(gRenderer);
 
@@ -371,6 +377,7 @@ void Options::start(LWindow &gWindow, SDL_Renderer *gRenderer)
 			SDL_Delay((1000/FRAMES_PER_SECOND ) - fps.get_ticks());
 		}*/
 	}
+	gCursor.free();
 }
 
 /*
@@ -396,7 +403,7 @@ void Options::SaveLevel(LWindow &gWindow, SDL_Renderer *gRenderer, bool &mainLoo
 	SDL_StartTextInput();
 
 	//Mouse properties
-	int mx, my;
+	int mex, mey;
 
 	//input text box
 	SDL_Rect customRect = {0,0,0,0};
@@ -408,16 +415,16 @@ void Options::SaveLevel(LWindow &gWindow, SDL_Renderer *gRenderer, bool &mainLoo
 		helper.fps.start();
 
 		//Mouse Position
-		SDL_GetMouseState(&mx, &my);
+		SDL_GetMouseState(&mex, &mey);
 
 		// get new mouse coordinates based on render size, and actual screen size
 		int renderW = 0;
-		int renderHDummy = 0;
-		SDL_GetRendererOutputSize(gRenderer,&renderW,&renderHDummy);
+		int renderHDummey = 0;
+		SDL_GetRendererOutputSize(gRenderer,&renderW,&renderHDummey);
 		int en = renderW * 0.4375;
 		int renderH = renderW - en;
-		mx = (helper.screenWidth*mx)/renderW;	// New mouse coordinates, no relation to camera
-		my = (helper.screenHeight*my)/renderH;	// New mouse coordinates, no relation to camera
+		mex = (helper.screenWidth*mex)/renderW;	// New mouse coordinates, no relation to camera
+		mey = (helper.screenHeight*mey)/renderH;	// New mouse coordinates, no relation to camera
 
 		while (SDL_PollEvent(&e) != 0) {
 			if (e.type == SDL_QUIT) {
@@ -558,7 +565,7 @@ void Options::SaveLevel(LWindow &gWindow, SDL_Renderer *gRenderer, bool &mainLoo
 				if (e.button.button == SDL_BUTTON_LEFT) {
 					//
 				}
-				if ( helper.checkCollision(mx, my, 1, 1, customRect.x,customRect.y, customRect.w, customRect.h)  ){
+				if ( helper.checkCollision(mex, mey, 1, 1, customRect.x,customRect.y, customRect.w, customRect.h)  ){
 					if (typing != "filename"){
 						typingAnim = 30;
 						typing = "filename";
@@ -610,7 +617,7 @@ void Options::SaveLevel(LWindow &gWindow, SDL_Renderer *gRenderer, bool &mainLoo
 			gText.render(gRenderer, customRect.x+4, customRect.y +newHeight - 2, newWidth, newHeight);
 			customRect.w = newWidth+8;
 			customRect.h = newHeight * 2;
-			if ( helper.checkCollision(mx, my, 1, 1, customRect.x,customRect.y, customRect.w, customRect.h)  ){
+			if ( helper.checkCollision(mex, mey, 1, 1, customRect.x,customRect.y, customRect.w, customRect.h)  ){
 				SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
 				SDL_RenderDrawRect(gRenderer, &customRect);
 			}else{
@@ -645,7 +652,7 @@ std::string Options::GetInput(LWindow &gWindow, SDL_Renderer *gRenderer, bool &m
 	SDL_StartTextInput();
 
 	//Mouse properties
-	int mx, my;
+	int mex, mey;
 
 	//input text box
 	SDL_Rect customRect = {0,0,0,0};
@@ -657,16 +664,16 @@ std::string Options::GetInput(LWindow &gWindow, SDL_Renderer *gRenderer, bool &m
 		helper.fps.start();
 
 		//Mouse Position
-		SDL_GetMouseState(&mx, &my);
+		SDL_GetMouseState(&mex, &mey);
 
 		// get new mouse coordinates based on render size, and actual screen size
 		int renderW = 0;
-		int renderHDummy = 0;
-		SDL_GetRendererOutputSize(gRenderer,&renderW,&renderHDummy);
+		int renderHDummey = 0;
+		SDL_GetRendererOutputSize(gRenderer,&renderW,&renderHDummey);
 		int en = renderW * 0.4375;
 		int renderH = renderW - en;
-		mx = (helper.screenWidth*mx)/renderW;	// New mouse coordinates, no relation to camera
-		my = (helper.screenHeight*my)/renderH;	// New mouse coordinates, no relation to camera
+		mex = (helper.screenWidth*mex)/renderW;	// New mouse coordinates, no relation to camera
+		mey = (helper.screenHeight*mey)/renderH;	// New mouse coordinates, no relation to camera
 
 		while (SDL_PollEvent(&e) != 0) {
 			if (e.type == SDL_QUIT) {
@@ -711,7 +718,7 @@ std::string Options::GetInput(LWindow &gWindow, SDL_Renderer *gRenderer, bool &m
 				if (e.button.button == SDL_BUTTON_LEFT) {
 					//
 				}
-				if ( helper.checkCollision(mx, my, 1, 1, customRect.x,customRect.y, customRect.w, customRect.h)  ){
+				if ( helper.checkCollision(mex, mey, 1, 1, customRect.x,customRect.y, customRect.w, customRect.h)  ){
 					if (typing != "inputBox"){
 						typingAnim = 30;
 						typing = "inputBox";
@@ -759,7 +766,7 @@ std::string Options::GetInput(LWindow &gWindow, SDL_Renderer *gRenderer, bool &m
 			gText.render(gRenderer, customRect.x+4, customRect.y,gText.getWidth(), gText.getHeight());
 			customRect.w = gText.getWidth()+8;
 			customRect.h = gText.getHeight();
-			if ( helper.checkCollision(mx, my, 1, 1, customRect.x,customRect.y, customRect.w, customRect.h)  ){
+			if ( helper.checkCollision(mex, mey, 1, 1, customRect.x,customRect.y, customRect.w, customRect.h)  ){
 				SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
 				SDL_RenderDrawRect(gRenderer, &customRect);
 			}else{
@@ -966,7 +973,7 @@ void Options::mousePressed() {
 // Update buttons
 void Options::mouseReleased(LWindow &gWindow) {
 	for (int i=0; i<5; i++) {
-		if (helper.checkCollision(mx, my, 1, 1, title[i].x-3, title[i].y-3, title[i].w+3, title[i].h+3)) {
+		if (helper.checkCollision(mex, mey, 1, 1, title[i].x-3, title[i].y-3, title[i].w+3, title[i].h+3)) {
 			// PauseMenu controls
 			if (type==0) {
 				// Resume Game
@@ -1024,7 +1031,7 @@ void Options::mouseReleased(LWindow &gWindow) {
 
 	/* Mouse on Keep or Revert button */
 	for (int i=0; i<2; i++) {
-		if (helper.checkCollision(mx, my, 1, 1, confirmButton[i].x, confirmButton[i].y, confirmButton[i].w, confirmButton[i].h)) {
+		if (helper.checkCollision(mex, mey, 1, 1, confirmButton[i].x, confirmButton[i].y, confirmButton[i].w, confirmButton[i].h)) {
 			confirmMouse[i] = true;
 		}
 		else{
@@ -1033,22 +1040,22 @@ void Options::mouseReleased(LWindow &gWindow) {
 	}
 
 	/* Apply Audio Button */
-	if (helper.checkCollision(mx, my, 1, 1, applyButton[0].x, applyButton[0].y, applyButton[0].w, applyButton[0].h)) {
+	if (helper.checkCollision(mex, mey, 1, 1, applyButton[0].x, applyButton[0].y, applyButton[0].w, applyButton[0].h)) {
 		actionApplyAudio();
 	}
 
 	/* Apply Video Button */
-	if (helper.checkCollision(mx, my, 1, 1, applyButton[1].x, applyButton[1].y, applyButton[1].w, applyButton[1].h)) {
+	if (helper.checkCollision(mex, mey, 1, 1, applyButton[1].x, applyButton[1].y, applyButton[1].w, applyButton[1].h)) {
 		actionApplyVideo(gWindow);
 	}
 
 	/* Keep Button */
-	if (helper.checkCollision(mx, my, 1, 1, confirmButton[0].x, confirmButton[0].y, confirmButton[0].w, confirmButton[0].h)) {
+	if (helper.checkCollision(mex, mey, 1, 1, confirmButton[0].x, confirmButton[0].y, confirmButton[0].w, confirmButton[0].h)) {
 		actionKeep();
 	}
 
 	/* Revert Button */
-	if (helper.checkCollision(mx, my, 1, 1, confirmButton[1].x, confirmButton[1].y, confirmButton[1].w, confirmButton[1].h)) {
+	if (helper.checkCollision(mex, mey, 1, 1, confirmButton[1].x, confirmButton[1].y, confirmButton[1].w, confirmButton[1].h)) {
 		actionRevert(gWindow);
 	}
 }
@@ -1341,7 +1348,7 @@ void Options::RenderII(LWindow &gWindow, SDL_Renderer *gRenderer) {
 
 			/* Mouse on Keep or Revert button */
 			for (int i=0; i<2; i++) {
-				if (helper.checkCollision(mx, my, 1, 1, confirmButton[i].x, confirmButton[i].y, confirmButton[i].w, confirmButton[i].h)) {
+				if (helper.checkCollision(mex, mey, 1, 1, confirmButton[i].x, confirmButton[i].y, confirmButton[i].w, confirmButton[i].h)) {
 					confirmMouse[i] = true;
 				}
 				else{

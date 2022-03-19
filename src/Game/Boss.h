@@ -42,7 +42,7 @@ public:	// Core Functions
 	void Init(Boss boss[]);
 	void Load(SDL_Renderer *gRenderer);
 	void Free();
-	void Clear(Boss boss[]);
+	void RemoveAll(Boss boss[]);
 	void Remove(Boss boss[]);
 	void Spawn(Boss boss[], float x, float y, float w, float h, float angle, float speed, int type);
 
@@ -50,7 +50,7 @@ public:	// Core Functions
 			Object &obj, Object object[],
 			Particle particle[], Particle &p_dummy,
 			Map &map, int mex, int mey,
-			int camx, int camy);
+			int camx, int camy, bool playerAlive);
 
 	void UpdateEditor(Boss boss[], int mex, int mey, int camx, int camy);
 

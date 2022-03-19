@@ -90,10 +90,18 @@ int main(int argc, char *argv[]) {
 // TODO [x] (3-15-2022) - Fix collision check with Slimer and Tiles
 // TODO [x] (3-15-2022) - Create sprite in photoshop for Player that animates when the Player uses teh Dash ability
 // TODO [x] (3-16-2022) - Make player invulnerable when dashing
-// TODO [ ] (3-18-2022) - Change Player bullet texture to Slash Textures instead of Bullet textures
+// TODO [x] (3-18-2022) - Change Player bullet texture to Slash Textures instead of Bullet textures
 
-// Focus here
-// TODO [x] (3-10-2022) - Create level selection Scene
-// TODO (2) [x] - Dash ability
+
+// TODO (2) [x] (3-10-2022) - Create level selection Scene
+// TODO (2) [x] (3-10-2022) - Dash ability
+
+// [ ] reanable Highscore render in Player class
+/*Reanable:
+ * [ ] applying damage multiplier for player
+ * [ ] rendering text for damage multiplier above player
+ * [ ] Players.cpp - Play SFX when Player has no more mana, but is still trying to shoot out SlashAttack particles
+ *
+ */
 
 

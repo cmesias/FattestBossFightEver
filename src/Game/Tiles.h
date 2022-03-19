@@ -72,7 +72,7 @@ public:	// editor functions
 
 	void removeTile(Tile tile[], int click);
 
-	void removeAllTiles(Tile tile[]);
+	void RemoveAll(Tile tile[]);
 
 	/* Place Tile */
 	void spawnTile(Tile tile[], int newMx, int newMy, int camx, int camy, SDL_Rect rTiles[]);

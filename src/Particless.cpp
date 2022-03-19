@@ -240,6 +240,15 @@ void Particle::spawnExplosion(Particle particle[], float x, float y, int size) {
 	}
 }
 
+void Particle::RemoveAll(Particle particle[]) {
+	count = 0;
+	for (int i = 0; i < this->max; i++) {
+		if (particle[i].alive){
+			particle[i].alive = false;
+		}
+	}
+}
+
 // Spawn a Particle: moves based on a fixed velocity given and fixed speed
 /*void Particle::fireParticle(Particle particle[], int type, int damage,
 									   int spawnx, int spawny, int w, int h,
@@ -360,8 +369,8 @@ void Particle::updateBulletParticles(Particle particle[], int mapX, int mapY, in
 			particle[i].x2 = particle[i].x + particle[i].w/2;
 			particle[i].y2 = particle[i].y + particle[i].h/2;
 
-			// Player particle
-			if (particle[i].type == 0)
+			// Player particle, and Player CounterAttack Particle
+			if (particle[i].type == -1 || particle[i].type == 0)
 			{
 				// get particle radius
 				particle[i].radius = particle[i].w;
@@ -403,8 +412,6 @@ void Particle::updateBulletParticles(Particle particle[], int mapX, int mapY, in
 			// Enemy particle
 			if (particle[i].type == 1)
 			{
-
-
 				// get particle radius
 				particle[i].radius = particle[i].w;
 
@@ -577,7 +584,7 @@ void Particle::renderBulletParticle(Particle particle[], int camX, int camY, flo
 		if (particle[i].alive) {
 
 			// Render Player magic cast particle
-			if (particle[i].type == 0) {
+			if (particle[i].type == -1 || particle[i].type == 0) {
 
 				// Render texture
 				gSlash.setBlendMode(SDL_BLENDMODE_BLEND);
@@ -609,7 +616,7 @@ void Particle::renderBulletParticleDebug(Particle particle[], int camX, int camY
 		if (particle[i].alive) {
 
 			// Render Player magic cast particle
-			if (particle[i].type == 0) {
+			if (particle[i].type == -1 || particle[i].type == 0) {
 
 				// World hit-box
 				SDL_Rect tempRect = {particle[i].x - camX,

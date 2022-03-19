@@ -46,6 +46,7 @@ public:	// Exclusive for this game
 public:
 	// don't declare
 	int mx, my;
+	int mex, mey;
 	// declare these
 	bool pauseLoop;
 	bool leftclick;
@@ -168,8 +169,8 @@ public: // Bar sliders and text
 
 		void init(Bar bar[]){
 			for (int i=0; i<barMax; i++){
-				bar[i].rect.w   	= 200;
-				bar[i].rect.h   	= 32;
+				bar[i].rect.w   	= 100;
+				bar[i].rect.h   	= 20;
 				bar[i].highlight 	= false;
 				bar[i].alive 		= false;
 			}
