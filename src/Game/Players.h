@@ -36,6 +36,7 @@ public:
 public:	// resources
 	// Local resources
 	LTexture gPlayer;
+	LTexture gPlayerShadow;
 	LTexture gShield;
 
 	// Audio
@@ -192,6 +193,10 @@ public: // attack variables
 	bool spawnAttack;
     //float *tempXX;
     //float *tempYY;
+
+private:	// Variables used in Textures
+
+	int shadowW = 44;
 
 public:	// functions
 	// Functions

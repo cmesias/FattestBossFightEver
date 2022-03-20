@@ -53,15 +53,9 @@ int main(int argc, char *argv[]) {
  * TODO [x] (3-7-2022) - Save and load Boss data to files for loading
  * TODO [x] (3-7-2022) - Replace Title Menu screen from our previous Dungeon Game,
  *						 and also get pause-menu from previous Dungeon Game
- *
- *
- *
- *
- *
- *
- * // Player.cpp
  * TODO [x] - Code an Options Menu inside options to be used in both MainMenu and during GamePlay
  *			  After coding of Options Menu, the goal is to remove the Pause.cpp class.
+ * TODO [ ] - Create shadows under Player's texture
  *
  *
  *

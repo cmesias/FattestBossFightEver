@@ -148,6 +148,7 @@ void Players::Load(SDL_Renderer* gRenderer){
 
     // load textures
 	gPlayer.loadFromFile(gRenderer, "resource/gfx/player/player.png");
+	gPlayerShadow.loadFromFile(gRenderer, "resource/gfx/player/player_shadow.png");
 	gShield.loadFromFile(gRenderer, "resource/gfx/player/shield.png");
 	rPlayer[0] = {0,0,48,48};			// Walking 			0
 	rPlayer[1] = {48,0,48,48};			// Walking 			1
@@ -183,6 +184,7 @@ void Players::Free(){
     // Free textures
 	gPlayer.free();
     gShield.free();
+    gPlayerShadow.free();
 
     // Free audio
 	Mix_FreeChunk(sCast);
@@ -661,6 +663,17 @@ void Players::Update(Map &map,
 					// Reset sprite
 					if (sprite_index > 3) {
 						sprite_index = 0;
+					}
+
+					// Adjust player shadow based on what frame we're currently rendering
+					if (sprite_index == 0) {
+						shadowW = 44;
+					}else if (sprite_index == 1) {
+						shadowW = 32;
+					}else if (sprite_index == 2) {
+						shadowW = 38;
+					}else if (sprite_index == 3) {
+						shadowW = 42;
 					}
 				}
 				//----------------------------- Do walkTimer ----------------------------//
@@ -1276,23 +1289,32 @@ void Players::Render(int mx, int my, int camx, int camy, LWindow gWindow, SDL_Re
 		int newRustleH = rustleH * radianSin;
 
 		// render player
-		//gPlayer.render(gRenderer, newX-recoilX+newRustleW-camx, newY-recoilY+newRustleH-camy, realw, realh, &rPlayer[sprite_index], 0.0);
-		// Adjust player sprite if on attack animation
-		// The '-9", in the y coordinate is adjusting the sprite to the appropriiate position
-		if (sprite_index == 5) {
-			if (facing == "right") {
-				gPlayer.render(gRenderer, x-camx, y-camy, 62, 48, &rPlayer[sprite_index], 0.0, NULL, flipW);
+		{
+			// Render shadow
+			int shadowH = 48;
+			gPlayerShadow.setAlpha(110);
+			gPlayerShadow.render(gRenderer, x+w/2-shadowW/2-camx,
+											y+shadowH/4-2-camy,
+											shadowW, shadowH, NULL, 0.0, NULL);
+
+			//gPlayer.render(gRenderer, newX-recoilX+newRustleW-camx, newY-recoilY+newRustleH-camy, realw, realh, &rPlayer[sprite_index], 0.0);
+			// Adjust player sprite if on attack animation
+			// The '-9", in the y coordinate is adjusting the sprite to the appropriiate position
+			if (sprite_index == 5) {
+				if (facing == "right") {
+					gPlayer.render(gRenderer, x-camx, y-camy, 62, 48, &rPlayer[sprite_index], 0.0, NULL, flipW);
+				}else{
+					gPlayer.render(gRenderer, x-18-camx, y-camy, 62, 48, &rPlayer[sprite_index], 0.0, NULL, flipW);
+				}
+			}else if (sprite_index == 7) {
+				if (facing == "right") {
+					gPlayer.render(gRenderer, x-camx, y-camy, 48, 55, &rPlayer[sprite_index], 0.0, NULL, flipW);
+				}else{
+					gPlayer.render(gRenderer, x-camx, y-camy, 48, 55, &rPlayer[sprite_index], 0.0, NULL, flipW);
+				}
 			}else{
-				gPlayer.render(gRenderer, x-18-camx, y-camy, 62, 48, &rPlayer[sprite_index], 0.0, NULL, flipW);
+				gPlayer.render(gRenderer, x-12-camx, y-camy, realw, realh, &rPlayer[sprite_index], 0.0, NULL, flipW);
 			}
-		}else if (sprite_index == 7) {
-			if (facing == "right") {
-				gPlayer.render(gRenderer, x-camx, y-camy, 48, 55, &rPlayer[sprite_index], 0.0, NULL, flipW);
-			}else{
-				gPlayer.render(gRenderer, x-camx, y-camy, 48, 55, &rPlayer[sprite_index], 0.0, NULL, flipW);
-			}
-		}else{
-			gPlayer.render(gRenderer, x-12-camx, y-camy, realw, realh, &rPlayer[sprite_index], 0.0, NULL, flipW);
 		}
 
 		// muzzle flash
