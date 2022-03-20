@@ -138,13 +138,31 @@ int main(int argc, char *argv[]) {
  *
  * [Contact these people!]
  * TODO [ ] - Contact resource authors and notify them of the game.
- * TODO [ ]	- Knight set
-				- Author: MASTER484
-				- Author Website: http://m484games.ucoz.com/
+ *
+ *
+ *
+ * TODO [ ]	- Resource Name: 		Knight set
+ *			- Author: 				MASTER484
+ *			- Author Website: 		http://m484games.ucoz.com/
 
- * TODO [ ]	- Dungeon Tileset
-				- Author: Rekkimaru
-				- Author Website: https://rekkimaru.itch.io/dungeon-rpg-tileset
+ * TODO [ ]	- Resource Name:		Dungeon Tileset
+ *			- Author: 				Rekkimaru
+ *			- Author Website: 		https://rekkimaru.itch.io/dungeon-rpg-tileset
+ *
+ *
+ * TODO [ ]	- Resource Name: 		Neon starlight by Necrophageon
+ *			  Author: 				Necrophageon
+ *			  Author Website: 		http://famitracker.com/forum/profile.php?id=2752
+ *			  Author Website #2: 	https://soundcloud.com/necrophageon
+ *
+ *
+ *
+ *
+ *
+ *
+
+
+
  */
 
 

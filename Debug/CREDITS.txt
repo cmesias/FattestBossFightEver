@@ -3,18 +3,21 @@
 - Website: https://cmesias.itch.io
 - Github: https://github.com/cmesias
 
+[Neon Starlight by Necrophageon - Background Music]
+- Author: Necrophageon
+- Author Website: https://soundcloud.com/necrophageon
+- Song name: Neon starlight
+
 [MiniKnight]
 - Author: MASTER484
 - Author Website: http://m484games.ucoz.com/
-
-- Name: MiniKnightSet.png
+- Sprite name: MiniKnightSet.png
 - Resource Website: https://opengameart.org/content/mini-knight
 
 [Dungeon Tileset]
 - Author: Rekkimaru
 - Author Website: https://www.patreon.com/rekkimaru7
-
-- Name: Dungeon Tileset
+- Sprite name: Dungeon Tileset
 - Resource Website: https://rekkimaru.itch.io/dungeon-rpg-tileset
 
 
