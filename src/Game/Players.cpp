@@ -999,7 +999,7 @@ void Players::Update(Map &map,
 			//-----------------------------------------------------------------------//
 			//------------------------------ Do Parrying ----------------------------//
 			// Parrying animation
-			else if (this->parry)
+			if (this->parry)
 			{
 				// Stop movement
 				StopMovement();
@@ -1017,7 +1017,9 @@ void Players::Update(Map &map,
 
 				// Parry for 15 frames
 				if (this->parryTimer > 15){
-					this->StopParrying();
+					this->parryTimer = 0;
+					this->parry = false;
+					//this->StopParrying();
 				}
 			// Parry cool-down
 			} else if (!this->parry) {
@@ -1990,6 +1992,9 @@ void Players::ActivateParry() {
     	// enable parrying
     	this->parry = true;
 
+    	// Have parry on CD
+    	this->parryCDTimer = this->parryCDMax;
+
     	// Play sound effect
     	Mix_PlayChannel(-1, sParry, 0);
     }
@@ -2090,10 +2095,21 @@ void Players::ExtendParryDuration()
 
 void Players::IncreaseHealth(float value) {
 	this->health += value;
+	if (this->health > this->healthMax) {
+		this->health = this->healthMax;
+	}
 }
 
 void Players::IncreaseScore(float value) {
 	this->score += value;
+}
+
+void Players::ShortenParryCD(float value) {
+	this->parryCDTimer -= 10;
+
+	if (this->parryCDTimer > this->parryCDMax) {
+		this->parryCDTimer = this->parryCDMax;
+	}
 }
 
 void Players::ApplyHighScore(float previousHighScore) {

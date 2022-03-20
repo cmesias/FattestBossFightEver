@@ -526,8 +526,8 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 				// If Charge attack animation
 				if (boss[i].chargingAttack)
 				{
-					for (int j=0; j<5; j++) {
-						if (boss[i].chargeTime == j * 6) {
+					for (int j=0; j<15; j++) {
+						if (boss[i].chargeTime == j * 2) {
 
 							// Spawn particle effect
 							int rands = 32;
@@ -546,8 +546,8 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 												   {0, 254, 254, 255}, 1,
 												   1, 1,
 												   255, 0,
-												   randDouble(5, 30), 1,
-												   true, randDouble(0.1, 0.7),
+												   randDouble(5, 30), 0.2,
+												   false, 0,
 												   100, 10);
 							}
 

@@ -81,7 +81,7 @@ public:	// functions
 			SDL_Color color, int layer,
 			int angleSpe, int angleDir,
 			float alpha, float alphaspeed,
-			int deathTimer, int deathTimerSpeed,
+			float deathTimer, float deathTimerSpeed,
 			bool sizeDeath, float deathSpe,
 			double splatDistance = 1, double splatSpeed = 0.0);
 

@@ -138,7 +138,7 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 	gFont26 = TTF_OpenFont("fonts/Viga-Regular.ttf", 26);
 
 	// load audio
-	sAmbientMusic 		= Mix_LoadMUS("sounds/ambient_space.mp3");
+	sAmbientMusic 		= Mix_LoadMUS("sounds/necrophageonNeonStarlight.mp3");
 	sRockBreak 			= Mix_LoadWAV("sounds/bfxr/rock_break.wav");
 	sAtariBoom 			= Mix_LoadWAV("sounds/bfxr/atari_boom.wav");
 	sDownStabHitTilec	= Mix_LoadWAV("sounds/bfxr/snd_downStabHitTilec.wav");
@@ -236,7 +236,7 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 	LoadLevel();
 
     // Play Music, looped
-	//Mix_FadeInMusic(sAmbientMusic, -1, 0);
+	Mix_FadeInMusic(sAmbientMusic, -1, 0);
 
 	//SDL_ShowCursor(false);
 
@@ -1086,14 +1086,14 @@ void PlayGame::RenderText(SDL_Renderer *gRenderer, LWindow &gWindow)
 
 			// Render always on the top left corner of the screen (general debug information)
 			if (text[i].type == 0) {
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255, 255, 255, 255}, gFont26);
+				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), text[i].color, gFont26);
 				gText.setAlpha(text[i].alpha);
 				gText.render(gRenderer, 0, 0 + i*28, gText.getWidth(), gText.getHeight());
 			}
 
 			// These texts have an x & y coordinate, render these (like damage text)
 			else if (text[i].type == 1) {
-				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255, 255, 0, 255}, gFont26);
+				gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), text[i].color, gFont26);
 				gText.setAlpha(text[i].alpha);
 				gText.render(gRenderer, text[i].x-camx, text[i].y-camy, gText.getWidth(), gText.getHeight());
 			}
@@ -1299,7 +1299,7 @@ void PlayGame::checkCollisionParticleBoss()
 				                // Show damage text (it will print how much damage the player did to the boss)
 				    			std::stringstream tempss;
 				    			tempss << player.getCastDamage();
-				    			tex.spawn(text, boss[i].x+boss[i].w/2, boss[i].y+boss[i].w/2-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
+				    			tex.spawn(text, boss[i].x+boss[i].w/2, boss[i].y+boss[i].w/2-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {255, 255, 0, 255});
 							}
 							//----------------------------- Collision Detection based on player-attack hit-box and Boss hit-box -----------------------------//
 							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1576,7 +1576,7 @@ void PlayGame::checkPlayerAttacksCollisionBoss() {
 				                // Show damage text (it will print how much damage the player did to the boss)
 				    			std::stringstream tempss;
 				    			tempss << player.getDamage();
-				    			tex.spawn(text, boss[i].x+boss[i].w/2, boss[i].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
+				    			tex.spawn(text, boss[i].x+boss[i].w/2, boss[i].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {255, 255, 0, 255});
 							}
 							//----------------------------- Collision Detection based on player-attack hit-box and Boss hit-box -----------------------------//
 							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1755,7 +1755,7 @@ void PlayGame::checkPlayerAttacksBossParticleCollision() {
 								// Show damage text (it will print how much damage the player did to the boss)
 								std::stringstream tempss;
 								tempss << player.getDamage();
-								tex.spawn(text, particles[i].x+particles[i].w/2, particles[i].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
+								tex.spawn(text, particles[i].x+particles[i].w/2, particles[i].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {255, 255, 0, 255});
 
 								// Remove Object
 								object[j].alive = false;
@@ -1969,7 +1969,7 @@ void PlayGame::checkBossAttacksCollisionPlayer() {
 						// Show damage text (it will print how much damage the player did to the boss)
 						std::stringstream tempss;
 						tempss << 20;
-						tex.spawn(text, player.x+player.w/2, player.y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
+						tex.spawn(text, player.x+player.w/2, player.y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {255, 255, 0, 255});
 					}
 					//----------------------------- Collision Detection based on Boss-attack hit-box and Player hit-box -----------------------------//
 					////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2058,7 +2058,7 @@ void PlayGame::checkCollisionBossPlayer() {
 // Check collision: Enemy Particle and Player
 void PlayGame::checkCollisionParticlePlayer() {
 	// Player
-	if (player.alive && !player.getInvurnerableStatus() && !player.getDashStatus()){
+	if (player.alive && !player.getDashStatus()){
 		// Particle
 		for (int i = 0; i < part.max; i++)
 		{
@@ -2079,10 +2079,35 @@ void PlayGame::checkCollisionParticlePlayer() {
 					{
 						///////////////////////////////////////////////////////////////////
 						//---------------------------------------------------------------//
+						//------------- Invulnerability is up Successful ----------------//
+
+						if (player.getInvurnerableStatus()) {
+
+							// remove particle
+							particles[i].alive = false;
+							part.count--;
+
+			                // Show damage text (it will print how much damage the player did to the boss)
+			    			std::stringstream tempss;
+			    			tempss << "0";
+			    			tex.spawn(text, player.x+player.w/2, player.y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {144, 144, 144, 255});
+
+							// play sound effect
+							Mix_PlayChannel(-1, sParrySuccess, 0);
+						}
+						//------------- Invulnerability is up Successful ----------------//
+						//---------------------------------------------------------------//
+						///////////////////////////////////////////////////////////////////
+
+
+
+
+						///////////////////////////////////////////////////////////////////
+						//---------------------------------------------------------------//
 						//------------------------ Parry Successful ---------------------//
 
 						// If player is currently parrying
-						if (player.getParryStatus())
+						else if (player.getParryStatus())
 						{
 							// Spawn Counter Attack: Slash Attack Wave
 							{
@@ -2103,6 +2128,9 @@ void PlayGame::checkCollisionParticlePlayer() {
 
 							// Extend Parry duration
 							player.ExtendParryDuration();
+
+							// Shorten Parry cool down
+							player.ShortenParryCD(0.5);
 
 							// Increase score depending on size of bullet parried
 							{
@@ -2206,7 +2234,7 @@ void PlayGame::checkCollisionParticlePlayer() {
 			                // Show damage text (it will print how much damage the player did to the boss)
 			    			std::stringstream tempss;
 			    			tempss << particles[i].damage;
-			    			tex.spawn(text, player.x+player.w/2, player.y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
+			    			tex.spawn(text, player.x+player.w/2, player.y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {255, 20, 20, 255});
 
 							// remove particle
 							particles[i].alive = false;
@@ -2260,7 +2288,7 @@ void PlayGame::checkCollisionParticleParticle() {
 									// Show damage text (it will print how much damage the player did to the boss)
 									std::stringstream tempss;
 									tempss << particles[i].dmgToParticles;
-									tex.spawn(text, particles[j].x+particles[j].w/2, particles[j].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
+									tex.spawn(text, particles[j].x+particles[j].w/2, particles[j].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1, {0, 240, 240, 255});
 
 									// Remove Player particle next
 									particles[i].time = 0;

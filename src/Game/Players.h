@@ -258,9 +258,9 @@ private:	// Private variables
 
 	// Parry state
 	bool parry;
-	int parryTimer;			// Parry timer
-	int parryCDTimer;		// Parry cooldown timer tracker
-	int parryCDMax;			// Parry cooldown, default: 60*3
+	float parryTimer;		// Parry timer
+	float parryCDTimer;		// Parry cooldown timer tracker
+	float parryCDMax;		// Parry cooldown, default: 60*3
 
 	// Dash state
 	bool dash;							// Dash ability
@@ -313,6 +313,9 @@ public:	// Mutator functions
 
 	// Score
 	void IncreaseScore(float value);
+
+	// Shorten parry cool down
+	void ShortenParryCD(float value);
 
 	// Load previous high score from PlayGame.cpp
 	void ApplyHighScore(float previousHighScore);

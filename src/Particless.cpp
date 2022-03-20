@@ -101,7 +101,7 @@ void Particle::spawnParticleAngle(Particle particle[], int type,
 		SDL_Color color, int layer,
 		int angleSpe, int angleDir,
 		float alpha, float alphaspeed,
-		int deathTimer, int deathTimerSpeed,
+		float deathTimer, float deathTimerSpeed,
 		bool sizeDeath, float deathSpe,
 		double splatDistance, double splatSpeed) {
 	for (int i = 0; i < max; i++)
@@ -425,8 +425,6 @@ void Particle::updateBulletParticles(Particle particle[], int mapX, int mapY, in
 										  (bmy - bmy2) * (bmy - bmy2));
 					particle[i].vX 	= particle[i].speed * (bmx - bmx2) / distance;
 					particle[i].vY 	= particle[i].speed * (bmy - bmy2) / distance;
-
-
 
 					// Particle movement
 					particle[i].x += particle[i].vX;

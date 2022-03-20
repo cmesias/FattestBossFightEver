@@ -76,6 +76,7 @@ public:	// Scene textures
 		bool alive;
 		float vX;
 		float vY;
+		SDL_Color color;
 
 		/*
 		 * 0: General information logs like debug logs
@@ -90,11 +91,12 @@ public:	// Scene textures
 				text[i].alive = false;
 			}
 		}
-		void spawn(Text text[], float x, float y, float vX, float vY, int alpha, std::string textfield, int type) {
+		void spawn(Text text[], float x, float y, float vX, float vY, int alpha, std::string textfield, int type, SDL_Color color={244,144,40}) {
 			for (int i=0; i<100; i++) {
 				if (!text[i].alive) {
 					//std::cout << "Spawning text object." << std::endl;
 					text[i].type = type;
+					text[i].color = color;
 					text[i].x = x;
 					text[i].y = y;
 					text[i].w = 139;
@@ -259,6 +261,7 @@ public:	// Functions mixed with other classes
 	// Check collision between Boss & Player
 	void checkCollisionBossPlayer();
 
+	//---------- Hurts Player
 	// Check collision between Particle & Player
 	void checkCollisionParticlePlayer();
 
