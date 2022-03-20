@@ -39,8 +39,11 @@ void Game::Init() {
 	SDL_Init( SDL_INIT_VIDEO);
 
 	// Create window
-	gWindow.create("CEngine V2", RESOLUTION, ANTI_ALIAS, FULLSCREEN, VSYNC | SDL_WINDOW_RESIZABLE );
+	//gWindow.create("CEngine V2", RESOLUTION, ANTI_ALIAS, FULLSCREEN, VSYNC | SDL_WINDOW_RESIZABLE );
+	gWindow.create("FattestBossFightEver", RESOLUTION, ANTI_ALIAS, FULLSCREEN, VSYNC);
 
+	//SDL_SetWindowFullscreen(mWindow, SDL_TRUE);
+	//SDL_SetWindowPosition(mWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	// Create renderer for window
 	gRenderer = gWindow.createRenderer();
 	SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);

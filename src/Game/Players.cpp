@@ -107,7 +107,7 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 	this->parry 			= false;
 	this->parryTimer 		= 0;
 	this->parryCDTimer 		= 0;
-	this->parryCDMax		= 60*3;
+	this->parryCDMax		= 60*2.6;
 
 	// Dash ability
 	this->dash 			= false;
@@ -1535,7 +1535,10 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY)
 		{
 			// Health bar
 			int uiX = screenWidth * 0.95 - 100 - 10;
-			int uiY = screenHeight * 0.96 - 20 - 20 - 24 - 6;
+			int uiY = screenHeight * 0.96 - 20 - 20 - 48 - 6;
+
+			gText.loadFromRenderedText(gRenderer, "Health", {255,255,255}, gFont13);
+			gText.render(gRenderer,  uiX-gText.getWidth()-2, uiY, gText.getWidth(), gText.getHeight());
 
 			// Render health, bg
 			int barWidth = 150;
@@ -1558,7 +1561,10 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY)
 		{
 			// Mana bar
 			int uiX = screenWidth * 0.95 - 100 - 10;
-			int uiY = screenHeight * 0.96 - 20 - 20;
+			int uiY = screenHeight * 0.96 - 20 - 20 - 24 - 6;
+
+			gText.loadFromRenderedText(gRenderer, "Mana", {255,255,255}, gFont13);
+			gText.render(gRenderer,  uiX-gText.getWidth()-2, uiY, gText.getWidth(), gText.getHeight());
 
 			// Render mana, bg
 			int barWidth = 150;
@@ -1577,11 +1583,41 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY)
 			SDL_RenderDrawRect(gRenderer, &tempRect);
 		}
 
+		// Parry CD
+		{
+			// Parry bar
+			int uiX = screenWidth * 0.95 - 100 - 10;
+			int uiY = screenHeight * 0.96 - 20 - 20;
+
+			gText.loadFromRenderedText(gRenderer, "Parry CD ", {255,255,255}, gFont13);
+			gText.render(gRenderer,  uiX-gText.getWidth()-2, uiY, gText.getWidth(), gText.getHeight());
+
+			// Render Parry, bg
+			int barWidth = 150;
+			SDL_Rect tempRect = {uiX, uiY, (barWidth*this->parryCDMax)/this->parryCDMax, 24};
+			SDL_SetRenderDrawColor(gRenderer, 60, 60, 60, 255);
+			SDL_RenderFillRect(gRenderer, &tempRect);
+
+			// Render Parry
+			int tempN = this->parryCDTimer - this->parryCDMax;
+			tempRect = {uiX + 1, uiY + 1, ((barWidth*(-tempN))/this->parryCDMax) - 2, 24-2};
+			SDL_SetRenderDrawColor(gRenderer, 0, 220, 220, 255);
+			SDL_RenderFillRect(gRenderer, &tempRect);
+
+			// Render Parry, border
+			tempRect = {uiX, uiY, (barWidth*this->parryCDMax)/this->parryCDMax, 24};
+			SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+			SDL_RenderDrawRect(gRenderer, &tempRect);
+		}
+
 		// Dash counter
 		{
 			// Dash bar
 			int uiX = screenWidth * 0.95 - 100 - 10;
 			int uiY = screenHeight * 0.96 - 20 - 20 + 24 + 6;
+
+			gText.loadFromRenderedText(gRenderer, "Dash CD ", {255,255,255}, gFont13);
+			gText.render(gRenderer,  uiX-gText.getWidth()-2, uiY, gText.getWidth(), gText.getHeight());
 
 			// Render dash, bg
 			int barWidth = 150;
@@ -2188,31 +2224,61 @@ float Players::getScore() {
 }
 
 void Players::SaveHighScore(int LevelToLoad) {
-	bool saveHighscore = false;
 
 	// Open highscore first to check value
-	int tempScore = -1;
-	std::fstream fileOpen("data/highscore.txt");
-	fileOpen >> tempScore;
-	fileOpen.close();
+	unsigned int tempScore = -1;
 
-	// If current score is higher than previously saved score, save it
-	if (this->score > tempScore) {
-		saveHighscore = true;
-	}
-
-	// Now save high score
-	if (saveHighscore) {
-
+	// Open file, and get previous High Score
+	{
 		std::stringstream filePath;
 		filePath << "data/maps/highscore";
 		filePath << LevelToLoad;
 		filePath << ".txt";
 
-		std::ofstream fileSave;
-		fileSave.open(filePath.str().c_str());
-		fileSave << this->score;
-		fileSave.close();
+		std::fstream fileOpen(filePath.str().c_str());
+
+		// If a file exist
+		if (fileOpen.is_open()) {
+			// Store previous High score in this variable
+			fileOpen >> tempScore;
+
+
+			// Check if current Score is higher than previous High score
+			if (this->score > tempScore) {
+
+				// Save current Score as new High Score
+				std::stringstream filePath;
+				filePath << "data/maps/highscore";
+				filePath << LevelToLoad;
+				filePath << ".txt";
+
+				std::ofstream fileSave;
+				fileSave.open(filePath.str().c_str());
+				fileSave << this->score;
+				fileSave.close();
+			}
+		}
+
+		// If no file exists, create new highscore
+		else {
+
+			std::cout<< "File does not exist on Saving Highscore, creating new\n";
+			{
+				std::stringstream filePath;
+				filePath << "data/maps/highscore";
+				filePath << LevelToLoad;
+				filePath << ".txt";
+
+				std::ofstream fileSave;
+				fileSave.open(filePath.str().c_str());
+				fileSave << this->score;
+				fileSave.close();
+			}
+		}
+
+
+		fileOpen.close();
+
 	}
 }
 

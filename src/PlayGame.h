@@ -235,17 +235,23 @@ public:	// Functions mixed with other classes
 	// Check collision between Particle & Tile
 	void checkCollisionParticleTile();
 
+	//------------------ Hurts Boss
 	// Check collision between Particle & Boss
 	void checkCollisionParticleBoss();
 
 	// Check collision between Boss & Tile
 	void checkBossTileCollision();
 
+	//------------------ Hurts Boss
 	// Check collision between Player attacks & Boss
 	void checkPlayerAttacksCollisionBoss();
 
 	// Check collision between Player attacks & Tile
 	void checkPlayerAttacksTileCollision();
+
+	//------------------ Hurts Boss
+	// Check collision between Player attacks & Boss Particle
+	void checkPlayerAttacksBossParticleCollision();
 
 	// Check collision between Boss attacks & Player
 	void checkBossAttacksCollisionPlayer();
@@ -258,6 +264,8 @@ public:	// Functions mixed with other classes
 
 	// Check collision between Player Particle & Boss Particle
 	void checkCollisionParticleParticle();
+
+
 
 public:	// Controls
 	// Editor controls

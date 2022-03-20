@@ -24,14 +24,14 @@
 void PlayGame::Init() {
 	// Upon entry
 	place_type 			= 0;
-    debug 				= true;
-	editor	 			= true;
+    debug 				= false;
+	editor	 			= false;
 	quit 				= false;
 	leftClick 			= false;
 	shift 				= false;
 	camx 				= 0;
 	camy 				= 0;
-	camlock				= false;
+	camlock				= true;
 	frame 				= 0;
     cap 				= true;
 	int i = 0;
@@ -229,6 +229,9 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 	// Load save configurations
 	LoadCFG();
 
+	// Load Player last high score for current Level
+	LoadHighScore();
+
 	// Load level selected from ActSelection.cpp
 	LoadLevel();
 
@@ -270,7 +273,7 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 							break;
 						case SDLK_p:
 							//editor = (!editor);
-							if (editor) {
+							/*if (editor) {
 								// Disable editor
 								editor = false;
 								camlock = true;
@@ -278,25 +281,25 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 								// Enable editor
 								editor = true;
 								camlock = false;
-							}
+							}*/
 							break;
 						case SDLK_h:
-							debug = (!debug);
+							//debug = (!debug);
 							break;
 						case SDLK_ESCAPE:	// pause menu
 							start(gWindow, gRenderer);
 							break;
 						case SDLK_F1:							// Set render size 1
-							SDL_RenderSetLogicalSize(gRenderer,1920,1080);
+							//SDL_RenderSetLogicalSize(gRenderer,1920,1080);
 							break;
 						case SDLK_F2:							// Set render size 2
-							SDL_RenderSetLogicalSize(gRenderer,1600,900);
+							//SDL_RenderSetLogicalSize(gRenderer,1600,900);
 							break;
 						case SDLK_F3:							// Set render size 3
-							SDL_RenderSetLogicalSize(gRenderer,1280,720);
+							//SDL_RenderSetLogicalSize(gRenderer,1280,720);
 							break;
 						case SDLK_F4:							// Set render size 4
-							SDL_RenderSetLogicalSize(gRenderer,800,600);
+							//SDL_RenderSetLogicalSize(gRenderer,800,600);
 							break;
 					}
 
@@ -754,6 +757,9 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 
 		// Check collision between Player attacks & Tile
 		checkPlayerAttacksTileCollision();
+
+		// Check collision between Player attacks & Boss Particle
+		checkPlayerAttacksBossParticleCollision();
 
 		// Check collision between Boss attacks & Player
 		checkBossAttacksCollisionPlayer();
@@ -1277,6 +1283,11 @@ void PlayGame::checkCollisionParticleBoss()
 				                // Subtract boss health
 				                boss[i].health -= player.getCastDamage();
 
+				                // If Boss died, go back to ActSelection
+				                if (boss[i].health <= 0) {
+				    				// Show congrats screen
+				                }
+
 				                // Increase player score
 				                if (particles[j].type == -1) {
 					                player.IncreaseScore(10);
@@ -1687,6 +1698,87 @@ void PlayGame::checkPlayerAttacksTileCollision() {
 		}
 	}
 }
+
+void PlayGame::checkPlayerAttacksBossParticleCollision() {
+	for (int j = 0; j < obj.max; j++) {
+		if (object[j].alive) {
+			for (int i = 0; i < part.max; i++) {
+				if (particles[i].alive) {
+					if (particles[i].type == 1) {
+						// Get ccenter of object's target
+						float bmx = particles[i].x+particles[i].w/2;
+						float bmy = particles[i].y+particles[i].h/2;
+
+						// Get center of object
+						float bmx2 = object[j].x+object[j].w/2;
+						float bmy2 = object[j].y+object[j].h/2;
+
+						// Distance of particles relative to attack-object
+						float distance = sqrt((bmx - bmx2) * (bmx - bmx2)+
+											  (bmy - bmy2) * (bmy - bmy2));
+
+						// If it goes less than 0, the game crashes
+						if (distance <= 1) {
+							distance = 1;
+						}
+
+						// If distance is less than 50 pixels
+						if (distance < 600)
+						{
+							// Get angle of particles relative to attack-object
+							float angle = atan2(bmy - bmy2,bmx - bmx2);
+							angle = angle * (180 / 3.1416);
+							if (angle < 0) {
+								angle = 360 - (-angle);
+							}
+
+							// Handle radians, cos, sin
+							float radians = (3.1415926536/180)*(angle);
+							float Cos = floor(cos(radians)*10+0.5)/10;
+							float Sin = floor(sin(radians)*10+0.5)/10;
+
+							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+							//--------------------------------------------------------------------------------------------------------------------------------//
+							//----------------------------- Collision Detection based on player-attack hit-box and particles hit-box ------------------------------//
+							// Check collision between object and particles
+							//if (checkCollision(object[j].x, object[j].y, object[j].w, object[j].h, particles[i].x, particles[i].y, particles[i].w, particles[i].h))
+							//{
+
+
+							// Circle Collision
+							if (distance < object[j].h/2 + particles[i].w/2)
+							{
+
+								// Reduce health of Enemey Particle
+								particles[i].health -= player.getDamage();;
+
+								// Show damage text (it will print how much damage the player did to the boss)
+								std::stringstream tempss;
+								tempss << player.getDamage();
+								tex.spawn(text, particles[i].x+particles[i].w/2, particles[i].y-15, 0.0, -0.5, 150, tempss.str().c_str(), 1);
+
+								// Remove Object
+								object[j].alive = false;
+								obj.count--;
+
+								// If attack-type: Slash
+								if (player.attackType == 0)
+								{
+									// Play hit sound effect: Slash attack
+					                Mix_PlayChannel(-1, sSlashHitBoss, 0);
+								}
+							}
+							//----------------------------- Collision Detection based on player-attack hit-box and particles hit-box ------------------------------//
+							//--------------------------------------------------------------------------------------------------------------------------------//
+							////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 
 void PlayGame::checkBossAttacksCollisionPlayer() {
 	for (int j = 0; j < obj.max; j++)
@@ -2727,7 +2819,7 @@ void PlayGame::LoadHighScore() {
 
 	// File does NOT exist, create file with default of 0 high score
 	else {
-		std::cout<< "File does not exist\n";
+		std::cout<< "File does not exist on Loading Highscore, creating new\n";
 		{
 			std::stringstream filePath;
 			filePath << "data/maps/highscore";
@@ -2748,8 +2840,6 @@ void PlayGame::LoadHighScore() {
 // Load level
 void PlayGame::LoadLevel()
 {
-	// Load Player last high score for current Level
-	LoadHighScore();
 
 	// Remove everything
 	{

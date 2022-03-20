@@ -108,6 +108,10 @@ int main(int argc, char *argv[]) {
  * 					 4. How many bullets the Player blocked/parried
  * 					 5. How many times the Player died
  * [ ] - SaveHighScore in Player.cpp not working
+ * [ ] - re enable Keyboard key P and H to show Debug and Enable Editor mode
+ * [ ] - Set Editor, Debug, and camlock back to true upon Init() of PlayGame.cpp
+ * [ ] - Set saving map and loading map SDLK_0 and _1
+ * [ ] Line 1288 PlayGame.cpp, show congrats screen when Boss dies, and do for Slash attack also
  *
  */
 

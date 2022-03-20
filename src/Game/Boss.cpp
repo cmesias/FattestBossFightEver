@@ -307,15 +307,17 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 					// Start charge-attack animation
 					boss[i].chargingAttack = true;
 
-					// Change animation state
-					boss[i].animState = rand()% 1 + 2;	// random number from 2-3
-
 					// Stop moving boss
 					boss[i].vX = 0.0;
 					boss[i].vY = 0.0;
 
 					// Choose random attack for Boss before starting Shooting animations
 					boss[i].randomAttack = rand() % 2;
+
+					// Change animation state
+					int randNum = rand() % 2 + 2;
+
+					boss[i].animState = randNum;	// random number from 2-3
 				}
 			}
 
@@ -465,7 +467,7 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 						if (boss[i].chargeTime == j * 10) {
 
 							// Spawn particle effect
-							int rands = 20;
+							int rands = 32;
 							float tempX = boss[i].x + boss[i].w/2 - rands/2;
 							float tempY = boss[i].y + boss[i].h/2 - rands/2;
 							for (double h=0.0; h< 360.0; h+=rand() % 10 + 5){
@@ -528,7 +530,7 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 						if (boss[i].chargeTime == j * 6) {
 
 							// Spawn particle effect
-							int rands = 20;
+							int rands = 32;
 							float tempX = boss[i].x + boss[i].w/2 - rands/2;
 							float tempY = boss[i].y + boss[i].h/2 - rands/2;
 							for (double h=0.0; h< 360.0; h+=rand() % 10 + 5){
