@@ -97,6 +97,11 @@ int main(int argc, char *argv[]) {
  * 					 3. How many bullets the Player destroyed
  * 					 4. How many bullets the Player blocked/parried
  * 					 5. How many times the Player died
+ * TODO [ ] - Create re-bind keys section in Settings
+ * TODO [ ] - Create End Screen after defeating Boss, and add a transition to go into next Level.
+ * TODO [ ] - Also after defeating the boss, make sure to save into the save file "levelsUnlocked.mp" to save how many levels the Player has completed
+ * TODO [ ] - When we have 2 or more Boss's spawned, they used up the max number of particles we have started with, making it look like the Boss is not shooting its full attack
+ *
  *
  *
  *
