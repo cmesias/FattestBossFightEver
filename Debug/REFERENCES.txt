@@ -1,2 +1,0 @@
-[Game Engine]
-- http://www.gamefromscratch.com/page/Game-From-Scratch-CPP-Edition-Part-3.aspx

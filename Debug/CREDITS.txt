@@ -1,10 +1,21 @@
 [Software Developer]
 - Carl Mesias (cmesias)
+- Website: https://cmesias.itch.io
+- Github: https://github.com/cmesias
+
+[MiniKnight]
+- Author: MASTER484
+- Author Website: http://m484games.ucoz.com/
+
+- Name: MiniKnightSet.png
+- Resource Website: https://opengameart.org/content/mini-knight
 
 [Dungeon Tileset]
 - Author: Rekkimaru
+- Author Website: https://www.patreon.com/rekkimaru7
+
 - Name: Dungeon Tileset
-- Link: https://rekkimaru.itch.io/dungeon-rpg-tileset
+- Resource Website: https://rekkimaru.itch.io/dungeon-rpg-tileset
 
 
 //---------------------------------------------------------------------//

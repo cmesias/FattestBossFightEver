@@ -64,7 +64,6 @@ void PlayGame::Init() {
 	enem.init(enemy);
 	spaw.init(spawner);
 	player.Init(map.x+map.w/2-player.w/2, map.y+map.h/2-player.h/2, "Player1", false);
-	player.loadScore();
 	tex.init(text);
 	tl.initTile(tile);
 	tlc.Init(tilec);
@@ -133,9 +132,9 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 	gCursor.loadFromFile(gRenderer, "resource/gfx/cursor.png");
 
 	// load fonts
-	gFont 	= TTF_OpenFont("fonts/Viga-Regular.ttf", 18);
-	gFont13 = TTF_OpenFont("fonts/Viga-Regular.ttf", 13);
-	gFont26 = TTF_OpenFont("fonts/Viga-Regular.ttf", 26);
+	gFont 	= TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 18);
+	gFont13 = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 13);
+	gFont26 = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 26);
 
 	// load audio
 	sAmbientMusic 		= Mix_LoadMUS("sounds/necrophageonNeonStarlight.mp3");
@@ -148,7 +147,7 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 	sParrySuccess		= Mix_LoadWAV("sounds/bfxr/snd_parrySuccess.wav");
 
 	// load particle textures
-	gParticles.loadFromFile(gRenderer, "img/particle/particles.png");
+	gParticles.loadFromFile(gRenderer, "resource/gfx/particles.png");
 	gParticles.setBlendMode(SDL_BLENDMODE_ADD);
 
 	//Load texture target
@@ -2130,7 +2129,7 @@ void PlayGame::checkCollisionParticlePlayer() {
 							player.ExtendParryDuration();
 
 							// Shorten Parry cool down
-							player.ShortenParryCD(0.5);
+							player.ShortenParryCD(10.0f);
 
 							// Increase score depending on size of bullet parried
 							{

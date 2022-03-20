@@ -32,7 +32,7 @@ void Particle::load(SDL_Renderer* gRenderer){
 	setClips(cParticles[3], 24, 0, 8, 8);
 	setClips(cParticles[4], 32, 0, 8, 8);
 	setClips(cParticles[5], 48, 0, 8, 8);
-	gParticles.loadFromFile(gRenderer, "img/particle/particles.png");
+	gParticles.loadFromFile(gRenderer, "resource/gfx/particles.png");
 	gParticles.setBlendMode(SDL_BLENDMODE_ADD);
 	gBullet.loadFromFile(gRenderer, "resource/gfx/player/gBullet.png");
 	gSlash.loadFromFile(gRenderer, "resource/gfx/player/gSlash.png");

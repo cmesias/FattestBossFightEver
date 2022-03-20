@@ -75,9 +75,9 @@ void Game::Init() {
 // Load
 void Game::Load() {
 	// load fonts
-	gFont 	= TTF_OpenFont("fonts/Viga-Regular.ttf", 18);
-	gFont13 = TTF_OpenFont("fonts/Viga-Regular.ttf", 13);
-	gFont26 = TTF_OpenFont("fonts/Viga-Regular.ttf", 26);
+	gFont 	= TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 18);
+	gFont13 = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 13);
+	gFont26 = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 26);
 
 	// load particle textures
 	setClips(cParticles, 32, 0, 8, 8);
@@ -210,27 +210,27 @@ void Game::ShowMenu()
 		break;
 
 	case MainMenu::HowToPlay:				// Menu returned 'Load', LoadGame()
-		std::cout<< "HowToPlay" << std::endl;
+		//std::cout<< "HowToPlay" << std::endl;
 		//_gameState = Game::LoadGameScene;
 		break;
 
 	case MainMenu::Options:					// Menu returned 'Options', Options()
-		std::cout<< "Options" << std::endl;
+		//std::cout<< "Options" << std::endl;
 		_gameState = Game::OptionScene;
 		break;
 
 	case MainMenu::Credits:					// Menu returned 'Credits', Credits()
-		std::cout<< "Credits" << std::endl;
+		//std::cout<< "Credits" << std::endl;
 		_gameState = Game::CreditScene;
 		break;
 
 	case MainMenu::Nothing:
-		std::cout<< "Nothing" << std::endl;
+		//std::cout<< "Nothing" << std::endl;
 		//
 		break;
 
 	case MainMenu::Exit:					// Menu returned 'Exit', Quit()
-		std::cout<< "Exit" << std::endl;
+		//std::cout<< "Exit" << std::endl;
 		_gameState = Game::Exiting;
 		break;
 	}

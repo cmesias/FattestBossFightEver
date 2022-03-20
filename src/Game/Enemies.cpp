@@ -21,7 +21,7 @@
 
 // Load enemy resources
 void Enemy::load(SDL_Renderer* gRenderer){
-	gEnemyShip.loadFromFile(gRenderer, "img/enemy_ship.png");
+	gEnemyShip.loadFromFile(gRenderer, "resource/gfx/enemy.png");
 }
 
 // Free enemy resources

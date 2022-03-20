@@ -12,10 +12,10 @@
 void TextNFont::LoadFonts() {
 
 	// Load fonts
-	gFont13 = TTF_OpenFont("fonts/Viga-Regular.ttf", 13);
-	gFont20 = TTF_OpenFont("fonts/Viga-Regular.ttf", 20);
-	gFont24 = TTF_OpenFont("fonts/Viga-Regular.ttf", 24);
-	gFont36 = TTF_OpenFont("fonts/Viga-Regular.ttf", 36);
+	gFont13 = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 13);
+	gFont20 = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 20);
+	gFont24 = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 24);
+	gFont36 = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 36);
 }
 
 void TextNFont::FreeFonts() {

@@ -396,7 +396,6 @@ void CustomizeCharacter::free() {
 	eyes.free();
 	body.free();
 	hair.free();
-	std::cout << std::endl;
 	// Free resources
 	gBlank.free();
 	gBG.free();

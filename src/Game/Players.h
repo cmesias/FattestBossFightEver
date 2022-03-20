@@ -195,11 +195,11 @@ public: // attack variables
 
 public:	// functions
 	// Functions
-	void resetHighScore();
+
+	// Reset High Scores
+	void ResetHighScore(int LevelWeLoaded);
 	void Load(SDL_Renderer* gRenderer);
 	void Free();
-	void loadScore();
-	void saveHighScore();
 	void Init(float spawnX, float spawnY, std::string newName, bool respawn);
 	bool checkCollision(int x, int y, int w, int h, int x2, int y2, int w2, int h2);
 
@@ -220,7 +220,7 @@ public:	// functions
 				LWindow gWindow, SDL_Renderer* gRenderer,
 				LTexture gText, TTF_Font *gFont, SDL_Color color,
 				Mix_Chunk *sAtariBoom, bool &RestartLevel,
-				int LevelToLoad);
+				int LevelWeLoaded);
 
 	void Render(int mx, int my, int camX, int camY, LWindow gWindow,
 				SDL_Renderer* gRenderer,

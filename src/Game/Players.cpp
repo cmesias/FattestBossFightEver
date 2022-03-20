@@ -148,7 +148,7 @@ void Players::Load(SDL_Renderer* gRenderer){
 
     // load textures
 	gPlayer.loadFromFile(gRenderer, "resource/gfx/player/player.png");
-	gShield.loadFromFile(gRenderer, "img/shield.png");
+	gShield.loadFromFile(gRenderer, "resource/gfx/player/shield.png");
 	rPlayer[0] = {0,0,48,48};			// Walking 			0
 	rPlayer[1] = {48,0,48,48};			// Walking 			1
 	rPlayer[2] = {96,0,48,48};			// Walking 			2
@@ -202,106 +202,23 @@ void Players::Free(){
 	FreeFonts();
 }
 
-// Reset high scores
-void Players::resetHighScore(){
-	// Overwrite "highscores.txt"
-	std::ofstream fileS;
-	fileS.open("highscores.txt");
-	for (int i=0; i<10; i++){
-		fileS << "AAA 0" << "\n";
-	}
-	fileS.close();
-}
+void Players::ResetHighScore(int LevelWeLoaded){
 
-// Load Player high score data
-void Players::loadScore(){
-	indx = 0;
-	bool getHighest = true;
-	std::ifstream fileO("highscores.txt");
-	std::string str;
-	while (std::getline(fileO, str))
-	{
-		// Read current line
-		std::stringstream iss(str);
-		std::string temps[2];
-		iss >> temps[0] >> temps[1];
-
-		// Store first line as highscore
-		if (getHighest){
-			getHighest = false;
-			highscore = atoi(temps[1].c_str());
-		}
-
-		// Load highscore data
-		std::stringstream tempss;
-		tempss << temps[0] << " " << temps[1];
-		highList[indx] = tempss.str().c_str();
-		indx++;
-	}
-
-	fileO.close();
-}
-
-// Save high score
-void Players::saveHighScore() {
-	std::ifstream fileO("highscores.txt");
-	std::string str;
-	std::stringstream tempss;
-	std::vector<std::string> t_name;
-	std::vector<int> t_score;
-	int indx = 0;
-	bool replace = true;
-
-	while (getline(fileO, str)){
-		// Read current line
-		std::stringstream iss(str);
-
-		// Temp string to store Name & Score
-		std::string temps[2];
-
-		// Store Name & Score in temp string
-		iss >> temps[0] >> temps[1];
-
-		// Now store everything in a vector for checking
-		t_name.push_back(temps[0]);
-		t_score.push_back( atoi(temps[1].c_str()) );
-	}
-	fileO.close();
-
-
-	// If score > saveScore, then insert current score at current index, and remove last index
-	for (unsigned int i=0; i<t_name.size(); i++){
-		if (score > t_score[i])
-		{
-			// Insert Player data if we haven't yet
-			if (replace)
-			{
-				replace = false;
-				// Insert data at current index
-				t_name.insert(t_name.begin()+i, name);
-				t_score.insert(t_score.begin()+i, score);
-				indexSaved = i;
-
-				// Remove last index
-				t_score.pop_back();
-				t_name.pop_back();
-			}
-		}
-	}
-
-	// After replacing data
-	for (unsigned int i=0; i<t_name.size(); i++){
-		tempss << t_name[i] << " " << t_score[i] << std::endl;
-	}
+	// Set a file path for score.txt
+	std::stringstream filePath;
+	filePath << "data/maps/highscore";
+	filePath << LevelWeLoaded;
+	filePath << ".txt";
 
 	// Overwrite "highscores.txt"
-	std::ofstream fileS;
-	fileS.open("highscores.txt");
-	fileS << tempss.str().c_str();
-	fileS.close();
+	std::ofstream fileSave;
+	fileSave.open(filePath.str().c_str());
+	fileSave << 0;
+	fileSave.close();
 
-	// Update score display
-	loadScore();
+	// Reset scores
+	this->highscore = 0;
+	this->score = 0;
 }
 
 // Player shoot
@@ -549,7 +466,7 @@ void Players::Update(Map &map,
 					LWindow gWindow, SDL_Renderer* gRenderer,
 					LTexture gText, TTF_Font *gFont, SDL_Color color,
 					Mix_Chunk *sAtariBoom, bool &RestartLevel,
-					int LevelToLoad)
+					int LevelWeLoaded)
 {
 	// Player center
 	x2 = x+w/2;
@@ -1153,7 +1070,7 @@ void Players::Update(Map &map,
 		// Player death
 		if (health <=0)
 		{
-			SaveHighScore(LevelToLoad);
+			SaveHighScore(LevelWeLoaded);
 
 			//Spawn explosion after asteroid death
 			// spawn blood particle effect
@@ -1196,7 +1113,6 @@ void Players::Update(Map &map,
 				deathScreen 	= true;
 
 				// SAVE HIGH SCORE
-				//saveHighScore();
 			}
 		}
 
@@ -1301,10 +1217,7 @@ void Players::Update(Map &map,
 				if (checkCollision(mex, mey, 1, 1, continueButton[2].x, continueButton[2].y, continueButton[2].w, continueButton[2].h))
 				{
 					// Reset high scores
-					resetHighScore();
-
-					// Load again
-					loadScore();
+					ResetHighScore(LevelWeLoaded);
 				}
 			}
 		// Menu Screen
@@ -1337,10 +1250,7 @@ void Players::Update(Map &map,
 				if (checkCollision(mex, mey, 1, 1, continueButton[2].x, continueButton[2].y, continueButton[2].w, continueButton[2].h))
 				{
 					// Reset high scores
-					resetHighScore();
-
-					// Load again
-					loadScore();
+					ResetHighScore(LevelWeLoaded);
 				}
 			}
 		}
@@ -1471,10 +1381,10 @@ void Players::RenderUI(SDL_Renderer *gRenderer, int camX, int camY)
 										 gText.getWidth(), gText.getHeight());
 
 				// Render Text
-				//gText.loadFromRenderedText(gRenderer, "Reset High Scores", color, gFont24);
-				//gText.render(gRenderer, continueButton[2].x+continueButton[2].w/2-gText.getWidth()/2,
-				//						 continueButton[2].y+continueButton[2].h/2-gText.getHeight()/2,
-				//						 gText.getWidth(), gText.getHeight());
+				gText.loadFromRenderedText(gRenderer, "Reset High Scores", {255,255,255}, gFont24);
+				gText.render(gRenderer, continueButton[2].x+continueButton[2].w/2-gText.getWidth()/2,
+										 continueButton[2].y+continueButton[2].h/2-gText.getHeight()/2,
+										 gText.getWidth(), gText.getHeight());
 			// Player Menu screen
 			}else{
 
@@ -2105,10 +2015,10 @@ void Players::IncreaseScore(float value) {
 }
 
 void Players::ShortenParryCD(float value) {
-	this->parryCDTimer -= 10;
+	this->parryCDTimer -= value;
 
-	if (this->parryCDTimer > this->parryCDMax) {
-		this->parryCDTimer = this->parryCDMax;
+	if (this->parryCDTimer <= 0) {
+		this->parryCDTimer = 0;
 	}
 }
 
@@ -2239,7 +2149,7 @@ float Players::getScore() {
 	return this->score;
 }
 
-void Players::SaveHighScore(int LevelToLoad) {
+void Players::SaveHighScore(int LevelWeLoaded) {
 
 	// Open highscore first to check value
 	unsigned int tempScore = -1;
@@ -2248,7 +2158,7 @@ void Players::SaveHighScore(int LevelToLoad) {
 	{
 		std::stringstream filePath;
 		filePath << "data/maps/highscore";
-		filePath << LevelToLoad;
+		filePath << LevelWeLoaded;
 		filePath << ".txt";
 
 		std::fstream fileOpen(filePath.str().c_str());
@@ -2265,7 +2175,7 @@ void Players::SaveHighScore(int LevelToLoad) {
 				// Save current Score as new High Score
 				std::stringstream filePath;
 				filePath << "data/maps/highscore";
-				filePath << LevelToLoad;
+				filePath << LevelWeLoaded;
 				filePath << ".txt";
 
 				std::ofstream fileSave;
@@ -2282,7 +2192,7 @@ void Players::SaveHighScore(int LevelToLoad) {
 			{
 				std::stringstream filePath;
 				filePath << "data/maps/highscore";
-				filePath << LevelToLoad;
+				filePath << LevelWeLoaded;
 				filePath << ".txt";
 
 				std::ofstream fileSave;

@@ -25,14 +25,14 @@
 
 // Load
 void Spawner::load(SDL_Renderer* gRenderer){
-	gSpawner.loadFromFile(gRenderer, "img/spawner.png");
+	gSpawner.loadFromFile(gRenderer, "resource/gfx/spawner.png");
 	setClips(rSpawner[4], 0, 0, 128, 128);
 	setClips(rSpawner[3], 128, 0, 128, 128);
 	setClips(rSpawner[2], 256, 0, 128, 128);
 	setClips(rSpawner[1], 384, 0, 128, 128);
 	setClips(rSpawner[0], 512, 0, 128, 128);
 	gSpawner.setColor(255, 25, 25);
-	gFont = TTF_OpenFont("fonts/Viga-Regular.ttf", 18);
+	gFont = TTF_OpenFont("resource/fonts/Viga-Regular.ttf", 18);
 
 	/*for (int i=0; i<5; i++){
 		setClips(rSpawner[i], i*128, 0, 128, 128);

@@ -1404,7 +1404,7 @@ void Options::RenderII(LWindow &gWindow, SDL_Renderer *gRenderer) {
 
 				// Render buttons, if using Controller
 				if (key == 0) {
-					std::cout << "key0\n";
+					//std::cout << "key0\n";
 					if (indexX == 2 && i == 0) {
 						SDL_SetRenderDrawColor(gRenderer, 244, 144, 20, 155);
 						/*if (!confirmKey) {
