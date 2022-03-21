@@ -1,5 +1,4 @@
 # FattestBossFightEver
-![cr790k](https://user-images.githubusercontent.com/17791454/159342642-9030da84-1c66-42f6-be20-0e9ceff78de0.png)
 ![vkO98O](https://user-images.githubusercontent.com/17791454/159342652-b5477f29-bcdd-4435-9fe5-2f7d8b40d0a1.png)
 
 # Video
