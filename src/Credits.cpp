@@ -410,6 +410,9 @@ void Credits::Show(LWindow &gWindow, SDL_Renderer *gRenderer, Credits::CreditsRe
 										newHeight);
 			}
 
+			// RENDER BG IN FRONT OF TEXT
+			gBG2.render( gRenderer, 0, 0, screenWidth, screenHeight);
+
 
 			float x = 0+4;
 			float y = screenHeight-24 - 8;

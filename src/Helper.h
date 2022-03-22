@@ -20,10 +20,10 @@ public:
     bool cap 					= true;
 	int frame 					= 0;
     const int FRAMES_PER_SECOND = 60;
-    //int screenWidth = 1920;
-    //int screenHeight = 1080;
-    const int screenWidth = 1280;
-    const int screenHeight = 720;
+    int screenWidth = 1920;
+    int screenHeight = 1080;
+    //const int screenWidth = 1280;
+    //const int screenHeight = 720;
 
     static const int UniqueTileBarTiles = 288;
     //const int screenWidth = 1008;

@@ -1168,47 +1168,34 @@ void PlayGame::checkCollisionParticleTile()
 							// Circle Collision
 							if (distance < tile[j].w/2 + particles[i].w/2)
 							{
-								// Square Collision
-								// Check collision between particle and tile
-								/*if (checkCollision(particles[i].x, particles[i].y, particles[i].w, particles[i].h, tile[j].x, tile[j].y, tile[j].w, tile[j].h)) {
-									particles[i].collide = true;
-								} else {
-									particles[i].collide = false;
-								}*/
+								// Spawn particle effect
+								for (double h=0.0; h< 180.0; h+=rand() % 10 + 40){
+									//for (double h=0.0; h< 360.0; h+=rand() % 10 + 10){
+									int rands = rand() % 3 + 8;
+									float newX = particles[i].x+particles[i].w/2;
+									float newY = particles[i].y+particles[i].h/2;
 
-								// If there was a collision
-								//if (particles[i].collide)
-								//{
-									// Remove particle
-									particles[i].time = 0;
-									particles[i].alive = false;
-									part.count--;
+									part.spawnParticleAngle(particles, 2,
+														newX-rands/2,
+														newY-rands/2,
+													   rands, rands,
+													   i, randDouble(2.1, 5.1),
+													   0.0, 0, 0,
+													   {210, 144, 40, 255}, 1,
+													   1, 1,
+													   rand() % 100 + 150, rand() % 2 + 5,
+													   rand() % 50 + 90, 0,
+													   true, randDouble(0.1, 0.7),
+													   100, 10);
+								}
 
+								// Remove particle
+								particles[i].time = 0;
+								particles[i].alive = false;
+								part.count--;
 
-									// Spawn particle effect
-									for (double h=0.0; h< 180.0; h+=rand() % 10 + 40){
-										//for (double h=0.0; h< 360.0; h+=rand() % 10 + 10){
-										int rands = rand() % 3 + 8;
-										float newX = tile[j].x+tile[j].w/2;
-										float newY = tile[j].y+tile[j].h/2;
-
-										part.spawnParticleAngle(particles, 2,
-															newX-rands/2,
-															newY-rands/2,
-														   rands, rands,
-														   i, randDouble(2.1, 5.1),
-														   0.0, 0, 0,
-														   {210, 144, 40, 255}, 1,
-														   1, 1,
-														   rand() % 100 + 150, rand() % 2 + 5,
-														   rand() % 50 + 90, 0,
-														   true, randDouble(0.1, 0.7),
-														   100, 10);
-									}
-
-									// Play hit sound effect
-					                //Mix_PlayChannel(-1, sSlashTilec, 0);
-								//}
+								// Play hit sound effect
+								Mix_PlayChannel(-1, sParrySuccess, 0);
 							}
 						}
 					}
