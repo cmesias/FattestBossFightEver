@@ -10,19 +10,12 @@
 void ActSelection::Init()
 {
 	debug = false;
-	levelsUnlocked = -1;	// How many levels player has unlocked
+	LevelsCompleted = 1;	// How many levels player has unlocked
 	levelIndex = 1;			// Current index for level
 	selectedLevel = -1;		// Current index for level selected
 
 	// Open saved file
-	std::fstream fileTileNumL("data/levelsUnlocked.mp");
-	if (fileTileNumL.is_open())
-	{
-		fileTileNumL >> levelsUnlocked;
-	}
-
-	// Close file
-	fileTileNumL.close();
+	LoadLevelsUnlockedFile();
 
 	// levelBoxes
 	for (int i=0; i < levelMax; i++) {
@@ -42,6 +35,7 @@ void ActSelection::Init()
 
 	// Other classes
 	StartGameBtn.Init("Start Game", "StartGame");
+	EraseDataBtn.Init("Erase Data", "EraseData");
 	BackBtn.Init("Back", "Back");
 }
 
@@ -67,6 +61,7 @@ void ActSelection::Load(SDL_Renderer *gRenderer) {
 
 	// Other classes
 	StartGameBtn.Load();
+	EraseDataBtn.Load();
 	BackBtn.Load();
 	LoadFonts();
 }
@@ -78,8 +73,91 @@ void ActSelection::Free() {
 
 	// Other classes
 	StartGameBtn.Free();
+	EraseDataBtn.Free();
 	BackBtn.Free();
 	FreeFonts();
+}
+
+void ActSelection::LoadLevelsUnlockedFile() {
+	// Open highscore first to check value
+	unsigned int PreviousLevelsUnlocked = -1;
+
+	// Open file
+	{
+		// Set file path
+		std::stringstream filePath;
+		filePath << "data/LevelsUnlocked.mp";
+
+		// Open file
+		std::fstream file(filePath.str().c_str());
+
+		// Part #1
+		// We run this code first to see if there is a file that exist
+		// If there is no file that exist then we create one, with the default of level 1
+		{
+			if (!file.is_open()) {
+				//std::cout<< "File does not exist for Levels Unlocked, creating new file.\n";
+				{
+					// Set file path
+					std::stringstream filePath;
+					filePath << "data/LevelsUnlocked.mp";
+
+					// Create file
+					std::ofstream fileSave;
+
+					// Open newly made file
+					fileSave.open(filePath.str().c_str());
+
+					// Save to file
+					fileSave << LevelsCompleted;
+
+					// Close file
+					fileSave.close();
+				}
+			}
+			// Close file
+			file.close();
+		}
+
+		// Part #2
+		// Next we attempt to open the newly created file OR
+		// We attempt to load a previously saved file.
+		{
+			// Open file again
+			std::fstream fileAgain(filePath.str().c_str());
+
+			// If file opened
+			if (fileAgain.is_open())
+			{
+				// Store previous levels completed in this variable for checking
+				fileAgain >> LevelsCompleted;
+			}
+			// Close file
+			fileAgain.close();
+		}
+	}
+}
+
+void ActSelection::EraseFileData()
+{
+	// Set file path
+	std::stringstream filePath;
+	filePath << "data/LevelsUnlocked.mp";
+
+	// Create file
+	std::ofstream fileSave;
+
+	// Open newly made file
+	fileSave.open(filePath.str().c_str());
+
+	// Save to file
+	fileSave << 1;
+
+	// Set default
+	LevelsCompleted = 1;
+
+	// Close file
+	fileSave.close();
 }
 
 void ActSelection::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
@@ -254,7 +332,13 @@ void ActSelection::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 					// Set level to load to selection
 					LevelToLoad = selectedLevel;
 				} else {
-					levelbox[i].selected = false;
+
+					// If we dont click on above levelbox then if the selectedLevel is
+					// not the level we have selected, set the levelbox selection to off
+					if (selectedLevel != i+1) {
+						levelbox[i].selected = false;
+					}
+
 				}
 			}
 		}
@@ -285,6 +369,13 @@ void ActSelection::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 							screenWidth * 0.90 - StartGameBtn.w,
 							screenHeight * 0.90 - StartGameBtn.h,
 							leftClick);
+
+		// Set position of button: Erase Data Button
+		EraseDataBtn.Update(mex, mey,
+							screenWidth * 0.5 - EraseDataBtn.w/2,
+							screenHeight * 0.90 - EraseDataBtn.h,
+							leftClick);
+
 
 		// Set position of button: Back Button
 		BackBtn.Update(mex, mey,
@@ -328,7 +419,7 @@ void ActSelection::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 															levelbox[i].w*2,
 															levelbox[i].h*2);
 						// Render locked level if not unlocked yet
-						if (i+1 > levelsUnlocked) {
+						if (i+1 > LevelsCompleted) {
 							gLockedLevel.render(gRenderer, (screenWidth/2 - levelbox[i].w) +40,
 															(screenHeight/2 - levelbox[i].h) + 35,
 															(levelbox[i].w*2) - 80,
@@ -340,7 +431,7 @@ void ActSelection::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 					gLevelPreviews[i].render(gRenderer, levelbox[i].x, levelbox[i].y, levelbox[i].w, levelbox[i].h);
 
 					// Render locked level if not unlocked yet
-					if (i+1 > levelsUnlocked) {
+					if (i+1 > LevelsCompleted) {
 						gLockedLevel.render(gRenderer, levelbox[i].x+40, levelbox[i].y+35+5,
 													   levelbox[i].w-80, levelbox[i].h-70);
 					}
@@ -357,6 +448,7 @@ void ActSelection::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 
 			// Render buttons
 			StartGameBtn.Render(gRenderer);
+			EraseDataBtn.Render(gRenderer);
 			BackBtn.Render(gRenderer);
 
 			//--------------------------- Render buttons ----------------------------//
@@ -385,7 +477,7 @@ void ActSelection::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 					// Render text: Levels unlocked
 					{
 						std::stringstream tempss;
-						tempss << "Completed Levels: " << levelsUnlocked;
+						tempss << "Completed Levels: " << LevelsCompleted;
 						gText.loadFromRenderedText(gRenderer, tempss.str().c_str(),
 												   {255,255,255}, gFont13);
 						gText.setAlpha(255);
@@ -408,7 +500,7 @@ void ActSelection::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 												gText.getHeight());
 
 						tempss.str(std::string());
-						tempss << "this->controls: " << this->controls;
+						tempss << "selectedLevel: " << selectedLevel;
 						gText.loadFromRenderedText(gRenderer, tempss.str().c_str(),
 												   {255,255,255}, gFont13);
 						gText.setAlpha(255);
@@ -459,35 +551,37 @@ ActSelection::Result ActSelection::mousePressed(SDL_Event event)
 // Mouse Released
 ActSelection::Result ActSelection::mouseReleased(SDL_Event event){
 	ActSelection::Result result = Nothing;
-	if (event.type == SDL_MOUSEBUTTONUP) {
+
+	// If mouse button released
+	if (event.type == SDL_MOUSEBUTTONUP)
+	{
+		// If left mouse button
 		if (event.button.button == SDL_BUTTON_LEFT) {
 			leftClick = false;
 
-			// Check if mouse released on top of "StartGameBtn"
-			if (StartGameBtn.CheckMouseReleased(mex, mey) == "StartGame") {
-				result = StartGame;
-			} else if (BackBtn.CheckMouseReleased(mex, mey) == "Back") {
-				result = Back;
+			// Start game button
+			if (StartGameBtn.CheckMouseReleased(mex, mey) == "StartGame")
+			{
+				// If the Player tries to Play a level that they have unlocked, then player game
+				if (selectedLevel <= LevelsCompleted) {
+					result = StartGame;
+				}
+
 			}
 
-			// Perform actions
-			/*for (int i=0; i<3; i++) {
-				// Check Mouse hover w/ Menu item
-				SDL_Rect a = {mx, my, 1, 1};
-				SDL_Rect b = {button[i].x, button[i].y, button[i].w, button[i].h};
-				// If mouse is hovering over menu item then render specifically
-				if (checkCollision(a, b)) {
-					if (i == 0) {			// Back
-						result = Back;
-					}else if (i == 1) {		// Save Character
-						// function here to save customized character to file
-						result = Nothing;
-					}else if (i == 2) {		// Start Game
-						result = StartGame;
-					}
-				}
-			}*/
+			// Erase data Button
+			else if (EraseDataBtn.CheckMouseReleased(mex, mey) == "EraseData")
+			{
+				EraseFileData();
+			}
+
+			// Back button
+			else if (BackBtn.CheckMouseReleased(mex, mey) == "Back")
+			{
+				result = Back;
+			}
 		}
+		// If right mouse button
 		if (event.button.button == SDL_BUTTON_RIGHT) {
 			//
 		}

@@ -42,16 +42,6 @@ private:	// Textures
 	// Locked level preview texture
 	LTexture gLockedLevel;
 
-public:
-
-	// Initialize
-	void Init();
-
-	// Load resources
-	void Load(SDL_Renderer *gRenderer);
-
-	// Free resources
-	void Free();
 private:
 	int mx, my, mex, mey;
 	bool leftClick;
@@ -92,9 +82,7 @@ private:	// Variables for ActSelection
 
 public:	// Save these data to a file
 
-	int levelsUnlocked;	// how many levels the player has unlocked
-
-
+	int LevelsCompleted;	// how many levels the player has unlocked
 
 
 
@@ -103,8 +91,28 @@ private:	// Other classes
 	// Start game button
 	Button StartGameBtn;
 
+	// Erase data button
+	Button EraseDataBtn;
+
 	// Back button
 	Button BackBtn;
+
+public:
+
+	// Initialize
+	void Init();
+
+	// Load resources
+	void Load(SDL_Renderer *gRenderer);
+
+	// Free resources
+	void Free();
+
+	// Load previous levelsCompleted.mp
+	void LoadLevelsUnlockedFile();
+
+	// Erase levelsCompleted.mp, and set default
+	void EraseFileData();
 
 };
 

@@ -124,7 +124,7 @@ void Players::Init(float spawnX, float spawnY, std::string newName, bool respawn
 	this->manaGainOnParry		= 5.25;
 	this->damage				= 75;
 	this->damageMultipler		= 1;
-	this->castDamage			= 25;
+	this->castDamage			= 22225;
 	this->knockBackPower		= 1.58;
 
 }
@@ -2210,7 +2210,7 @@ void Players::SaveHighScore(int LevelWeLoaded) {
 		// If no file exists, create new highscore
 		else {
 
-			std::cout<< "File does not exist on Saving Highscore, creating new\n";
+			std::cout<< "File does not exist on Saving Highscore, creating new file.\n";
 			{
 				std::stringstream filePath;
 				filePath << "data/maps/highscore";

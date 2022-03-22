@@ -41,12 +41,6 @@ int main(int argc, char *argv[]) {
  * TODO [x] (3-8-2022) - Make hit box on player's attack wider, but less height
  * TODO [x] (3-8-2022) - Check collision for player's attack hit-box and Slime's
  * 						hit-box with a square check collision rather than distance collision
- *
- *
- *
- *
- *
- *
  * // Player.cpp
  * TODO [x] - fix players position when they Attack facing the Left side
  * TODO [x] - fix player size so that they may be able to go through a tight squeeze of 48x48
@@ -55,22 +49,10 @@ int main(int argc, char *argv[]) {
  *						 and also get pause-menu from previous Dungeon Game
  * TODO [x] - Code an Options Menu inside options to be used in both MainMenu and during GamePlay
  *			  After coding of Options Menu, the goal is to remove the Pause.cpp class.
- * TODO [ ] - Create shadows under Player's texture
- *
- *
- *
- *
- *
- *
+ * TODO [x] - Create shadows under Player's texture
  * //Customize Character
  * TODO [ ] - how to save Texture as a PNG file format? possible solution:: find another library for loading png
  * TODO [ ] - replace in-game-text-buttons with drawn buttons from photoshop
- *
- *
- *
- *
- *
- *
  * // No specific class
  * TODO [x] - Go left and right, up and down
  * TODO [x] - Create monsters class (i.e. slime, goblin)

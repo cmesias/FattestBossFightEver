@@ -51,7 +51,7 @@ std::string Button::CheckMouseReleased(float mex, float mey)
 {
 	std::string result = "";
 
-	if (checkCollision(mex, mey, 1, 1, this->x, this->y, this->w, this->h))
+	if (checkCollision(mex-25, mey-25, 50, 50, this->x, this->y, this->w, this->h))
 	{
 		// Set result text
 		result = this->resultText;

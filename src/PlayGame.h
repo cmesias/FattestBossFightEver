@@ -23,7 +23,7 @@
 class PlayGame : public Helper, public Options {
 public:	// Global World Variables
 	double gravity = 0.6;
-	int LevelToLoad;
+	unsigned int LevelToLoad;
 	bool RestartLevel = false;
 
 public: // global functions
@@ -168,7 +168,7 @@ public:	// Other classes
 	Object object[10];
 
 	// Boss
-	Boss sli;
+	Boss bos;
 	Boss boss[100];
 
 public: // Tile Variables
@@ -268,6 +268,8 @@ public:	// Functions mixed with other classes
 	// Check collision between Player Particle & Boss Particle
 	void checkCollisionParticleParticle();
 
+	//---------- Boss deafeated? Update levelsCompleted.mp
+	void checkBossDied();
 
 
 public:	// Controls
@@ -281,6 +283,9 @@ private:	// used for some debugging
 	SDL_Event event;
 
 private:	// Load level
+
+	// Boss died, update levelsUnlocked.mp
+	void SaveLevelsCompleted();
 
 	// Load config files
 	void LoadCFG();

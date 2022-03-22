@@ -240,12 +240,6 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 				boss[i].animTimer = 0;
 			}
 
-			// If boss health goes lower than 0, remove boss
-			if (boss[i].health <= 0) {
-				boss[i].alive = false;
-				count--;
-			}
-
 			// Decelerate boss velocity every frame
 			//boss[i].vX = boss[i].vX - boss[i].vX * 0.2;
 			//boss[i].vY = boss[i].vY - boss[i].vY * 0.2;

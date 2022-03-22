@@ -59,7 +59,7 @@ void PlayGame::Init() {
 	camy = map.y + screenHeight/2 + 100;
 
 	// Initialize
-	sli.Init(boss);
+	bos.Init(boss);
 	part.init(particles);
 	enem.init(enemy);
 	spaw.init(spawner);
@@ -154,7 +154,7 @@ void PlayGame::Load(LWindow &gWindow, SDL_Renderer *gRenderer)
 	gTargetTexture.createBlank( gRenderer, screenWidth, screenHeight, SDL_TEXTUREACCESS_TARGET );
 
 	// load media for other classes
-	sli.Load(gRenderer);
+	bos.Load(gRenderer);
 	part.load(gRenderer);
 	enem.load(gRenderer);
 	spaw.load(gRenderer);
@@ -200,7 +200,7 @@ void PlayGame::Free() {
 	sParrySuccess		= NULL;
 
 	// free media from other classes
-	sli.Free();
+	bos.Free();
 	player.Free();
 	part.free();
 	enem.free();
@@ -578,7 +578,7 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		// Boss.cpp class
 
 		// Update Editor boss
-		sli.UpdateEditor(boss, mex+camx, mey+camy, camx, camy);
+		bos.UpdateEditor(boss, mex+camx, mey+camy, camx, camy);
 
 		//--------------------------- Update editor Updates from other classes ---------------------------//
 		//------------------------------------------------------------------------------------------------//
@@ -604,7 +604,7 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 
 				// If removing Bosses
 				else if (place_type == 2) {
-					sli.Remove(boss);
+					bos.Remove(boss);
 				}
 			}else{
 				if (shift) {
@@ -704,18 +704,18 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 		/* Notes on order:
 		 *
 		 * 0. obj.Update()
-		 * 1. sli.GetDistanceOfPlayer()
-		 * 2. sli.Update()
+		 * 1. bos.GetDistanceOfPlayer()
+		 * 2. bos.Update()
 		 * 3. player.Update()
 		 *
 		 *
 		 */
 
 		// Move boss towards player
-		sli.GetDistanceOfPlayer(boss, player.getX(), player.getY(), player.getW(), player.getH(), &player.x2, &player.y2);
+		bos.GetDistanceOfPlayer(boss, player.getX(), player.getY(), player.getW(), player.getH(), &player.x2, &player.y2);
 
 		// Update boss
-		sli.Update(boss, obj, object, particles, part, map, mex+camx, mey+camy, camx, camy, player.alive);
+		bos.Update(boss, obj, object, particles, part, map, mex+camx, mey+camy, camx, camy, player.alive);
 
 		// Update Player
 		player.Update(map,
@@ -771,6 +771,9 @@ void PlayGame::Update(LWindow &gWindow, SDL_Renderer *gRenderer) {
 
 		// Check collision between Player Particle & Boss Particle
 		checkCollisionParticleParticle();
+
+		//---------- Boss deafeated? Update levelsCompleted.mp
+		checkBossDied();
 
 		// Damage text: for zombie
 		tex.updateDamageText(text);
@@ -894,14 +897,14 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 		tl.RenderBack(gRenderer, tile, camx, camy);
 
 		// Render Boss
-		sli.RenderBack(gRenderer, boss, gFont13, gText, camx, camy);
+		bos.RenderBack(gRenderer, boss, gFont13, gText, camx, camy);
 
 		// Render our player
 		player.Render(mex, mey, camx, camy, gWindow,
 					  gRenderer, {255,255,255}, part.count, gText);
 
 		// Render Boss
-		sli.RenderFront(gRenderer, boss, gFont13, gText, camx, camy);
+		bos.RenderFront(gRenderer, boss, gFont13, gText, camx, camy);
 
 		// Render Star particles
 		part.renderStarParticle(particles, camx, camy, 1, gRenderer);
@@ -924,10 +927,16 @@ void PlayGame::RenderUI(SDL_Renderer *gRenderer, LWindow &gWindow)
 {
 
 	// Render Boss Health
-	sli.RenderUI(gRenderer, boss, camx, camy);
+	bos.RenderUI(gRenderer, boss, camx, camy);
 
 	// Render Player Health
 	player.RenderUI(gRenderer, camx, camy);
+
+	std::stringstream tempss;
+	tempss << "LevelToLoad: " 				<< LevelToLoad;
+	gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont26);
+	gText.setAlpha(255);
+	gText.render(gRenderer, 0, 100, gText.getWidth(), gText.getHeight());
 }
 
 // Render debug information
@@ -949,7 +958,7 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 		tlc.Render(gRenderer, tilec, camx, camy);
 
 		// Render Boss text
-		sli.RenderDebug(gRenderer, boss, gFont13, gText, camx, camy);
+		bos.RenderDebug(gRenderer, boss, gFont13, gText, camx, camy);
 
 		// Render Player spawn point
 		SDL_Rect tempRect = {spawnX-camx, spawnY-camy, 48, 48};
@@ -1030,7 +1039,7 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 
 		// Render hand debug info
 		std::stringstream tempss;
-		tempss << "Tiles: " 				<< tl.tileCount 		<< ", Tilecs: " 	<< tlc.count 		<< ", Bosss: " << sli.count;
+		tempss << "Tiles: " 				<< tl.tileCount 		<< ", Tilecs: " 	<< tlc.count 		<< ", Bosss: " << bos.count;
 		tempss << "place_type: " 			<< place_type 			<< ", tl.id: " 		<< tl.id 			<< ", tlc.id: " << tlc.id;
 		tempss << ", tl.collisionTile: " 	<< tl.collisionTile 	<< ", layer: " 		<< tl.layer;
 		tempss << ", tilew: " 				<< tl.tilew 			<< ", tileh: " 		<< tl.tileh;
@@ -1055,7 +1064,7 @@ void PlayGame::RenderDebug(SDL_Renderer *gRenderer)
 				// Render collision tiles
 				//rendercTile(ctile);
 				// Render Collision Tile debug
-				sli.RenderHand(gRenderer, boss, newMx, newMy, mex, mey, camx, camy);
+				bos.RenderHand(gRenderer, boss, newMx, newMy, mex, mey, camx, camy);
 			}
 		}
 
@@ -1221,7 +1230,7 @@ void PlayGame::checkCollisionParticleBoss()
 		{
 			if (particles[j].type == -1 || particles[j].type == 0)
 			{
-				for (int i = 0; i < sli.max; i++)
+				for (int i = 0; i < bos.max; i++)
 				{
 					if (boss[i].alive)
 					{
@@ -1282,11 +1291,6 @@ void PlayGame::checkCollisionParticleBoss()
 				                // Subtract boss health
 				                boss[i].health -= player.getCastDamage();
 
-				                // If Boss died, go back to ActSelection
-				                if (boss[i].health <= 0) {
-				    				// Show congrats screen
-				                }
-
 				                // Increase player score
 				                if (particles[j].type == -1) {
 					                player.IncreaseScore(10);
@@ -1317,7 +1321,7 @@ void PlayGame::checkBossTileCollision()
 	// X Axis Collision
 
 	// Boss
-	for (int i = 0; i < sli.max; i++) {
+	for (int i = 0; i < bos.max; i++) {
 		if (boss[i].alive) {
 			// Tiles
 			for (int j = 0; j < tl.max; j++) {
@@ -1488,7 +1492,7 @@ void PlayGame::checkPlayerAttacksCollisionBoss() {
 			if (object[j].id != 2)
 			{
 				// Bosss
-				for (int i = 0; i < sli.max; i++)
+				for (int i = 0; i < bos.max; i++)
 				{
 					if (boss[i].alive)
 					{
@@ -1982,7 +1986,7 @@ void PlayGame::checkBossAttacksCollisionPlayer() {
 void PlayGame::checkCollisionBossPlayer() {
 
 	// boss circle collision check with other bosss
-	for (int i = 0; i < sli.max; i++) {
+	for (int i = 0; i < bos.max; i++) {
 		if (boss[i].alive) {
 
 			// Center of Boss target for collision
@@ -2325,8 +2329,105 @@ void PlayGame::checkCollisionParticleParticle() {
 	}
 }
 
+void PlayGame::checkBossDied() {
+
+	for (int i = 0; i < bos.max; i++)
+	{
+		if (boss[i].alive)
+		{
+			// If boss health goes lower than 0, remove boss
+			if (boss[i].health <= 0) {
+				boss[i].alive = false;
+				bos.count--;
+
+				// Update levelsCompleted
+		    	SaveLevelsCompleted();
+			}
+		}
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //------------------------------------------------------ Save Functions ------------------------------------------------------//
+
+// If boss died, update levelsUnlocked.mp
+void PlayGame::SaveLevelsCompleted() {
+	// Open highscore first to check value
+	unsigned int PreviousLevelsUnlocked = -1;
+
+	// Open file
+	{
+		// Set file path
+		std::stringstream filePath;
+		filePath << "data/LevelsUnlocked.mp";
+
+		// Open file
+		std::fstream file(filePath.str().c_str());
+
+		// Part #1
+		// We run this code first to see if there is a file that exist
+		// If there is no file that exist then we create one, with the default of whatever level
+		// we are currently on
+		{
+			if (!file.is_open()) {
+				std::cout<< "File does not exist for Levels Unlocked, creating new file.\n";
+				{
+					// Set file path
+					std::stringstream filePath;
+					filePath << "data/LevelsUnlocked.mp";
+
+					// Create file
+					std::ofstream fileSave;
+
+					// Open newly made file
+					fileSave.open(filePath.str().c_str());
+
+					// Save to file
+					fileSave << LevelToLoad;
+
+					// Close file
+					fileSave.close();
+				}
+			}
+			// Close file
+			file.close();
+		}
+
+		// Part #2
+		// Next we attempt to open the newly created file OR
+		// We attempt to load a previously saved file.
+		{
+			// Open file again
+			std::fstream fileAgain(filePath.str().c_str());
+
+			// If file opened
+			if (fileAgain.is_open()) {
+				// Store previous levels completed in this variable for checking
+				fileAgain >> PreviousLevelsUnlocked;
+
+				// Check if current level is the same previous completed, if so go to next level
+				if (LevelToLoad == PreviousLevelsUnlocked) {
+
+					std::stringstream filePath;
+					filePath << "data/LevelsUnlocked.mp";
+
+					// Save current level as number of levels completed
+					std::ofstream fileSave;
+					fileSave.open(filePath.str().c_str());
+					fileSave << LevelToLoad+1;
+					fileSave.close();
+				}
+
+				// If level completed is greater than previous levels completed, do nothing
+				else if (LevelToLoad > PreviousLevelsUnlocked) {
+					// do nothing
+				}
+			}
+			// Close file
+			fileAgain.close();
+		}
+	}
+}
 
 // Save player spawn point
 std::string PlayGame::saveSpawnPoint(){
@@ -2410,7 +2511,7 @@ PlayGame::Result PlayGame::mousePressed(SDL_Event event){
 					if (place_type == 2) {
 
 						// Spawn bosss
-						sli.Spawn(boss, mex+camx, mey+camy, 256, 256, 0.0, randDouble(3.6, 4.4), 0);
+						bos.Spawn(boss, mex+camx, mey+camy, 256, 256, 0.0, randDouble(3.6, 4.4), 0);
 					}
 				}
 			}
@@ -2599,7 +2700,7 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 				else if (place_type == 2)
 				{
 					// Remove bosss
-					sli.RemoveAll(boss);
+					bos.RemoveAll(boss);
 				}
 			}
 			// Remove all tiles
@@ -2611,7 +2712,7 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 				//tlc.Clear(tilec);
 
 				// Remove bosss
-				sli.RemoveAll(boss);
+				bos.RemoveAll(boss);
 			}
 		}
 		break;
@@ -2676,7 +2777,7 @@ void PlayGame::editorOnKeyDown( SDL_Keycode sym )
 				aVeryLongString << tlc.SaveData(tilec);
 
 				// Save Boss data
-				aVeryLongString << sli.SaveData(boss);
+				aVeryLongString << bos.SaveData(boss);
 
 				// Save Player spawn point
 				aVeryLongString << saveSpawnPoint();
@@ -2880,7 +2981,7 @@ void PlayGame::LoadLevel()
 		tlc.RemoveAll(tilec);
 
 		// Remove bosss
-		sli.RemoveAll(boss);
+		bos.RemoveAll(boss);
 	}
 
 	// Set file path and name
@@ -2901,7 +3002,7 @@ void PlayGame::LoadLevel()
 		tlc.LoadData(tilec, fileTileDataL);
 
 		// Load Boss data
-		sli.LoadData(boss, fileTileDataL);
+		bos.LoadData(boss, fileTileDataL);
 
 		// Load Player spawn point
 		fileTileDataL >>  spawnX >> spawnY;
