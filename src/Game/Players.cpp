@@ -204,25 +204,6 @@ void Players::Free(){
 	FreeFonts();
 }
 
-void Players::ResetHighScore(int LevelWeLoaded){
-
-	// Set a file path for score.txt
-	std::stringstream filePath;
-	filePath << "data/maps/highscore";
-	filePath << LevelWeLoaded;
-	filePath << ".txt";
-
-	// Overwrite "highscores.txt"
-	std::ofstream fileSave;
-	fileSave.open(filePath.str().c_str());
-	fileSave << 0;
-	fileSave.close();
-
-	// Reset scores
-	this->highscore = 0;
-	this->score = 0;
-}
-
 // Player shoot
 void Players::fire(Particle particle[], Particle &p_dummy, Mix_Chunk* sCastSFX, int mx, int my){
 
@@ -1083,6 +1064,7 @@ void Players::Update(Map &map,
 		// Player death
 		if (health <=0)
 		{
+			// Save high score
 			SaveHighScore(LevelWeLoaded);
 
 			//Spawn explosion after asteroid death
@@ -2044,12 +2026,6 @@ void Players::ShortenParryCD(float value) {
 	}
 }
 
-void Players::ApplyHighScore(float previousHighScore) {
-	this->highscore = previousHighScore;
-}
-
-
-
 void Players::StopMovement()
 {
 	// Stop player movement
@@ -2171,6 +2147,29 @@ float Players::getScore() {
 	return this->score;
 }
 
+void Players::ResetHighScore(int LevelWeLoaded){
+
+	// Set a file path for score.txt
+	std::stringstream filePath;
+	filePath << "data/maps/highscore";
+	filePath << LevelWeLoaded;
+	filePath << ".txt";
+
+	// Overwrite "highscores.txt"
+	std::ofstream fileSave;
+	fileSave.open(filePath.str().c_str());
+	fileSave << 0;
+	fileSave.close();
+
+	// Reset scores
+	this->highscore = 0;
+	this->score = 0;
+}
+
+void Players::ApplyHighScore(float previousHighScore) {
+	this->highscore = previousHighScore;
+}
+
 void Players::SaveHighScore(int LevelWeLoaded) {
 
 	// Open highscore first to check value
@@ -2223,10 +2222,7 @@ void Players::SaveHighScore(int LevelWeLoaded) {
 				fileSave.close();
 			}
 		}
-
-
 		fileOpen.close();
-
 	}
 }
 

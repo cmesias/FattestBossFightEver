@@ -201,8 +201,6 @@ private:	// Variables used in Textures
 public:	// functions
 	// Functions
 
-	// Reset High Scores
-	void ResetHighScore(int LevelWeLoaded);
 	void Load(SDL_Renderer* gRenderer);
 	void Free();
 	void Init(float spawnX, float spawnY, std::string newName, bool respawn);
@@ -322,9 +320,6 @@ public:	// Mutator functions
 	// Shorten parry cool down
 	void ShortenParryCD(float value);
 
-	// Load previous high score from PlayGame.cpp
-	void ApplyHighScore(float previousHighScore);
-
 	// Stop movement
 	void StopMovement();
 
@@ -393,6 +388,17 @@ public:	// Accessor functions
 	// Get score
 	float getScore();
 
+public:
+
+	// Reset High Scores
+	void ResetHighScore(int LevelWeLoaded);
+
+	// Load previous high score from PlayGame.cpp
+	void ApplyHighScore(float previousHighScore);
+
+	// Save current highs-core for current Level
+	void SaveHighScore(int LevelToLoad);
+
 public:	// Controls
 	// Player controls
 	int controls;		// [0] Keyboard, [1] Xbox 360 Controller
@@ -418,11 +424,6 @@ public:	// Controls
 	bool leftclick;
 	bool rightclick;
 	bool test;
-
-public:
-
-	// Save current highs-core for current Level
-	void SaveHighScore(int LevelToLoad);
 
 };
 
