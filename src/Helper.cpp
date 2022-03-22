@@ -101,3 +101,15 @@ void Helper::ChangeRenderResolution(SDL_Renderer *gRenderer, int changeTo) {
 	    screenHeight = 600;
 	}*/
 }
+
+void Helper::RenderRect(SDL_Renderer *gRenderer, float x, float y, float w, float h, SDL_Color color) {
+	SDL_Rect tempRect = {x, y, w, h};
+	SDL_SetRenderDrawColor(gRenderer, color.r, color.g, color.b, 255);
+	SDL_RenderDrawRect(gRenderer, &tempRect);
+}
+
+void Helper::RenderFillRect(SDL_Renderer *gRenderer, float x, float y, float w, float h, SDL_Color color) {
+	SDL_Rect tempRect = {x, y, w, h};
+	SDL_SetRenderDrawColor(gRenderer, color.r, color.g, color.b, 255);
+	SDL_RenderFillRect(gRenderer, &tempRect);
+}

@@ -27,6 +27,7 @@ void Boss::Init(Boss boss[]) {
 		boss[i].angle 				= 0.0;
 		boss[i].angleFacingTarget   = 0.0;
 		boss[i].health 				= 10000;
+		boss[i].healthDecay 			= 10000;
 		boss[i].maxHealth 			= 10000;
 		boss[i].damage 				= 5;
 		boss[i].distance 			= 1;
@@ -133,11 +134,13 @@ void Boss::Spawn(Boss boss[], float x, float y, float w, float h, float angle, f
 
 			// Spawning normal boss, set default parameters
 			if (type == 0) {
-				boss[i].health = 10000;
-				boss[i].maxHealth = 10000;
+				boss[i].health 		= 10000;
+				boss[i].maxHealth 	= 10000;
+				boss[i].healthDecay 	= 10000;
 			} else {
-				boss[i].health = 20000;
-				boss[i].maxHealth = 20000;
+				boss[i].health 		= 20000;
+				boss[i].maxHealth 	= 20000;
+				boss[i].healthDecay 	= 20000;
 			}
 			boss[i].vX 			= dir;
 			boss[i].vY 			= sin( (3.14159265/180)*(angle) );
@@ -189,6 +192,11 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 				boss[i].onScreen = true;
 			}else{
 				boss[i].onScreen = false;
+			}
+
+			// Boss health decay
+			if (boss[i].healthDecay > boss[i].health) {
+				boss[i].healthDecay -= 3;
 			}
 
 			// boss circle collision check with other bosss
@@ -726,6 +734,16 @@ void Boss::UpdateEditor(Boss boss[], int mex, int mey, int camx, int camy) {
 	// Other classes:
 }
 
+void Boss::RenderShadow(SDL_Renderer *gRenderer, Boss boss[], int camx, int camy) {
+	for (int i = 0; i < max; i++) {
+		if (boss[i].alive) {
+			// Render boss shadow
+			gBossShadow.render(gRenderer, boss[i].x-3 - camx, boss[i].y+20 - camy,
+										boss[i].w+6, boss[i].h+30);
+		}
+	}
+}
+
 void Boss::RenderBack(SDL_Renderer *gRenderer, Boss boss[], TTF_Font *gFont, LTexture gText, int camx, int camy) {
 	for (int i = 0; i < max; i++) {
 		if (boss[i].alive) {
@@ -761,10 +779,6 @@ void Boss::RenderBack(SDL_Renderer *gRenderer, Boss boss[], TTF_Font *gFont, LTe
 					gTexture.setColor(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1);
 				}
 
-				// Render boss shadow
-				gBossShadow.render(gRenderer, boss[i].x-3 - camx, boss[i].y+20 - camy,
-											boss[i].w+6, boss[i].h+30);
-
 				// Render boss
 				if (boss[i].flash) {
 					gTextureFlashed.setAlpha(255);
@@ -789,7 +803,7 @@ void Boss::RenderBack(SDL_Renderer *gRenderer, Boss boss[], TTF_Font *gFont, LTe
 												66, 66, NULL,
 												boss[i].angleFacingTarget);
 
-				float turretSize = 21;
+				float turretSize = 42;
 				// Render Right Turret
 				gTurret.setAlpha(255);
 				float RightTurretX = 127;
@@ -864,10 +878,6 @@ void Boss::RenderFront(SDL_Renderer *gRenderer, Boss boss[], TTF_Font *gFont, LT
 					gTexture.setColor(rand() % 255 + 1, rand() % 255 + 1, rand() % 255 + 1);
 				}
 
-				// Render boss shadow
-				gBossShadow.render(gRenderer, boss[i].x-3 - camx, boss[i].y+20 - camy,
-											boss[i].w+6, boss[i].h+30);
-
 				// Render boss
 				if (boss[i].flash) {
 					gTextureFlashed.setAlpha(255);
@@ -892,7 +902,7 @@ void Boss::RenderFront(SDL_Renderer *gRenderer, Boss boss[], TTF_Font *gFont, LT
 												66, 66, NULL,
 												boss[i].angleFacingTarget);
 
-				float turretSize = 21;
+				float turretSize = 42;
 				// Render Right Turret
 				gTurret.setAlpha(255);
 				float RightTurretX = 127;
@@ -947,50 +957,58 @@ void Boss::RenderUI(SDL_Renderer *gRenderer, Boss boss[], int camx, int camy) {
 				gText.render(gRenderer, uiX, uiY, gText.getWidth(), gText.getHeight());
 			}
 
+			// Health Decay bar on Bosses
+			{
+				// Render health Decay
+				float barWidth = boss[i].w;
+
+				float uiX = boss[i].x + boss[i].w/2 - barWidth/2;
+				float uiY = boss[i].y - 35 - 18;
+
+				// Health Decay bar, bg
+				RenderFillRect(gRenderer, uiX-camx, uiY-camy, (barWidth*boss[i].maxHealth)/boss[i].maxHealth, 35, {0, 0, 0} );
+
+				// Render Decay health
+				RenderFillRect(gRenderer, uiX-camx, uiY-camy, (barWidth*boss[i].healthDecay)/boss[i].maxHealth, 35, {60, 30, 30} );
+			}
+
 			// Health bar on Bosses
 			{
 				// Render health
-				int barWidth = boss[i].w;
+				float barWidth = boss[i].w;
 
-				int uiX = boss[i].x + boss[i].w/2 - barWidth/2;
-				int uiY = boss[i].y - 35 - 18;
-
-				// Health bar, bg
-				SDL_Rect tempRect = {uiX-camx, uiY-camy, (barWidth*boss[i].maxHealth)/boss[i].maxHealth, 35};
-				SDL_SetRenderDrawColor(gRenderer, 60, 60, 60, 255);
+				float uiX = boss[i].x + boss[i].w/2 - barWidth/2;
+				float uiY = boss[i].y - 35 - 18;
 
 				// Render health
-				tempRect = {uiX-camx, uiY-camy, (barWidth*boss[i].health)/boss[i].maxHealth, 35};
-				SDL_SetRenderDrawColor(gRenderer, 200, 30, 30, 255);
-				SDL_RenderFillRect(gRenderer, &tempRect);
+				RenderFillRect(gRenderer, uiX-camx, uiY-camy, (barWidth*boss[i].health)/boss[i].maxHealth, 35, {200, 30, 30} );
+			}
 
-				// Render health, border
-				tempRect = {uiX-camx, uiY-camy, (barWidth*boss[i].maxHealth)/boss[i].maxHealth, 35};
-				SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
-				SDL_RenderDrawRect(gRenderer, &tempRect);
+			// Health Decay top of screen
+			{
+				// Render health
+				float barWidth = screenWidth * 0.85;
+
+				float uiX = screenWidth/2 - barWidth/2;
+				float uiY = 10;
+
+				// Health Decay bar, bg
+				RenderFillRect(gRenderer, uiX, uiY, (barWidth*boss[i].maxHealth)/boss[i].maxHealth, 35, {0, 0, 0} );
+
+				// Render Decay health
+				RenderFillRect(gRenderer, uiX, uiY, (barWidth*boss[i].healthDecay)/boss[i].maxHealth, 35, {60, 30, 30} );
 			}
 
 			// Health top of screen
 			{
 				// Render health
-				int barWidth = screenWidth * 0.85;
+				float barWidth = screenWidth * 0.85;
 
-				int uiX = screenWidth/2 - barWidth/2;
-				int uiY = 10;
-
-				// Health bar, bg
-				SDL_Rect tempRect = {uiX, uiY, (barWidth*boss[i].maxHealth)/boss[i].maxHealth, 35};
-				SDL_SetRenderDrawColor(gRenderer, 60, 60, 60, 255);
+				float uiX = screenWidth/2 - barWidth/2;
+				float uiY = 10;
 
 				// Render health
-				tempRect = {uiX, uiY, (barWidth*boss[i].health)/boss[i].maxHealth, 35};
-				SDL_SetRenderDrawColor(gRenderer, 200, 30, 30, 255);
-				SDL_RenderFillRect(gRenderer, &tempRect);
-
-				// Render health, border
-				tempRect = {uiX, uiY, (barWidth*boss[i].maxHealth)/boss[i].maxHealth, 35};
-				SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
-				SDL_RenderDrawRect(gRenderer, &tempRect);
+				RenderFillRect(gRenderer, uiX, uiY, (barWidth*boss[i].health)/boss[i].maxHealth, 35, {200, 30, 30} );
 			}
 
 		}

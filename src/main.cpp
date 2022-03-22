@@ -72,8 +72,13 @@ int main(int argc, char *argv[]) {
  * TODO [x] (3-18-2022) - Change Player bullet texture to Slash Textures instead of Bullet textures
  * TODO [x] Create damage multiplier for player when " " happens
  * TODO [x] Render text for damage multiplier above player
+ *
+ *
+ *
+ *
+ *
+ *
  * TODO [ ] Players.cpp - Play SFX when Player has no more mana, but is still trying to shoot out SlashAttack particles
- * TODO [ ] Players.cpp (2) - Create summary page after defeating the boss and add things like:
  * 					 1. How many bullets the Player shot
  * 					 2. How many bullets the Player took
  * 					 3. How many bullets the Player destroyed
@@ -85,9 +90,14 @@ int main(int argc, char *argv[]) {
  * TODO [ ] - When we have 2 or more Boss's spawned, they used up the max number of particles we have started with, making it look like the Boss is not shooting its full attack
  *
  *
+ * TODO [ ] - Fix this checkBossDied() at PlayGame.cpp
+ * 			  not really considered a bug, but if we have 5 bosses spawned,
+ * 			  if the player defeats 1 boss, it will automatically save to the levelsUnlocked.mp file
+ * 			  A way around this is creating a variables in PlayGame.cpp like RequiredBossesToDefeat and set it to 5.
+ * 			  if the player defeats one boss at a time, the RequiredBossesToDefeat variable will reduce by 1.
+ * 			  if the RequiredBossesToDefeat var reaches 0 or lower, then we save to the levelsCompleted.mp file.
  *
- *
- *
+ * TODO [ ] Players.cpp (2) - Create summary page after defeating the boss and add things like:
  *
  *
  * [Game Features (2)]
@@ -103,6 +113,7 @@ int main(int argc, char *argv[]) {
  * [Bugs]
  * TODO [x] - SaveHighScore in Player.cpp not working
  * TODO [ ] - Line 1288 PlayGame.cpp, show congrats screen when Boss dies, and do for Slash attack also
+ * TODO [ ] - Fix when text is displayed formthe text file Credits.txt
  *
  *
  *

@@ -54,6 +54,8 @@ public:	// Core Functions
 
 	void UpdateEditor(Boss boss[], int mex, int mey, int camx, int camy);
 
+	void RenderShadow(SDL_Renderer *gRenderer, Boss boss[], int camx, int camy);
+
 	void RenderBack(SDL_Renderer *gRenderer, Boss boss[], TTF_Font *gFont, LTexture gText, int camx, int camy);
 
 	void RenderFront(SDL_Renderer *gRenderer, Boss boss[], TTF_Font *gFont, LTexture gText, int camx, int camy);

@@ -20,6 +20,7 @@ public:
 	float speed;
 	int type;
 	float health;
+	float healthDecay;	// used fro VFX of health slowly decaying
 	float maxHealth;
 	int damage;
 	int timer;			// Used for shooting

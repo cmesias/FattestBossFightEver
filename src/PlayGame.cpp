@@ -24,14 +24,14 @@
 void PlayGame::Init() {
 	// Upon entry
 	place_type 			= 0;
-    debug 				= false;
-	editor	 			= false;
+    debug 				= true;
+	editor	 			= true;
 	quit 				= false;
 	leftClick 			= false;
 	shift 				= false;
 	camx 				= 0;
 	camy 				= 0;
-	camlock				= true;
+	camlock				= false;
 	frame 				= 0;
     cap 				= true;
 	int i = 0;
@@ -235,7 +235,7 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 	LoadLevel();
 
     // Play Music, looped
-	Mix_FadeInMusic(sAmbientMusic, -1, 0);
+	//Mix_FadeInMusic(sAmbientMusic, -1, 0);
 
 	//SDL_ShowCursor(false);
 
@@ -272,7 +272,7 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 							break;
 						case SDLK_p:
 							//editor = (!editor);
-							/*if (editor) {
+							if (editor) {
 								// Disable editor
 								editor = false;
 								camlock = true;
@@ -280,25 +280,25 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 								// Enable editor
 								editor = true;
 								camlock = false;
-							}*/
+							}
 							break;
 						case SDLK_h:
-							//debug = (!debug);
+							debug = (!debug);
 							break;
 						case SDLK_ESCAPE:	// pause menu
 							start(gWindow, gRenderer);
 							break;
 						case SDLK_F1:							// Set render size 1
-							//SDL_RenderSetLogicalSize(gRenderer,1920,1080);
+							SDL_RenderSetLogicalSize(gRenderer,1920,1080);
 							break;
 						case SDLK_F2:							// Set render size 2
-							//SDL_RenderSetLogicalSize(gRenderer,1600,900);
+							SDL_RenderSetLogicalSize(gRenderer,1600,900);
 							break;
 						case SDLK_F3:							// Set render size 3
-							//SDL_RenderSetLogicalSize(gRenderer,1280,720);
+							SDL_RenderSetLogicalSize(gRenderer,1280,720);
 							break;
 						case SDLK_F4:							// Set render size 4
-							//SDL_RenderSetLogicalSize(gRenderer,800,600);
+							SDL_RenderSetLogicalSize(gRenderer,800,600);
 							break;
 					}
 
@@ -896,6 +896,9 @@ void PlayGame::Render(SDL_Renderer *gRenderer, LWindow &gWindow) {
 		// Render Tile in back of player
 		tl.RenderBack(gRenderer, tile, camx, camy);
 
+		// Render Boss Shadow on floor
+		bos.RenderShadow(gRenderer, boss, camx, camy);
+
 		// Render Boss
 		bos.RenderBack(gRenderer, boss, gFont13, gText, camx, camy);
 
@@ -931,12 +934,6 @@ void PlayGame::RenderUI(SDL_Renderer *gRenderer, LWindow &gWindow)
 
 	// Render Player Health
 	player.RenderUI(gRenderer, camx, camy);
-
-	std::stringstream tempss;
-	tempss << "LevelToLoad: " 				<< LevelToLoad;
-	gText.loadFromRenderedText(gRenderer, tempss.str().c_str(), {255,255,255}, gFont26);
-	gText.setAlpha(255);
-	gText.render(gRenderer, 0, 100, gText.getWidth(), gText.getHeight());
 }
 
 // Render debug information
@@ -1326,7 +1323,7 @@ void PlayGame::checkBossTileCollision()
 			// Tiles
 			for (int j = 0; j < tl.max; j++) {
 				if (tile[j].alive){
-					if (tile[j].collisionTile)
+					if (tile[j].collisionTile && tile[j].id != 223)
 					{
 						// Get center of attack-particle (spawned by the player attacking)
 						float bmx = boss[i].x+boss[i].w/2;
@@ -2370,7 +2367,7 @@ void PlayGame::SaveLevelsCompleted() {
 		// we are currently on
 		{
 			if (!file.is_open()) {
-				std::cout<< "File does not exist for Levels Unlocked, creating new file.\n";
+				//std::cout<< "File does not exist for Levels Unlocked, creating new file.\n";
 				{
 					// Set file path
 					std::stringstream filePath;
@@ -2947,7 +2944,7 @@ void PlayGame::LoadHighScore() {
 
 	// File does NOT exist, create file with default of 0 high score
 	else {
-		std::cout<< "File does not exist on Loading Highscore, creating new\n";
+		//std::cout<< "File does not exist on Loading Highscore, creating new\n";
 		{
 			std::stringstream filePath;
 			filePath << "data/maps/highscore";

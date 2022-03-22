@@ -156,7 +156,7 @@ public:	// Other classes
 	Players player;
 
 	// Class instance, multiple
-	Particle particles[512];
+	Particle particles[800];
 	Enemy enemy[8];
 	Spawner spawner[200];
 	//Mixed mix;

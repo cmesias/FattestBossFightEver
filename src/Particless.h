@@ -18,7 +18,7 @@ class Particle: public Helper, public TextNFont {
 
 public:	// other variables
 	int count;
-	const int max = 512;
+	const int max = 800;
 	LTexture gBullet;				// Bullet Texture blue
 	LTexture blue_block;					// Blue block, this will be used to create "bits" that come off of a block when hit
 	LTexture gSlash;

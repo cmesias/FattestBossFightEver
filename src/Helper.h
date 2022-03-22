@@ -55,6 +55,10 @@ public:
 	// Doesnt work properly (3/17/2022)
 	void ChangeRenderResolution(SDL_Renderer *gRenderer, int changeTo);
 
+	void RenderRect(SDL_Renderer *gRenderer, float x, float y, float w, float h, SDL_Color color);
+
+	void RenderFillRect(SDL_Renderer *gRenderer, float x, float y, float w, float h, SDL_Color color);
+
 };
 
 #endif /* LOCAL_HELPER_H_ */
