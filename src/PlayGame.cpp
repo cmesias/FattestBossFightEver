@@ -1195,7 +1195,7 @@ void PlayGame::checkCollisionParticleTile()
 								part.count--;
 
 								// Play hit sound effect
-								Mix_PlayChannel(-1, sParrySuccess, 0);
+								//Mix_PlayChannel(-1, sParrySuccess, 0);
 							}
 						}
 					}
