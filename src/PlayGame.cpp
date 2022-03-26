@@ -24,14 +24,14 @@
 void PlayGame::Init() {
 	// Upon entry
 	place_type 			= 0;
-    debug 				= true;
-	editor	 			= true;
+    debug 				= false;
+	editor	 			= false;
 	quit 				= false;
 	leftClick 			= false;
 	shift 				= false;
 	camx 				= 0;
 	camy 				= 0;
-	camlock				= false;
+	camlock				= true;
 	frame 				= 0;
     cap 				= true;
 	int i = 0;
@@ -272,7 +272,7 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 							break;
 						case SDLK_p:
 							//editor = (!editor);
-							if (editor) {
+							/*if (editor) {
 								// Disable editor
 								editor = false;
 								camlock = true;
@@ -280,25 +280,25 @@ void PlayGame::Show(LWindow &gWindow, SDL_Renderer *gRenderer,
 								// Enable editor
 								editor = true;
 								camlock = false;
-							}
+							}*/
 							break;
 						case SDLK_h:
-							debug = (!debug);
+							//debug = (!debug);
 							break;
 						case SDLK_ESCAPE:	// pause menu
 							start(gWindow, gRenderer);
 							break;
 						case SDLK_F1:							// Set render size 1
-							SDL_RenderSetLogicalSize(gRenderer,1920,1080);
+							//SDL_RenderSetLogicalSize(gRenderer,1920,1080);
 							break;
 						case SDLK_F2:							// Set render size 2
-							SDL_RenderSetLogicalSize(gRenderer,1600,900);
+							//SDL_RenderSetLogicalSize(gRenderer,1600,900);
 							break;
 						case SDLK_F3:							// Set render size 3
-							SDL_RenderSetLogicalSize(gRenderer,1280,720);
+							//SDL_RenderSetLogicalSize(gRenderer,1280,720);
 							break;
 						case SDLK_F4:							// Set render size 4
-							SDL_RenderSetLogicalSize(gRenderer,800,600);
+							//SDL_RenderSetLogicalSize(gRenderer,800,600);
 							break;
 					}
 
