@@ -56,6 +56,7 @@ void Boss::Init(Boss boss[]) {
 		boss[i].chargingAttack 	= false;
 		boss[i].chargeTime 		= this->chargeTimeStart;
 		boss[i].constantFiringTimer = 0;
+		boss[i].animState5Angle 	= 0.0;
 	}
 
 	// Other classes:
@@ -170,6 +171,7 @@ void Boss::Spawn(Boss boss[], float x, float y, float w, float h, float angle, f
 			boss[i].chargingAttack 	= false;
 			boss[i].chargingAttack 	= false;
 			boss[i].chargeTime 		= this->chargeTimeStart;
+			boss[i].animState5Angle 	= 0.0;
 			boss[i].distance 			= 1;
 			boss[i].collision 			= false;
 			boss[i].onScreen 			= false;
@@ -303,8 +305,8 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 				{
 				}
 
-				// If player is within 200 pixels, start charging animation
-				if (boss[i].distance < 200 && !boss[i].chargingAttack)
+				// If player is within 500 pixels, start charging animation
+				if (boss[i].distance < 500 && !boss[i].chargingAttack)
 				{
 					// Start charge-attack animation
 					boss[i].chargingAttack = true;
@@ -317,7 +319,13 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 					boss[i].randomAttack = rand() % 2;
 
 					// Change animation state
-					int randNum = rand() % 2 + 2;
+					//int randNum = rand() % 2 + 2;
+					int randNum = 5;
+
+					// If 360 spinning attack then set length of attack to 5 seconds
+					if (randNum == 5) {
+						boss[i].chargeTime = 60 * 5;
+					}
 
 					boss[i].animState = randNum;	// random number from 2-3
 				}
@@ -495,24 +503,8 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 						}
 					}
 
-					// If count down has not reached 0 seconds
-					if (boss[i].chargeTime > 0) {
-
-						// Start counting down charge-attack animation
-						boss[i].chargeTime--;
-					}
-
-					// Countdown reached 0 seconds.
-					else {
-
-						// Attack has 2 parts
-
-						// Reset charge-attack count down
-						boss[i].chargeTime = this->chargeTimeStart;
-
-						// Set animation state
-						boss[i].animState = 4;
-					}
+					// Countdown & Reset
+					CountDownResetAnimState4Part1(boss, i);
 				}
 			}
 			//---------------------------- Barrage Attack Part 1 ----------------------------//
@@ -558,28 +550,69 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 						}
 					}
 
-					// If count down has not reached 0 seconds
-					if (boss[i].chargeTime > 0) {
-
-						// Start counting down charge-attack animation
-						boss[i].chargeTime--;
-					}
-
-					// Countdown reached 0 seconds.
-					else {
-
-						// Stop charge attack animation
-						boss[i].chargingAttack = false;
-
-						// Reset charge-attack count down
-						boss[i].chargeTime = this->chargeTimeStart;
-
-						// Set animation state to cooldown (-1)
-						boss[i].animState = -1;
-					}
+					// Countdown & Reset
+					CountDownResetAnimState4Part2(boss, i);
 				}
 			}
 			//---------------------------- Barrage Attack Part 2 ----------------------------//
+			//-------------------------------------------------------------------------------//
+			///////////////////////////////////////////////////////////////////////////////////
+
+
+			///////////////////////////////////////////////////////////////////////////////////
+			//-------------------------------------------------------------------------------//
+			//------------------------------ Spinning 360 Attack ----------------------------//
+			else if (boss[i].animState == 5) {
+
+				// If Charge attack animation
+				if (boss[i].chargingAttack)
+				{
+
+					// Do attack
+					// 20 goes into 300 for a total of 15 times, so the boss will shoot 15 shots
+					for (int j=0; j< 60 * 5; j += 5) {
+
+						// Only attack at certain frames
+						if (boss[i].chargeTime == j) {
+
+							// Spawn variables
+							int rands = 32;
+							float tempX = boss[i].x + boss[i].w/2 - rands/2;
+							float tempY = boss[i].y + boss[i].h/2 - rands/2;
+
+							// Spawn multiple bullets around boss in a 360
+							for (double h=0.0; h< 360.0; h += 30){
+
+								//int rands = rand() % 11 + 3;
+
+								// Spawn particle
+								p_dummy.spawnParticleAngle(particle, 1,
+												   tempX,
+												   tempY,
+												   rands, rands,
+												   h + boss[i].animState5Angle, 15,
+												   5, 0, 20,
+												   {255, 255, 255, 255}, 1,
+												   1, 1,
+												   255, 0,
+												   randDouble(5, 30), 0.2,
+												   false, 0,
+												   100, 10);
+							}
+
+							// Play SFX
+							Mix_PlayChannel(-1, sCast, 0);
+
+							// Increase angle attack every tick
+							boss[i].animState5Angle += 1;
+						}
+					}
+
+					// Countdown & Reset
+					CountDownResetAnimState5(boss, i);
+				}
+			}
+			//------------------------------ Spinning 360 Attack ----------------------------//
 			//-------------------------------------------------------------------------------//
 			///////////////////////////////////////////////////////////////////////////////////
 
@@ -1070,70 +1103,6 @@ void Boss::RenderHand(SDL_Renderer *gRenderer, Boss boss[], int newMx, int newMy
 	SDL_RenderDrawRect(gRenderer, &tempr);
 }
 
-// Functions that work with other classes
-void Boss::GetDistanceOfPlayer(Boss boss[], float targetX, float targetY, float targetW, float targetH, float *xFollow, float *yFollow) {
-	for (int i = 0; i < max; i++) {
-		if (boss[i].alive) {
-
-			////////////////////////////////////////////////////////////////////////////
-			/////////////////////////// GET DISTANCE OF PLAYER /////////////////////////
-			// Get center of attack-object (spawned by the player attacking)
-			boss[i].xFollow = xFollow;
-			boss[i].yFollow = yFollow;
-
-			////////////////////////////////////////////////////////////////////////////
-			/////////////////////////// GET DISTANCE OF PLAYER /////////////////////////
-			// Get center of attack-object (spawned by the player attacking)
-			boss[i].bmx = targetX+targetW/2;
-			boss[i].bmy = targetY+targetH/2;
-
-			// Get center of boss
-			boss[i].bmx2 = boss[i].x+boss[i].w/2;
-			boss[i].bmy2 = boss[i].y+boss[i].h/2;
-
-			// Get angle of boss relative to attack-object
-			float angle = atan2(boss[i].bmy - boss[i].bmy2, boss[i].bmx - boss[i].bmx2);
-			angle = angle * (180 / 3.1416);
-			if (angle < 0) {
-				angle = 360 - (-angle);
-			}
-
-			// Get angle of boss relative to attack-object
-			boss[i].angleFacingTarget = atan2(boss[i].bmy - boss[i].bmy2, boss[i].bmx - boss[i].bmx2);
-			boss[i].angleFacingTarget = boss[i].angleFacingTarget * (180 / 3.1416);
-			if (boss[i].angleFacingTarget < 0) { boss[i].angleFacingTarget = 360 - (-boss[i].angleFacingTarget); }
-
-			// Handle radians, cos, sin
-			float radians = (3.1415926536/180)*(angle);
-			float Cos = floor(cos(radians)*10+0.5)/10;
-			float Sin = floor(sin(radians)*10+0.5)/10;
-
-			// Distance of boss relative to attack-object
-			boss[i].distance = sqrt((boss[i].bmx - boss[i].bmx2) * (boss[i].bmx - boss[i].bmx2)+
-								  (boss[i].bmy - boss[i].bmy2) * (boss[i].bmy - boss[i].bmy2));
-
-			// If it goes less than 0, the game crashes
-			if (boss[i].distance <= 0.01) {
-				boss[i].distance = 0.01;
-			}
-
-			float distanceW = sqrt((bmx - bmx2) * (bmx - bmx2));
-			float distanceH = sqrt((bmy - bmy2) * (bmy - bmy2));
-			float tempVX 	= 0.5 * (bmx - bmx2) / distanceW;
-			float tempVY 	= 0.5 * (bmy - bmy2) / distanceH;
-
-			/////////////////////////// GET DISTANCE OF PLAYER /////////////////////////
-			////////////////////////////////////////////////////////////////////////////
-
-			// Check if player is in front of boss or not
-			if (boss[i].y+boss[i].h > targetY+targetH){
-				boss[i].renderInFront = true;
-			} else {
-				boss[i].renderInFront = false;
-			}
-		}
-	}
-}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////// LOAD-SAVE ///////////////////////////////////////////
@@ -1231,6 +1200,142 @@ std::string Boss::SaveData(Boss boss[])
 /////////////////////////////////////////// LOAD-SAVE ///////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+
+// Functions that work with other classes
+void Boss::GetDistanceOfPlayer(Boss boss[], float targetX, float targetY, float targetW, float targetH, float *xFollow, float *yFollow) {
+	for (int i = 0; i < max; i++) {
+		if (boss[i].alive) {
+
+			////////////////////////////////////////////////////////////////////////////
+			/////////////////////////// GET DISTANCE OF PLAYER /////////////////////////
+			// Get center of attack-object (spawned by the player attacking)
+			boss[i].xFollow = xFollow;
+			boss[i].yFollow = yFollow;
+
+			////////////////////////////////////////////////////////////////////////////
+			/////////////////////////// GET DISTANCE OF PLAYER /////////////////////////
+			// Get center of attack-object (spawned by the player attacking)
+			boss[i].bmx = targetX+targetW/2;
+			boss[i].bmy = targetY+targetH/2;
+
+			// Get center of boss
+			boss[i].bmx2 = boss[i].x+boss[i].w/2;
+			boss[i].bmy2 = boss[i].y+boss[i].h/2;
+
+			// Get angle of boss relative to attack-object
+			float angle = atan2(boss[i].bmy - boss[i].bmy2, boss[i].bmx - boss[i].bmx2);
+			angle = angle * (180 / 3.1416);
+			if (angle < 0) {
+				angle = 360 - (-angle);
+			}
+
+			// Get angle of boss relative to attack-object
+			boss[i].angleFacingTarget = atan2(boss[i].bmy - boss[i].bmy2, boss[i].bmx - boss[i].bmx2);
+			boss[i].angleFacingTarget = boss[i].angleFacingTarget * (180 / 3.1416);
+			if (boss[i].angleFacingTarget < 0) { boss[i].angleFacingTarget = 360 - (-boss[i].angleFacingTarget); }
+
+			// Handle radians, cos, sin
+			float radians = (3.1415926536/180)*(angle);
+			float Cos = floor(cos(radians)*10+0.5)/10;
+			float Sin = floor(sin(radians)*10+0.5)/10;
+
+			// Distance of boss relative to attack-object
+			boss[i].distance = sqrt((boss[i].bmx - boss[i].bmx2) * (boss[i].bmx - boss[i].bmx2)+
+								  (boss[i].bmy - boss[i].bmy2) * (boss[i].bmy - boss[i].bmy2));
+
+			// If it goes less than 0, the game crashes
+			if (boss[i].distance <= 0.01) {
+				boss[i].distance = 0.01;
+			}
+
+			float distanceW = sqrt((bmx - bmx2) * (bmx - bmx2));
+			float distanceH = sqrt((bmy - bmy2) * (bmy - bmy2));
+			float tempVX 	= 0.5 * (bmx - bmx2) / distanceW;
+			float tempVY 	= 0.5 * (bmy - bmy2) / distanceH;
+
+			/////////////////////////// GET DISTANCE OF PLAYER /////////////////////////
+			////////////////////////////////////////////////////////////////////////////
+
+			// Check if player is in front of boss or not
+			if (boss[i].y+boss[i].h > targetY+targetH){
+				boss[i].renderInFront = true;
+			} else {
+				boss[i].renderInFront = false;
+			}
+		}
+	}
+}
+
+void Boss::CountDownResetAnimState4Part1(Boss boss[], int i) {
+
+	// If count down has not reached 0 seconds
+	if (boss[i].chargeTime > 0) {
+
+		// Start counting down charge-attack animation
+		boss[i].chargeTime--;
+	}
+
+	// Countdown reached 0 seconds.
+	else {
+
+		// Attack has 2 parts
+
+		// Reset charge-attack count down
+		boss[i].chargeTime = this->chargeTimeStart;
+
+		// Set animation state
+		boss[i].animState = 4;
+	}
+}
+
+void Boss::CountDownResetAnimState4Part2(Boss boss[], int i) {
+
+	// If count down has not reached 0 seconds
+	if (boss[i].chargeTime > 0) {
+
+		// Start counting down charge-attack animation
+		boss[i].chargeTime--;
+	}
+
+	// Countdown reached 0 seconds.
+	else {
+
+		// Stop charge attack animation
+		boss[i].chargingAttack = false;
+
+		// Reset charge-attack count down
+		boss[i].chargeTime = this->chargeTimeStart;
+
+		// Set animation state to cooldown (-1)
+		boss[i].animState = -1;
+	}
+}
+
+void Boss::CountDownResetAnimState5(Boss boss[], int i) {
+	// If count down has not reached 0 seconds
+	if (boss[i].chargeTime > 0) {
+
+		// Start counting down charge-attack animation
+		boss[i].chargeTime--;
+	}
+
+	// Countdown reached 0 seconds.
+	else {
+
+		// Stop charge attack animation
+		boss[i].chargingAttack = false;
+
+		// Reset charge-attack count down
+		boss[i].chargeTime = this->chargeTimeStart;
+
+		// Set animation state to cooldown (-1)
+		boss[i].animState = -1;
+
+		// Reset shooting spin angle back to 0.0
+		boss[i].animState5Angle 	= 0.0;
+	}
+}
 
 
 

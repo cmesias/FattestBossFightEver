@@ -67,12 +67,6 @@ public:	// Core Functions
 	void RenderHand(SDL_Renderer *gRenderer, Boss boss[], int newMx, int newMy,
 						  int mex, int mey, int camx, int camy);
 
-public:	// Functions that work with other classes
-
-	void GetDistanceOfPlayer(Boss boss[], float targetX, float targetY,
-				float targetW, float targetH,
-				float *xFollow, float *yFollow);
-
 public:	// Animations
 
 	float *xFollow;
@@ -106,13 +100,28 @@ public:	// Animations
 	 */
 	int animState;
 	bool chargingAttack;
-	float chargeTime;					// After 3 seconds, attack
-	const float chargeTimeStart = 30;	// Change this to change the charge-attack animation start time
+	int chargeTime;						// After 3 seconds, attack
+	int chargeTimeStart = 30;		// Change this to change the charge-attack animation start time
+
+	//animState: 5 Variables (every frame we will increase by a certain amount to spin Boss's attack
+	float animState5Angle;
 
 	float constantFiringTimer;
 
 	float coolDownTimer;
 	float coolDownTimeStart = 180;
+
+public:	// Functions that work with other classes
+
+	void GetDistanceOfPlayer(Boss boss[], float targetX, float targetY,
+				float targetW, float targetH,
+				float *xFollow, float *yFollow);
+
+	void CountDownResetAnimState4Part1(Boss boss[], int i);
+
+	void CountDownResetAnimState4Part2(Boss boss[], int i);
+
+	void CountDownResetAnimState5(Boss boss[], int i);
 
 public: // Saving & loading functions
 

@@ -98,7 +98,7 @@ void Credits::Show(LWindow &gWindow, SDL_Renderer *gRenderer, Credits::CreditsRe
 
 
 	static Particle part;
-	static Particle particle[800];
+	static Particle particle[9];
 	part.init(particle);
 	part.load(gRenderer);
     LoadFonts();

@@ -14,11 +14,11 @@
 #include "Helper.h"
 #include "Game/TextNFont.h"
 
-class Particle: public Helper, public TextNFont {
+struct Particle: public Helper, public TextNFont {
 
 public:	// other variables
 	int count;
-	const int max = 800;
+	const int max = 900;
 	LTexture gBullet;				// Bullet Texture blue
 	LTexture blue_block;					// Blue block, this will be used to create "bits" that come off of a block when hit
 	LTexture gSlash;
