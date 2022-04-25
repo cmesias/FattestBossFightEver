@@ -97,6 +97,8 @@ public:	// Animations
 	 * 2: 	Normal 4 shot Attack
 	 * 3: 	Pre BARRAGE Attack!!!		- Part 1 of Barrage Attack
 	 * 4: 	BARRAGE Attack!				- Part 2 of Barrage Attack
+	 * 5: 	Spinning 360 Attack
+	 * 6: 	Spinning 360 Attack	(Counter-clockwise)
 	 */
 	int animState;
 	bool chargingAttack;
@@ -109,7 +111,7 @@ public:	// Animations
 	float constantFiringTimer;
 
 	float coolDownTimer;
-	float coolDownTimeStart = 180;
+	float coolDownTimeStart = 60 * 5;
 
 public:	// Functions that work with other classes
 

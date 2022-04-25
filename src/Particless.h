@@ -102,6 +102,8 @@ public:	// functions
 
 	void spawnExplosion(Particle particle[], float x, float y, int size);
 
+	void spawn360Attack(Particle particle[], float spawnX, float spawnY, float spawnSize, float spinningAngle, float speed, float direction);
+
 	void RemoveAll(Particle particle[]);
 
 	/*void fireParticle(Particle particle[], int type, int damage,

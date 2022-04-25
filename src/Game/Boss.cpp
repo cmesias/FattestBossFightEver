@@ -320,10 +320,11 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 
 					// Change animation state
 					//int randNum = rand() % 2 + 2;
-					int randNum = 5;
+					int randNum = rand() % 3 + 5;
+					randNum = 8;
 
 					// If 360 spinning attack then set length of attack to 5 seconds
-					if (randNum == 5) {
+					if (randNum >= 5 && randNum <= 8) {
 						boss[i].chargeTime = 60 * 5;
 					}
 
@@ -581,30 +582,13 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 							float tempY = boss[i].y + boss[i].h/2 - rands/2;
 
 							// Spawn multiple bullets around boss in a 360
-							for (double h=0.0; h< 360.0; h += 30){
-
-								//int rands = rand() % 11 + 3;
-
-								// Spawn particle
-								p_dummy.spawnParticleAngle(particle, 1,
-												   tempX,
-												   tempY,
-												   rands, rands,
-												   h + boss[i].animState5Angle, 15,
-												   5, 0, 20,
-												   {255, 255, 255, 255}, 1,
-												   1, 1,
-												   255, 0,
-												   randDouble(5, 30), 0.2,
-												   false, 0,
-												   100, 10);
-							}
+							p_dummy.spawn360Attack(particle, tempX, tempY, rands, boss[i].animState5Angle, 15, 1);
 
 							// Play SFX
 							Mix_PlayChannel(-1, sCast, 0);
 
 							// Increase angle attack every tick
-							boss[i].animState5Angle += 1;
+							boss[i].animState5Angle += 2;
 						}
 					}
 
@@ -613,6 +597,124 @@ void Boss::Update(Boss boss[], Object &obj, Object object[],
 				}
 			}
 			//------------------------------ Spinning 360 Attack ----------------------------//
+			//-------------------------------------------------------------------------------//
+			///////////////////////////////////////////////////////////////////////////////////
+
+			///////////////////////////////////////////////////////////////////////////////////
+			//-------------------------------------------------------------------------------//
+			//------------------- Spinning 360 Attack (Counter-Clockwise) -------------------//
+			else if (boss[i].animState == 6) {
+
+				// If Charge attack animation
+				if (boss[i].chargingAttack)
+				{
+					// Do attack
+					// 20 goes into 300 for a total of 15 times, so the boss will shoot 15 shots
+					for (int j=0; j< 60 * 5; j += 5) {
+
+						// Only attack at certain frames
+						if (boss[i].chargeTime == j) {
+
+							// Spawn variables
+							int rands = 32;
+							float tempX = boss[i].x + boss[i].w/2 - rands/2;
+							float tempY = boss[i].y + boss[i].h/2 - rands/2;
+
+							// Spawn multiple bullets around boss in a 360
+							p_dummy.spawn360Attack(particle, tempX, tempY, rands, boss[i].animState5Angle, 15, -1);
+
+							// Play SFX
+							Mix_PlayChannel(-1, sCast, 0);
+
+							// Increase angle attack every tick
+							boss[i].animState5Angle += 2;
+						}
+					}
+
+					// Countdown & Reset
+					CountDownResetAnimState5(boss, i);
+				}
+			}
+			//------------------- Spinning 360 Attack (Counter-Clockwise) -------------------//
+			//-------------------------------------------------------------------------------//
+			///////////////////////////////////////////////////////////////////////////////////
+
+			///////////////////////////////////////////////////////////////////////////////////
+			//-------------------------------------------------------------------------------//
+			//------------------ Spinning 360 Attack (both directions) ----------------------//
+			else if (boss[i].animState == 7) {
+
+				// If Charge attack animation
+				if (boss[i].chargingAttack)
+				{
+					// Do attack
+					// 20 goes into 300 for a total of 15 times, so the boss will shoot 15 shots
+					for (int j=0; j< 60 * 5; j += 20) {
+
+						// Only attack at certain frames
+						if (boss[i].chargeTime == j) {
+
+							// Spawn variables
+							int rands = 28;
+							float tempX = boss[i].x + boss[i].w/2 - rands/2;
+							float tempY = boss[i].y + boss[i].h/2 - rands/2;
+
+							// Spawn multiple bullets around boss in a 360
+							p_dummy.spawn360Attack(particle, tempX, tempY, rands, boss[i].animState5Angle, 4, 1);
+							p_dummy.spawn360Attack(particle, tempX, tempY, rands, boss[i].animState5Angle, 4, -1);
+
+							// Play SFX
+							Mix_PlayChannel(-1, sCast, 0);
+
+							// Increase angle attack every tick
+							boss[i].animState5Angle += 2;
+						}
+					}
+
+					// Countdown & Reset
+					CountDownResetAnimState5(boss, i);
+				}
+			}
+			//------------------ Spinning 360 Attack (both directions) ----------------------//
+			//-------------------------------------------------------------------------------//
+			///////////////////////////////////////////////////////////////////////////////////
+
+			///////////////////////////////////////////////////////////////////////////////////
+			//-------------------------------------------------------------------------------//
+			//------------------ Spinning 360 Attack (both directions) ----------------------//
+			else if (boss[i].animState == 8) {
+
+				// If Charge attack animation
+				if (boss[i].chargingAttack)
+				{
+					// Do attack
+					// 20 goes into 300 for a total of 15 times, so the boss will shoot 15 shots
+					for (int j=0; j< 60 * 5; j += 60) {
+
+						// Only attack at certain frames
+						if (boss[i].chargeTime == j) {
+
+							// Spawn variables
+							int rands = 28;
+							float tempX = boss[i].x + boss[i].w/2 - rands/2;
+							float tempY = boss[i].y + boss[i].h/2 - rands/2;
+
+							// Spawn multiple bullets around boss in a 360
+							p_dummy.spawn360Attack(particle, tempX, tempY, rands, boss[i].animState5Angle, 4, 1);
+
+							// Play SFX
+							Mix_PlayChannel(-1, sCast, 0);
+
+							// Increase angle attack every tick
+							boss[i].animState5Angle += 2;
+						}
+					}
+
+					// Countdown & Reset
+					CountDownResetAnimState5(boss, i);
+				}
+			}
+			//------------------ Spinning 360 Attack (both directions) ----------------------//
 			//-------------------------------------------------------------------------------//
 			///////////////////////////////////////////////////////////////////////////////////
 

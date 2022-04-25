@@ -219,6 +219,28 @@ void Particle::spawnParticleAngleFollow(Particle particle[], int type,
 	}
 }
 
+void Particle::spawn360Attack(Particle particle[], float spawnX, float spawnY, float spawnSize, float spinningAngle, float speed, float direction) {
+	// Spawn multiple bullets around boss in a 360
+	for (double h=0.0; h< 360.0; h += 30){
+
+		//int rands = rand() % 11 + 3;
+
+		// Spawn particle
+		spawnParticleAngle(particle, 1,
+							spawnX,
+						   spawnY,
+						   spawnSize, spawnSize,
+						   direction * (h + spinningAngle), speed,
+						   5, 0, 20,
+						   {255, 255, 255, 255}, 1,
+						   1, 1,
+						   255, 0,
+						   randDouble(5, 30), 0.2,
+						   false, 0,
+						   100, 10);
+	}
+}
+
 // spawn explosion
 void Particle::spawnExplosion(Particle particle[], float x, float y, int size) {
 	// spawn blood particle effect
